@@ -5,28 +5,20 @@
 #ifndef INTRFACE_H
 #define INTRFACE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdint.h>
 
-extern LONG wait_ptr_state;
+extern int32_t wait_ptr_state;
 
-void cdecl init_interface(void);
-void cdecl shutdown_interface(void);
-void cdecl standby_cursor(void);
-void cdecl resume_cursor(void);
-void cdecl lock_mouse(void);
-void cdecl unlock_mouse(void);
-void cdecl show_mouse(void);
-void cdecl hide_mouse(void);
-void cdecl copy_mouse(int window);
-ULONG cdecl mouse_in_window(LONG argcnt, ULONG wnd);
-void cdecl refresh_window(LONG argcnt, ULONG src, ULONG target);
-
-#ifdef __cplusplus
-}
-#endif
+void init_interface(void);
+void shutdown_interface(void);
+void standby_cursor(void);
+void resume_cursor(void);
+void lock_mouse(void);
+void unlock_mouse(void);
+void show_mouse(void);
+void hide_mouse(void);
+void copy_mouse(int window);
+uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd);
+void refresh_window(int32_t argcnt, uint32_t src, uint32_t target);
 
 #endif
-
-

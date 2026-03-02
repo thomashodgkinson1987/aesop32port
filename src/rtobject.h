@@ -5,42 +5,32 @@
 #ifndef RTOBJECT_H
 #define RTOBJECT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdint.h>
 
 typedef struct
 {
-   UWORD slot;       // object list index
-   ULONG name;       // code object name
-   UWORD size;       // size of instance data (unused in text files)
-}
-CDESC;               // static context descriptor
+   uint16_t slot; // object list index
+   uint32_t name; // code object name
+   uint16_t size; // size of instance data (unused in text files)
+} CDESC;          // static context descriptor
 
-#define SF_TXT 1     // text savetype
-#define SF_BIN 0     // binary savetype
-                  
-extern UBYTE objflags[NUM_OBJECTS];
-extern HRES objlist[NUM_OBJECTS];
+#define SF_TXT 1 // text savetype
+#define SF_BIN 0 // binary savetype
 
-extern BYTE lvlmap[LVL_X][LVL_Y];
-extern WORD lvlobj[3][LVL_X][LVL_Y];
+extern uint8_t objflags[NUM_OBJECTS];
+extern uint32_t objlist[NUM_OBJECTS];
 
-void cdecl init_object_list(void);
+extern int8_t lvlmap[LVL_X][LVL_Y];
+extern int16_t lvlobj[3][LVL_X][LVL_Y];
 
-void cdecl restore_range(BYTE *filename, ULONG first, ULONG last, ULONG restoring);
-LONG cdecl save_range(BYTE *filename, LONG filetype, LONG first, LONG last);
-void cdecl translate_file(BYTE *TXT_filename, BYTE *BIN_filename, ULONG first,
-   ULONG last);
+void init_object_list(void);
 
-LONG cdecl create_object(LONG argcnt, ULONG name);
-LONG cdecl create_program(LONG argcnt, LONG index, ULONG name);
-LONG cdecl destroy_object(LONG argcnt, LONG index);
+void restore_range(int8_t *filename, uint32_t first, uint32_t last, uint32_t restoring);
+int32_t save_range(int8_t *filename, int32_t filetype, int32_t first, int32_t last);
+void translate_file(int8_t *TXT_filename, int8_t *BIN_filename, uint32_t first, uint32_t last);
 
-#ifdef __cplusplus
-}
-#endif
+int32_t create_object(int32_t argcnt, uint32_t name);
+int32_t create_program(int32_t argcnt, int32_t index, uint32_t name);
+int32_t destroy_object(int32_t argcnt, int32_t index);
 
 #endif
-
-

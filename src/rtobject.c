@@ -1,39 +1,39 @@
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  RTOBJECT.C                                                            ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  AESOP runtime code resource handlers for Eye III engine               ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Universal object management                                           ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Version: 1.00 of 23-Aug-92 -- Initial version                         ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Project: Eye III                                                      ÛÛ
-//ÛÛ   Author: John Miles                                                   ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  C source compatible with Borland C++ v3.0 or later                    ÛÛ
-//ÛÛ  Large memory model (16-bit DOS)                                       ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Copyright (C) 1992 Miles Design, Inc.                                 ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Miles Design, Inc.                                                    ÛÛ
-//ÛÛ  10926 Jollyville #308                                                 ÛÛ
-//ÛÛ  Austin, TX 78759                                                      ÛÛ
-//ÛÛ  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  RTOBJECT.C                                                            ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  AESOP runtime code resource handlers for Eye III engine               ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Universal object management                                           ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Version: 1.00 of 23-Aug-92 -- Initial version                         ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Project: Eye III                                                      ï¿½ï¿½
+// ï¿½ï¿½   Author: John Miles                                                   ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  C source compatible with Borland C++ v3.0 or later                    ï¿½ï¿½
+// ï¿½ï¿½  Large memory model (16-bit DOS)                                       ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Copyright (C) 1992 Miles Design, Inc.                                 ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Miles Design, Inc.                                                    ï¿½ï¿½
+// ï¿½ï¿½  10926 Jollyville #308                                                 ï¿½ï¿½
+// ï¿½ï¿½  Austin, TX 78759                                                      ï¿½ï¿½
+// ï¿½ï¿½  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <dos.h>
+// #include <dos.h> // Tom: commented out
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
-#include <io.h>
+// #include <io.h> // Tom: commented out
 #include <errno.h>
-#include <sys\stat.h>
+#include <sys/stat.h> // Tom: replaced `\` with `/`
 
 #include "defs.h"
 #include "shared.h"
@@ -47,20 +47,20 @@
 #include "event.h"
 #include "graphics.h"
 
-extern ULONG check_on;
+extern uint32_t check_on;
 
 //
 // objlist:  List of handles to all entities in "universe"
 //
 
-HRES objlist[NUM_OBJECTS];
+uint32_t objlist[NUM_OBJECTS];
 
 //
 // Other static vars
 //
 
-static BYTE linbuf[256];
-static BYTE name[256];
+static int8_t linbuf[256];
+static int8_t name[256];
 
 /***************************************************/
 //
@@ -70,11 +70,11 @@ static BYTE name[256];
 //
 /***************************************************/
 
-void cdecl init_object_list(void)
+void init_object_list(void)
 {
-   LONG i;
+   int32_t i;
 
-   for (i=0;i<NUM_OBJECTS;i++)
+   for (i = 0; i < NUM_OBJECTS; i++)
       objlist[i] = -1;
 }
 
@@ -85,11 +85,11 @@ void cdecl init_object_list(void)
 //
 /***************************************************/
 
-LONG cdecl find_free_entry(LONG min, LONG end)
+int32_t find_free_entry(int32_t min, int32_t end)
 {
-   LONG i;
+   int32_t i;
 
-   for (i=min;i<end;i++)
+   for (i = min; i < end; i++)
       if (objlist[i] == -1U)
          break;
 
@@ -105,31 +105,31 @@ LONG cdecl find_free_entry(LONG min, LONG end)
 //
 /***************************************************/
 
-void cdecl create_SOP_instance(ULONG name, LONG index)
+void create_SOP_instance(uint32_t name, int32_t index)
 {
-   objlist[index] = create_instance(RTR,name);
+   objlist[index] = create_instance(RTR, name);
 
-   RT_execute(index,MSG_CREATE,-1U);
+   RT_execute(index, MSG_CREATE, -1U);
 }
 
 /***************************************************/
 //
 // Create a SOP object and return its object list index
-// 
+//
 // Returns -1 if no space in list
-// 
+//
 /***************************************************/
 
-#pragma off (unreferenced)
-LONG cdecl create_object(LONG argcnt, ULONG name)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+int32_t create_object(int32_t argcnt, uint32_t name)
+#pragma on(unreferenced)
 {
-   LONG index;
+   int32_t index;
 
-   index = find_free_entry(0,NUM_ENTITIES);
+   index = find_free_entry(0, NUM_ENTITIES);
 
    if (index != -1)
-      create_SOP_instance(name,index);
+      create_SOP_instance(name, index);
 
    return index;
 }
@@ -137,21 +137,21 @@ LONG cdecl create_object(LONG argcnt, ULONG name)
 /***************************************************/
 //
 // Create a SOP program object at specified object list index
-// 
-// Dynamically assign an unused program object index if specified 
+//
+// Dynamically assign an unused program object index if specified
 // index == -1
-// 
+//
 /***************************************************/
 
-#pragma off (unreferenced)
-LONG cdecl create_program(LONG argcnt, LONG index, ULONG name)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+int32_t create_program(int32_t argcnt, int32_t index, uint32_t name)
+#pragma on(unreferenced)
 {
    if (index == -1)
-      index = find_free_entry(NUM_ENTITIES,NUM_OBJECTS);
+      index = find_free_entry(NUM_ENTITIES, NUM_OBJECTS);
 
    if (index != -1)
-      create_SOP_instance(name,index);
+      create_SOP_instance(name, index);
 
    return index;
 }
@@ -159,24 +159,24 @@ LONG cdecl create_program(LONG argcnt, LONG index, ULONG name)
 /***************************************************/
 //
 // Delete SOP object from object list
-// 
+//
 // Cancel any notifications for object, and release any
 // windows allocated by object
-// 
+//
 /***************************************************/
 
-#pragma off (unreferenced)
-LONG cdecl destroy_object(LONG argcnt, LONG index)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+int32_t destroy_object(int32_t argcnt, int32_t index)
+#pragma on(unreferenced)
 {
-   LONG rtn;
+   int32_t rtn;
 
-   rtn = RT_execute(index,MSG_DESTROY,-1U);
+   rtn = RT_execute(index, MSG_DESTROY, -1U);
 
    cancel_entity_requests(index);
    release_owned_windows(index);
 
-   destroy_instance(RTR,objlist[index]);
+   destroy_instance(RTR, objlist[index]);
 
    objlist[index] = -1;
 
@@ -189,19 +189,19 @@ LONG cdecl destroy_object(LONG argcnt, LONG index)
 //
 /***************************************************/
 
-void cdecl thrash_cache(void)
+void thrash_cache(void)
 {
-   LONG i,handles[50];
+   int32_t i, handles[50];
 
-   for (i=0;i<3;i++)
-      {
-      handles[i] = RTR_alloc(RTR,i*20000,DA_MOVEABLE | DA_DISCARDABLE);
-      }
+   for (i = 0; i < 3; i++)
+   {
+      handles[i] = RTR_alloc(RTR, i * 20000, DA_MOVEABLE | DA_DISCARDABLE);
+   }
 
-   for (i=0;i<3;i++)
-      {
-      RTR_free(RTR,handles[i]);
-      }
+   for (i = 0; i < 3; i++)
+   {
+      RTR_free(RTR, handles[i]);
+   }
 }
 
 /***************************************************/
@@ -210,11 +210,11 @@ void cdecl thrash_cache(void)
 //
 /***************************************************/
 
-#pragma off (unreferenced)
-ULONG cdecl flush_cache(LONG argcnt, ULONG goal)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t flush_cache(int32_t argcnt, uint32_t goal)
+#pragma on(unreferenced)
 {
-   return RTR_force_discard(RTR,goal);
+   return RTR_force_discard(RTR, goal);
 }
 
 /***************************************************/
@@ -223,124 +223,131 @@ ULONG cdecl flush_cache(LONG argcnt, ULONG goal)
 //
 /***************************************************/
 
-void cdecl dump_static_context(ULONG index, TF_class *TF)
+void dump_static_context(uint32_t index, TF_class *TF)
 {
-   LONG i;
-   ULONG n,p,offset,asize;
-   HRES instance,thunk,expt;
+   int32_t i;
+   uint32_t n, p, offset, asize;
+   uint32_t instance, thunk, expt;
    void *tptr;
    SD_entry *SD;
    THDR thdr;
-   BYTE val[32];
-   UBYTE *dict;
-   BYTE type,*tag,*def,*size;
-   void *inst,*d;
+   int8_t val[32];
+   uint8_t *dict;
+   int8_t type, *tag, *def, *size;
+   void *inst, *d;
 
-   strcpy((char *)linbuf,"Entry ");
-   ltoa(index,(char *)(&linbuf[6]),10);
+   strcpy((char *)linbuf, "Entry ");
+   ltoa(index, (char *)(&linbuf[6]), 10);
 
    i = strlen((char *)linbuf);
    linbuf[i] = ':';
-   linbuf[i+1] = ' ';
-   linbuf[i+2] = 0;
+   linbuf[i + 1] = ' ';
+   linbuf[i + 2] = 0;
 
    instance = objlist[index];
 
    if (instance == -1U)
-      {
-      strcat((char *)linbuf,"Available");
-      TF_writeln(TF,linbuf);
+   {
+      strcat((char *)linbuf, "Available");
+      TF_writeln(TF, linbuf);
       return;
-      }
+   }
 
-   thunk = ((IHDR *) RTR_addr(instance))->thunk;
+   thunk = ((IHDR *)RTR_addr(instance))->thunk;
 
    tptr = RTR_addr(thunk);
-   thdr = *((THDR *) tptr);
+   thdr = *((THDR *)tptr);
 
-   SD = add_ptr(tptr,thdr.SD_list);
+   SD = add_ptr(tptr, thdr.SD_list);
 
-   expt = RTR_get_resource_handle(RTR,SD[thdr.nprgs-1].exports,
-      DA_TEMPORARY | DA_EVANESCENT);
-   RTR_lock(RTR,expt);
-   linbuf[i+2] = '"';
-   strcpy((char *)(&linbuf[i+3]),(char *)RTD_lookup(expt,"N:OBJECT"));
-   strcat((char *)(&linbuf[i+3]),"\"");
+   expt = RTR_get_resource_handle(RTR, SD[thdr.nprgs - 1].exports, DA_TEMPORARY | DA_EVANESCENT);
+   RTR_lock(RTR, expt);
+   linbuf[i + 2] = '"';
+   strcpy((char *)(&linbuf[i + 3]), (char *)RTD_lookup(expt, "N:OBJECT"));
+   strcat((char *)(&linbuf[i + 3]), "\"");
 
    RTR_unlock(expt);
 
-   TF_writeln(TF,linbuf);
-   TF_writeln(TF,(BYTE *)"{");
+   TF_writeln(TF, linbuf);
+   TF_writeln(TF, (int8_t *)"{");
 
-   for (p=0;p<thdr.nprgs;p++)
-      {
+   for (p = 0; p < thdr.nprgs; p++)
+   {
       tptr = RTR_addr(thunk);
-      SD = add_ptr(tptr,thdr.SD_list);
+      SD = add_ptr(tptr, thdr.SD_list);
 
       offset = SD[p].static_base;
 
-      expt = RTR_get_resource_handle(RTR,SD[p].exports,
-         DA_TEMPORARY | DA_EVANESCENT);
-      RTR_lock(RTR,expt);
+      expt = RTR_get_resource_handle(RTR, SD[p].exports, DA_TEMPORARY | DA_EVANESCENT);
+      RTR_lock(RTR, expt);
 
-      def = RTD_lookup(expt,"N:OBJECT");
+      def = RTD_lookup(expt, "N:OBJECT");
 
-      if (p) TF_writeln(TF,(BYTE *)"");
+      if (p)
+         TF_writeln(TF, (int8_t *)"");
       linbuf[0] = '[';
-      strcpy((char *)(&linbuf[1]),(char *)def);
-      strcat((char *)linbuf,"]");
-      TF_writeln(TF,linbuf);
+      strcpy((char *)(&linbuf[1]), (char *)def);
+      strcat((char *)linbuf, "]");
+      TF_writeln(TF, linbuf);
 
-      inst = add_ptr(RTR_addr(instance),offset);
+      inst = add_ptr(RTR_addr(instance), offset);
 
       dict = RTD_first(RTR_addr(expt));
-      while ((dict = RTD_iterate(RTR_addr(expt),dict,&tag,&def)) != NULL)
-         {
+      while ((dict = RTD_iterate(RTR_addr(expt), dict, &tag, &def)) != NULL)
+      {
          type = tag[0];
          if ((type != 'B') && (type != 'W') && (type != 'L'))
             continue;
 
-         strcpy((char *)linbuf,"   ");
-         strcpy((char *)(&linbuf[3]),(char *)tag);
-         strcat((char *)linbuf," = ");
+         strcpy((char *)linbuf, "   ");
+         strcpy((char *)(&linbuf[3]), (char *)tag);
+         strcat((char *)linbuf, " = ");
 
-         d = add_ptr(inst,ascnum(def));
-         if ((size = (BYTE *)strchr((char *)def,',')) != NULL)
-            asize = (UWORD) ascnum(size+1);
+         d = add_ptr(inst, ascnum(def));
+         if ((size = (int8_t *)strchr((char *)def, ',')) != NULL)
+            asize = (uint16_t)ascnum(size + 1);
          else
             asize = 1;
 
-         for (n=0;n<asize;n++)
-            {
+         for (n = 0; n < asize; n++)
+         {
             switch (type)
-               {
-               case 'B': ltoa(*(BYTE *) d,(char *)val,10); d = add_ptr(d,1L); break;
-               case 'W': ltoa(*(WORD *) d,(char *)val,10); d = add_ptr(d,2L); break;
-               case 'L': ltoa(*(LONG *) d,(char *)val,10); d = add_ptr(d,4L); break;
-               }
-
-            strcat((char *)linbuf,(char *)val);
-
-            if (n != asize-1)
-               {
-               strcat((char *)linbuf,",");
-
-               if (!((n+1) % 10))
-                  {
-                  TF_writeln(TF,linbuf);
-                  strcpy((char *)linbuf,"      ");
-                  }
-               }
-
+            {
+            case 'B':
+               ltoa(*(int8_t *)d, (char *)val, 10);
+               d = add_ptr(d, 1L);
+               break;
+            case 'W':
+               ltoa(*(int16_t *)d, (char *)val, 10);
+               d = add_ptr(d, 2L);
+               break;
+            case 'L':
+               ltoa(*(int32_t *)d, (char *)val, 10);
+               d = add_ptr(d, 4L);
+               break;
             }
 
-         TF_writeln(TF,linbuf);
+            strcat((char *)linbuf, (char *)val);
+
+            if (n != asize - 1)
+            {
+               strcat((char *)linbuf, ",");
+
+               if (!((n + 1) % 10))
+               {
+                  TF_writeln(TF, linbuf);
+                  strcpy((char *)linbuf, "      ");
+               }
+            }
          }
 
-      RTR_unlock(expt);
+         TF_writeln(TF, linbuf);
       }
 
-   TF_writeln(TF,(BYTE *)"}");
+      RTR_unlock(expt);
+   }
+
+   TF_writeln(TF, (int8_t *)"}");
 }
 
 /***************************************************/
@@ -349,14 +356,14 @@ void cdecl dump_static_context(ULONG index, TF_class *TF)
 //
 /***************************************************/
 
-#pragma off (unreferenced)
-LONG cdecl readln(TF_class *TF, BYTE *buffer, LONG maxlen)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+int32_t readln(TF_class *TF, int8_t *buffer, int32_t maxlen)
+#pragma on(unreferenced)
 {
-   LONG status;
+   int32_t status;
 
    do
-      status = TF_readln(TF,linbuf,sizeof(linbuf));
+      status = TF_readln(TF, linbuf, sizeof(linbuf));
    while (status && (linbuf[0] == ';'));
 
    return status;
@@ -370,39 +377,39 @@ LONG cdecl readln(TF_class *TF, BYTE *buffer, LONG maxlen)
 //
 /***************************************************/
 
-CDESC *cdecl read_context_descriptor(TF_class *TF)
+CDESC *read_context_descriptor(TF_class *TF)
 {
    static CDESC c;
-   HRES HROED;
-   BYTE *num;
-   BYTE *name;
-   BYTE *def;
+   uint32_t HROED;
+   int8_t *num;
+   int8_t *name;
+   int8_t *def;
 
-   if (!readln(TF,linbuf,sizeof(linbuf)))
+   if (!readln(TF, linbuf, sizeof(linbuf)))
       return NULL;
 
    num = &linbuf[6];
 
    c.size = -1U;
-   c.slot = (UWORD) ascnum(num);
+   c.slot = (uint16_t)ascnum(num);
 
-   name = (BYTE *)strchr((char *)num,'"');
+   name = (int8_t *)strchr((char *)num, '"');
    if (name == NULL)
-      {
-      c.name = (ULONG) -1L;
+   {
+      c.name = (uint32_t)-1L;
       return &c;
-      }
+   }
 
    name++;
-   name[strlen((char *)name)-1] = 0;
+   name[strlen((char *)name) - 1] = 0;
 
-   HROED = RTR_get_resource_handle(RTR,ROED,DA_TEMPORARY | DA_EVANESCENT);
-   RTR_lock(RTR,HROED);
+   HROED = RTR_get_resource_handle(RTR, ROED, DA_TEMPORARY | DA_EVANESCENT);
+   RTR_lock(RTR, HROED);
 
-   def = RTD_lookup(HROED,name);
+   def = RTD_lookup(HROED, name);
 
    if (def == NULL)
-      abend(MSG_OMCR,name,c.slot);
+      abend(MSG_OMCR, name, c.slot);
 
    c.name = ascnum(def);
 
@@ -417,133 +424,144 @@ CDESC *cdecl read_context_descriptor(TF_class *TF)
 //
 /***************************************************/
 
-void cdecl restore_static_context(HRES instance, TF_class *TF)
+void restore_static_context(uint32_t instance, TF_class *TF)
 {
-   ULONG n,i,p,offset,asize;
-   HRES thunk,expt;
-   void *d,*tptr;
+   uint32_t n, i, p, offset, asize;
+   uint32_t thunk, expt;
+   void *d, *tptr;
    SD_entry *SD;
    THDR thdr;
-   BYTE *tag,*def,*size,*chrpnt;
+   int8_t *tag, *def, *size, *chrpnt;
 
-   thunk = ((IHDR *) RTR_addr(instance))->thunk;
-   thdr = *((THDR *) RTR_addr(thunk));
+   thunk = ((IHDR *)RTR_addr(instance))->thunk;
+   thdr = *((THDR *)RTR_addr(thunk));
 
-   while (readln(TF,linbuf,sizeof(linbuf)))
-      {
+   while (readln(TF, linbuf, sizeof(linbuf)))
+   {
       if (linbuf[0] == '{')
          continue;
       else if (linbuf[0] == '}')
          break;
       else if (linbuf[0] == '[')
-         {
-         if ((tag = (BYTE *)strchr((char *)linbuf,']')) != NULL)
+      {
+         if ((tag = (int8_t *)strchr((char *)linbuf, ']')) != NULL)
             *tag = 0;
-         tag = (BYTE *)strchr((char *)linbuf,'[')+1;
+         tag = (int8_t *)strchr((char *)linbuf, '[') + 1;
 
-         for (p=0; p<thdr.nprgs; p++)
-            {
+         for (p = 0; p < thdr.nprgs; p++)
+         {
             tptr = RTR_addr(thunk);
-            SD   = add_ptr (tptr, thdr.SD_list);
+            SD = add_ptr(tptr, thdr.SD_list);
 
             offset = SD[p].static_base;
 
-            expt = RTR_get_resource_handle(RTR,SD[p].exports,
-                                           DA_TEMPORARY | DA_EVANESCENT);
+            expt = RTR_get_resource_handle(RTR, SD[p].exports, DA_TEMPORARY | DA_EVANESCENT);
 
-            RTR_lock(RTR,expt);
-            def = RTD_lookup(expt,"N:OBJECT");
+            RTR_lock(RTR, expt);
+            def = RTD_lookup(expt, "N:OBJECT");
 
             RTR_unlock(expt);
 
-            if ( !strcmp((char *)def,(char *)tag) )
+            if (!strcmp((char *)def, (char *)tag))
                break;
-            }
-
-         if (p==thdr.nprgs)
-            abend(MSG_CMCR,tag);       //"Class '%s' missing; cannot restore"
          }
-      else
-         {
-         tag=linbuf;
 
-         //Skip leading white-space
+         if (p == thdr.nprgs)
+            abend(MSG_CMCR, tag); //"Class '%s' missing; cannot restore"
+      }
+      else
+      {
+         tag = linbuf;
+
+         // Skip leading white-space
 
          while (*tag == ' ')
             tag++;
 
-         //Get Variable Type and Name
+         // Get Variable Type and Name
 
-         for (i=0;(tag[i] != ' ') && tag[i];i++)
+         for (i = 0; (tag[i] != ' ') && tag[i]; i++)
             name[i] = tag[i];
          name[i] = 0;
          if (!i)
             continue;
-         
-         RTR_lock(RTR,expt);
-         def = RTD_lookup(expt,name);
+
+         RTR_lock(RTR, expt);
+         def = RTD_lookup(expt, name);
 
          RTR_unlock(expt);
-         
-         if (def == NULL)
-            abend(MSG_UVR,name);       //"Unresolved variable reference '%s'"
-         
-         d = (void *) ((ULONG)RTR_addr(instance) + ascnum(def) + offset);
 
-         if ((size = (BYTE *)strchr((char *)def,',')) != NULL)
-            asize = ascnum(size+1);
+         if (def == NULL)
+            abend(MSG_UVR, name); //"Unresolved variable reference '%s'"
+
+         d = (void *)((uint32_t)RTR_addr(instance) + ascnum(def) + offset);
+
+         if ((size = (int8_t *)strchr((char *)def, ',')) != NULL)
+            asize = ascnum(size + 1);
          else
             asize = 1;
-         
-         chrpnt = (BYTE *)strchr((char *)linbuf,'=');
+
+         chrpnt = (int8_t *)strchr((char *)linbuf, '=');
          if (chrpnt == NULL)
-            abend(MSG_BDIE);           //"Bad data item entry"
-         
-         for (n=0; n<asize; n++)
+            abend(MSG_BDIE); //"Bad data item entry"
+
+         for (n = 0; n < asize; n++)
+         {
+
+            // Skip to data
+
+            while ((!isnum(*chrpnt)) && (*chrpnt != '\''))
             {
-
-            //Skip to data
-
-            while ( (!isnum(*chrpnt)) && (*chrpnt != '\'') )
-               {
                if (!(*chrpnt))
                   break;
                else
                   ++chrpnt;
-               }
-         
-            //Get Next Line if needed
+            }
 
-            if ( (!(*chrpnt)) && (n != asize-1) )
-               {
-               readln(TF,linbuf,sizeof(linbuf));
+            // Get Next Line if needed
+
+            if ((!(*chrpnt)) && (n != asize - 1))
+            {
+               readln(TF, linbuf, sizeof(linbuf));
                chrpnt = linbuf;
-               }
+            }
 
-            //Store data from text file in Instance
+            // Store data from text file in Instance
 
             switch (name[0])
-               {
-               case 'B': *(BYTE *) d = (BYTE) ascnum(chrpnt); break;
-               case 'W': *(WORD *) d = (WORD) ascnum(chrpnt); break;
-               case 'L': *(LONG *) d = (LONG) ascnum(chrpnt); break;
-               }
-            
-            if (n != asize-1)
-               {
+            {
+            case 'B':
+               *(int8_t *)d = (int8_t)ascnum(chrpnt);
+               break;
+            case 'W':
+               *(int16_t *)d = (int16_t)ascnum(chrpnt);
+               break;
+            case 'L':
+               *(int32_t *)d = (int32_t)ascnum(chrpnt);
+               break;
+            }
+
+            if (n != asize - 1)
+            {
                switch (name[0])
-                  {
-                  case 'B': d = ((BYTE *)d + 1); break;
-                  case 'W': d = ((BYTE *)d + 2); break;
-                  case 'L': d = ((BYTE *)d + 4); break;
-                  }
-         
+               {
+               case 'B':
+                  d = ((int8_t *)d + 1);
+                  break;
+               case 'W':
+                  d = ((int8_t *)d + 2);
+                  break;
+               case 'L':
+                  d = ((int8_t *)d + 4);
+                  break;
+               }
+
                while (isnum(*chrpnt) || (*chrpnt == ' ') || (*chrpnt == '\''))
                   chrpnt++;
-               }
-            } // for
-         } // else
-      } // while
+            }
+         } // for
+      } // else
+   } // while
 }
 
 /*********************************************************/
@@ -554,13 +572,13 @@ void cdecl restore_static_context(HRES instance, TF_class *TF)
 //
 /*********************************************************/
 
-LONG cdecl save_range(BYTE *filename, LONG filetype, LONG first, LONG last)
+int32_t save_range(int8_t *filename, int32_t filetype, int32_t first, int32_t last)
 {
-   LONG good,index;
-   UBYTE typetest;
+   int32_t good, index;
+   uint8_t typetest;
    int handle;
    TF_class *TF;
-   HRES instance,thunk;
+   uint32_t instance, thunk;
    HD_entry *hd_inst;
    void *tptr;
    THDR thdr;
@@ -569,69 +587,67 @@ LONG cdecl save_range(BYTE *filename, LONG filetype, LONG first, LONG last)
    good = 1;
 
    if (filetype == SF_TXT)
-      {
-      TF = TF_construct(filename,TF_WRITE);
+   {
+      TF = TF_construct(filename, TF_WRITE);
       if (TF == NULL)
          return 0;
 
-      for (index=first;index<=last;index++)
-         {
-         dump_static_context(index,TF);
+      for (index = first; index <= last; index++)
+      {
+         dump_static_context(index, TF);
 
-         if (!TF_writeln(TF,(BYTE *)""))
-            {
+         if (!TF_writeln(TF, (int8_t *)""))
+         {
             good = 0;
             break;
-            };
-         }
+         };
+      }
 
       TF_destroy(TF);
-      }
+   }
    else
-      {
-      handle = open((char *)filename, O_CREAT | O_RDWR | O_TRUNC | O_BINARY,
-                    S_IREAD | S_IWRITE);
-      if (handle == -1) return 0;
+   {
+      handle = open((char *)filename, O_CREAT | O_RDWR | O_TRUNC | O_BINARY, S_IREAD | S_IWRITE);
+      if (handle == -1)
+         return 0;
 
       typetest = 26;
-      write(handle,&typetest,1);
+      write(handle, &typetest, 1);
 
-      for (index=first;index<=last;index++)
-         {
+      for (index = first; index <= last; index++)
+      {
          CD.slot = index;
 
          instance = objlist[index];
          if (instance == -1U)
-            {
-            CD.name = (ULONG) -1L;
+         {
+            CD.name = (uint32_t)-1L;
             CD.size = 0;
-            }
+         }
          else
-            {
-            thunk = ((IHDR *) RTR_addr(instance))->thunk;
+         {
+            thunk = ((IHDR *)RTR_addr(instance))->thunk;
 
             tptr = RTR_addr(thunk);
-            thdr = *((THDR *) tptr);
+            thdr = *((THDR *)tptr);
 
-            hd_inst = (HD_entry *) instance;
+            hd_inst = (HD_entry *)instance;
             CD.name = hd_inst->user;
             CD.size = thdr.isize - sizeof(IHDR);
-            }
-
-         write(handle,&CD,sizeof(CDESC));
-
-         if (CD.size)
-            if (write(handle,
-                      add_ptr(RTR_addr(objlist[index]),sizeof(IHDR)),
-                      CD.size) != CD.size)
-               {
-               good = 0;
-               break;
-               }
          }
 
-      close(handle);
+         write(handle, &CD, sizeof(CDESC));
+
+         if (CD.size)
+            if (write(handle, add_ptr(RTR_addr(objlist[index]), sizeof(IHDR)), CD.size) != CD.size)
+            {
+               good = 0;
+               break;
+            }
       }
+
+      close(handle);
+   }
 
    return good;
 }
@@ -651,7 +667,7 @@ LONG cdecl save_range(BYTE *filename, LONG filetype, LONG first, LONG last)
 //       If slot entry exists, destroy it
 //       Continue
 //
-//   If slot entry exists 
+//   If slot entry exists
 //       If CDESC.name != current entry's name
 //          Destroy the current entry to make room for the new one
 //       Else
@@ -669,118 +685,117 @@ LONG cdecl save_range(BYTE *filename, LONG filetype, LONG first, LONG last)
 //
 /*********************************************************/
 
-void cdecl restore_range(BYTE *filename, ULONG first, ULONG last, ULONG restoring)
+void restore_range(int8_t *filename, uint32_t first, uint32_t last, uint32_t restoring)
 {
-   ULONG bad, txttype;
-   ULONG index;
-   UBYTE typetest;
+   uint32_t bad, txttype;
+   uint32_t index;
+   uint8_t typetest;
    int handle;
    TF_class *TF;
-   HRES cur;
+   uint32_t cur;
    HD_entry *sel;
    CDESC stat_C;
    CDESC *CD;
 
-   UWORD CDslot;       // object list index
-   ULONG CDname;       // code object name
-   UWORD CDsize;       // size of instance data (unused in text files)
+   uint16_t CDslot; // object list index
+   uint32_t CDname; // code object name
+   uint16_t CDsize; // size of instance data (unused in text files)
 
    txttype = 0;
    bad = 0;
 
-   handle = open((char *)filename,O_RDONLY | O_BINARY);
+   handle = open((char *)filename, O_RDONLY | O_BINARY);
    if (handle == -1)
       bad = 1;
    else
-      {
+   {
       typetest = 0;
-      read(handle,&typetest,1);
+      read(handle, &typetest, 1);
 
       if (typetest != 26)
-         {
+      {
          close(handle);
          txttype = 1;
-         }
       }
+   }
 
    if (txttype)
-      {
-      TF = TF_construct(filename,TF_READ);
+   {
+      TF = TF_construct(filename, TF_READ);
       bad = (TF == NULL);
-      }
+   }
 
    if (bad)
-      abend(MSG_CNOCF,filename);          //"Could not open context file '%s'"
+      abend(MSG_CNOCF, filename); //"Could not open context file '%s'"
 
-   for (index=first;index<=last;index++)
-      {
+   for (index = first; index <= last; index++)
+   {
       cur = objlist[index];
 
       if (txttype)
-         {
+      {
          CD = read_context_descriptor(TF);
 
          bad = (CD == NULL);
-         }
+      }
       else
-         {
+      {
          CD = &stat_C;
-         bad = (read(handle,CD,sizeof(CDESC)) != sizeof(CDESC));
-         }
+         bad = (read(handle, CD, sizeof(CDESC)) != sizeof(CDESC));
+      }
 
       if ((bad) || (CD->slot != index))
-         abend(MSG_CFCAE,index);          //"Context file corrupt at entry %u"
+         abend(MSG_CFCAE, index); //"Context file corrupt at entry %u"
 
-      CDslot=CD->slot;
-      CDname=CD->name;
-      CDsize=CD->size;
+      CDslot = CD->slot;
+      CDname = CD->name;
+      CDsize = CD->size;
 
-      if (CD->name == (ULONG) -1L)
-         {
+      if (CD->name == (uint32_t)-1L)
+      {
          if (cur != -1)
-            {
-            destroy_object(0,index);
-            }
-
-         continue;
+         {
+            destroy_object(0, index);
          }
 
+         continue;
+      }
+
       if (cur != -1)
-         {
-         sel = (HD_entry *) cur;
+      {
+         sel = (HD_entry *)cur;
 
          if (sel->user != CD->name)
-            {
-            destroy_object(0,index);
-            }
+         {
+            destroy_object(0, index);
+         }
          else
-            {
+         {
             cancel_entity_requests(index);
 
             release_owned_windows(index);
-            }
-         }
-
-      if (objlist[index] == -1U)
-         {
-         create_SOP_instance(CD->name,index);
-         }
-
-      if (txttype)
-         {
-         restore_static_context(objlist[index],TF);
-         }
-      else
-         if (CD->size)
-            {
-            read(handle, (BYTE *)RTR_addr(objlist[index])+sizeof(IHDR), CD->size);
-            }
-
-      if (restoring)
-         {
-         RT_execute(index,MSG_RESTORE,-1U);
          }
       }
+
+      if (objlist[index] == -1U)
+      {
+         create_SOP_instance(CD->name, index);
+      }
+
+      if (txttype)
+      {
+         restore_static_context(objlist[index], TF);
+      }
+      else if (CD->size)
+      {
+         read(handle, (int8_t *)RTR_addr(objlist[index]) + sizeof(IHDR), CD->size);
+      }
+
+      if (restoring)
+      {
+         RT_execute(index, MSG_RESTORE, -1U);
+      }
+   }
 
    if (txttype)
       TF_destroy(TF);
@@ -793,7 +808,7 @@ void cdecl restore_range(BYTE *filename, ULONG first, ULONG last, ULONG restorin
 // Translate static context file from text to binary format
 //
 // For each entry in file:
-// 
+//
 // Read entry's context descriptor
 // Save descriptor to binary file
 //
@@ -807,78 +822,75 @@ void cdecl restore_range(BYTE *filename, ULONG first, ULONG last, ULONG restorin
 //   Restore instance from text file
 //   Save instance to binary file
 //   Destroy instance
-// 
+//
 // Errors during context file translation are fatal at the system level;
 // this routine will not return if translation fails
 //
 /*********************************************************/
 
-void cdecl translate_file(BYTE *TXT_filename, BYTE *BIN_filename, ULONG first,
-   ULONG last)
+void translate_file(int8_t *TXT_filename, int8_t *BIN_filename, uint32_t first, uint32_t last)
 {
    TF_class *TF;
    CDESC *CD;
    CDESC CD_out;
    int handle;
-   LONG index;
-   HRES instance,thunk;
+   int32_t index;
+   uint32_t instance, thunk;
    void *tptr;
    THDR thdr;
-   UBYTE typetest;
+   uint8_t typetest;
 
-   handle = open((char *)BIN_filename,O_CREAT | O_RDWR | O_TRUNC | O_BINARY,
-      S_IREAD | S_IWRITE);
+   handle = open((char *)BIN_filename, O_CREAT | O_RDWR | O_TRUNC | O_BINARY, S_IREAD | S_IWRITE);
    if (handle == -1)
-      abend(MSG_COOFFT);      //"Couldn't open output file for translation"
+      abend(MSG_COOFFT); //"Couldn't open output file for translation"
 
    typetest = 26;
-   write(handle,&typetest,1);
+   write(handle, &typetest, 1);
 
-   TF = TF_construct(TXT_filename,TF_READ);
+   TF = TF_construct(TXT_filename, TF_READ);
    if (TF == NULL)
-      abend(MSG_COIFFT);      //"Couldn't open input file for translation"
+      abend(MSG_COIFFT); //"Couldn't open input file for translation"
 
-   for (index=first;index<=last;index++)
-      {
+   for (index = first; index <= last; index++)
+   {
       CD = read_context_descriptor(TF);
-      if ((CD==NULL) || (CD->slot != index))
-         abend(MSG_CTCFE,index); //"Couldn't translate context file entry %u"
+      if ((CD == NULL) || (CD->slot != index))
+         abend(MSG_CTCFE, index); //"Couldn't translate context file entry %u"
 
       CD_out.name = CD->name;
       CD_out.slot = index;
 
-      if (CD->name != (ULONG) -1L)
-         {
-         instance = create_instance(RTR,CD->name);
+      if (CD->name != (uint32_t)-1L)
+      {
+         instance = create_instance(RTR, CD->name);
 
-         thunk = ((IHDR *) RTR_addr(instance))->thunk;
+         thunk = ((IHDR *)RTR_addr(instance))->thunk;
 
          tptr = RTR_addr(thunk);
-         thdr = *((THDR *) tptr);
+         thdr = *((THDR *)tptr);
 
          CD_out.size = thdr.isize - sizeof(IHDR);
 
-         write(handle,&CD_out,sizeof(CDESC));
+         write(handle, &CD_out, sizeof(CDESC));
 
-         restore_static_context(instance,TF);
+         restore_static_context(instance, TF);
 
          if (CD_out.size)
-            {
-            if (write(handle,add_ptr(RTR_addr(instance),sizeof(IHDR)),CD_out.size)
-               != CD_out.size)
-               {
-               abend(MSG_CWTE,index);  //"Couldn't write translated entry %u"
-               }
-            }
-
-         destroy_instance(RTR,instance);
-         }
-      else
          {
-         CD_out.size = 0;
-         write(handle,&CD_out,sizeof(CDESC));
+            if (write(handle, add_ptr(RTR_addr(instance), sizeof(IHDR)), CD_out.size) != CD_out.size)
+            {
+               abend(MSG_CWTE, index); //"Couldn't write translated entry %u"
+            }
          }
+
+         destroy_instance(RTR, instance);
       }
+      else
+      {
+         CD_out.size = 0;
+         write(handle, &CD_out, sizeof(CDESC));
+      }
+   }
 
    TF_destroy(TF);
    close(handle);

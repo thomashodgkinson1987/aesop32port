@@ -1,34 +1,35 @@
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  GRAPHICS.C                                                            ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  AESOP graphics interface for Eye III engine                           ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Version: 1.00 of 6-May-92 -- Initial version                          ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Project: Eye III                                                      ÛÛ
-//ÛÛ   Author: John Miles                                                   ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  C source compatible with Borland C++ v3.0 or later                    ÛÛ
-//ÛÛ  Large memory model (16-bit DOS)                                       ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Copyright (C) 1992 Miles Design, Inc.                                 ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Miles Design, Inc.                                                    ÛÛ
-//ÛÛ  10926 Jollyville #308                                                 ÛÛ
-//ÛÛ  Austin, TX 78759                                                      ÛÛ
-//ÛÛ  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  GRAPHICS.C                                                            ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  AESOP graphics interface for Eye III engine                           ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Version: 1.00 of 6-May-92 -- Initial version                          ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Project: Eye III                                                      ï¿½ï¿½
+// ï¿½ï¿½   Author: John Miles                                                   ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  C source compatible with Borland C++ v3.0 or later                    ï¿½ï¿½
+// ï¿½ï¿½  Large memory model (16-bit DOS)                                       ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Copyright (C) 1992 Miles Design, Inc.                                 ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Miles Design, Inc.                                                    ï¿½ï¿½
+// ï¿½ï¿½  10926 Jollyville #308                                                 ï¿½ï¿½
+// ï¿½ï¿½  Austin, TX 78759                                                      ï¿½ï¿½
+// ï¿½ï¿½  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-#include <conio.h>
+// #include <conio.h> // Tom: commented out
 #include <stdio.h>
-#include <dos.h>
+// #include <dos.h> // Tom: commented out
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdint.h> // Tom: added
 
 #include "vfx.h"
 #include "mouse.h"
@@ -46,79 +47,76 @@
 #include "rtobject.h"
 #include "graphics.h"
 
-
 VFX_DESC *VFX;
 
-LONG window_owner[256];
+int32_t window_owner[256];
 
-ULONG lastg_x;
-ULONG lastg_y;
-ULONG lastg_p;
+uint32_t lastg_x;
+uint32_t lastg_y;
+uint32_t lastg_p;
 
 TEXTWINDOW tw[NTW];
-//WINDOW tw_refresh[NTW];
-LONG tw_refresh[NTW];
+// WINDOW tw_refresh[NTW];
+int32_t tw_refresh[NTW];
 
-BYTE strbuf[256];              // used for string resource buffering
-BYTE txtbuf[2402];             // used for word-wrapped text (also used as
-                               // buffer for dot pattern effects in EYE.C!)
-                               // Final 2 bytes used for overflow checking
+int8_t strbuf[256];  // used for string resource buffering
+int8_t txtbuf[2402]; // used for word-wrapped text (also used as
+                     // buffer for dot pattern effects in EYE.C!)
+                     // Final 2 bytes used for overflow checking
 #define FBEG 0
 #define FCNT 192
 
-UBYTE  F_fade[11][256];        // fixed      00-AF (also initializes B0-FF)
-UBYTE  W_fade[11][16];         // wallset    B0-BF
-UBYTE M1_fade[11][32];         // monster #1 C0-DF
-UBYTE M2_fade[11][32];         // monster #2 E0-FF
+uint8_t F_fade[11][256]; // fixed      00-AF (also initializes B0-FF)
+uint8_t W_fade[11][16];  // wallset    B0-BF
+uint8_t M1_fade[11][32]; // monster #1 C0-DF
+uint8_t M2_fade[11][32]; // monster #2 E0-FF
 
-UBYTE M1_gry[32];
-UBYTE M1_wht[32];
-UBYTE M2_gry[32];
-UBYTE M2_wht[32];
-UBYTE M1_blu[32];
-UBYTE M2_blu[32];
-UBYTE M1_grn[32];
-UBYTE M2_grn[32];
-UBYTE M1_brn[32];
-UBYTE M2_brn[32];
-UBYTE F_grn[256];
-UBYTE F_blu[256];
-UBYTE F_red[256];
-UBYTE F_gry[256];
+uint8_t M1_gry[32];
+uint8_t M1_wht[32];
+uint8_t M2_gry[32];
+uint8_t M2_wht[32];
+uint8_t M1_blu[32];
+uint8_t M2_blu[32];
+uint8_t M1_grn[32];
+uint8_t M2_grn[32];
+uint8_t M1_brn[32];
+uint8_t M2_brn[32];
+uint8_t F_grn[256];
+uint8_t F_blu[256];
+uint8_t F_red[256];
+uint8_t F_gry[256];
 
-UWORD first_color[5] = { 0x00,0xb0,0xc0,0xe0,0xb0 };
-UWORD num_colors[5] =  {  256,  16,  32,  32,  80 };
+uint16_t first_color[5] = {0x00, 0xb0, 0xc0, 0xe0, 0xb0};
+uint16_t num_colors[5] = {256, 16, 32, 32, 80};
 
-UBYTE *fade_tables[5][16] =
-                            { { F_fade[0],F_fade[1],F_fade[2],F_fade[3],
-                                F_fade[4],F_fade[5],F_fade[6],F_fade[7],
-                                F_fade[8],F_fade[9],F_fade[10],
-                                F_blu,F_grn,F_red,F_gry,NULL },
+uint8_t *fade_tables[5][16] =
+    {{F_fade[0], F_fade[1], F_fade[2], F_fade[3],
+      F_fade[4], F_fade[5], F_fade[6], F_fade[7],
+      F_fade[8], F_fade[9], F_fade[10],
+      F_blu, F_grn, F_red, F_gry, NULL},
 
-                              { W_fade[0],W_fade[1],W_fade[2],W_fade[3],
-                                W_fade[4],W_fade[5],W_fade[6],W_fade[7],
-                                W_fade[8],W_fade[9],W_fade[10],
-                                NULL,NULL,NULL,NULL,NULL },
+     {W_fade[0], W_fade[1], W_fade[2], W_fade[3],
+      W_fade[4], W_fade[5], W_fade[6], W_fade[7],
+      W_fade[8], W_fade[9], W_fade[10],
+      NULL, NULL, NULL, NULL, NULL},
 
-                              { M1_fade[0],M1_fade[1],M1_fade[2],M1_fade[3],
-                                M1_fade[4],M1_fade[5],M1_fade[6],M1_fade[7],
-                                M1_fade[8],M1_fade[9],M1_fade[10],
-                                M1_gry,M1_wht,M1_grn,M1_blu,M1_brn },
+     {M1_fade[0], M1_fade[1], M1_fade[2], M1_fade[3],
+      M1_fade[4], M1_fade[5], M1_fade[6], M1_fade[7],
+      M1_fade[8], M1_fade[9], M1_fade[10],
+      M1_gry, M1_wht, M1_grn, M1_blu, M1_brn},
 
-                              { M2_fade[0],M2_fade[1],M2_fade[2],M2_fade[3],
-                                M2_fade[4],M2_fade[5],M2_fade[6],M2_fade[7],
-                                M2_fade[8],M2_fade[9],M2_fade[10],
-                                M2_gry,M2_wht,M2_grn,M2_blu,M2_brn },
+     {M2_fade[0], M2_fade[1], M2_fade[2], M2_fade[3],
+      M2_fade[4], M2_fade[5], M2_fade[6], M2_fade[7],
+      M2_fade[8], M2_fade[9], M2_fade[10],
+      M2_gry, M2_wht, M2_grn, M2_blu, M2_brn},
 
-                              { NULL,NULL,NULL,NULL,
-                                NULL,NULL,NULL,NULL,
-                                NULL,NULL,NULL,
-                                NULL,NULL,NULL,NULL,NULL } };
-
-
+     {NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL}};
 
 //
-// Fixed-palette color ranges for magical auras, poison effects, 
+// Fixed-palette color ranges for magical auras, poison effects,
 // petrification effects, damage effects, etc.
 //
 
@@ -134,42 +132,41 @@ UBYTE *fade_tables[5][16] =
 #define BRN_NUM 7
 #define FIX_WHT 0x0b
 
-UBYTE blu_inten[BLU_NUM];
-UBYTE grn_inten[GRN_NUM];
-UBYTE gry_inten[GRY_NUM];
-UBYTE red_inten[RED_NUM];
-UBYTE brn_inten[BRN_NUM];
+uint8_t blu_inten[BLU_NUM];
+uint8_t grn_inten[GRN_NUM];
+uint8_t gry_inten[GRY_NUM];
+uint8_t red_inten[RED_NUM];
+uint8_t brn_inten[BRN_NUM];
 
-UBYTE text_colors[9] =
-   {
-   DK_GRN,
-   LT_GRN,
-   YEL,   
-   LT_RED,
-   DK_RED,
-   BLK,   
-   WHT,
-   WHT,
-   WHT
-   };
+uint8_t text_colors[9] =
+    {
+        DK_GRN,
+        LT_GRN,
+        YEL,
+        LT_RED,
+        DK_RED,
+        BLK,
+        WHT,
+        WHT,
+        WHT};
 
 /*********************************************************/
-void cdecl init_graphics(void)
+void init_graphics(void)
 {
-   ULONG i, j;
+   uint32_t i, j;
 
    GIL2VFX_init();
-   
-   for (i=0;i<256;i++)
+
+   for (i = 0; i < 256; i++)
       window_owner[i] = -1;
 
-   GIL2VFX_wipe_window(PAGE2,0);
+   GIL2VFX_wipe_window(PAGE2, 0);
 
-   txtbuf[sizeof(txtbuf)-1] = 0x69;    // constants for integrity checking
-   txtbuf[sizeof(txtbuf)-2] = 0x77;
+   txtbuf[sizeof(txtbuf) - 1] = 0x69; // constants for integrity checking
+   txtbuf[sizeof(txtbuf) - 2] = 0x77;
 
-   for (i=0;i<NTW;i++)
-      {
+   for (i = 0; i < NTW; i++)
+   {
       tw[i].font = NULL;
       tw[i].window = 0;
       tw[i].htab = tw[i].vtab = 0;
@@ -179,17 +176,17 @@ void cdecl init_graphics(void)
       tw[i].txtpnt = txtbuf;
       tw[i].justify = J_LEFT;
 
-      for (j=0; j<256; j++)
+      for (j = 0; j < 256; j++)
          tw[i].lookaside[j] = j;
 
       tw_refresh[i] = -1;
 
-      tw[i].font = (void *) -1U;
-      }
+      tw[i].font = (void *)-1U;
+   }
 }
 
 /*********************************************************/
-void cdecl shutdown_graphics(void)
+void shutdown_graphics(void)
 {
    GIL2VFX_shutdown_driver();
 }
@@ -204,112 +201,112 @@ void cdecl shutdown_graphics(void)
 //
 /*********************************************************/
 
-void cdecl release_owned_windows(LONG owner)
+void release_owned_windows(int32_t owner)
 {
-   LONG i;
+   int32_t i;
 
    if (owner == -1)
-      {
-      for (i=PAGE2+1;i<256;i++)
+   {
+      for (i = PAGE2 + 1; i < 256; i++)
          if ((window_owner[i] != -1) &&
-            (window_owner[i] < NUM_ENTITIES))
-            {
+             (window_owner[i] < NUM_ENTITIES))
+         {
             window_owner[i] = -1;
             GIL2VFX_release_window(i);
-            }
-      }
+         }
+   }
    else
-      {
-      for (i=PAGE2+1;i<256;i++)
+   {
+      for (i = PAGE2 + 1; i < 256; i++)
          if (window_owner[i] == owner)
-            {
+         {
             window_owner[i] = -1;
             GIL2VFX_release_window(i);
-            }
-      }
+         }
+   }
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl draw_dot(LONG argcnt, ULONG page, ULONG x, ULONG y, ULONG color)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void draw_dot(int32_t argcnt, uint32_t page, uint32_t x, uint32_t y, uint32_t color)
+#pragma on(unreferenced)
 {
-   GIL2VFX_draw_dot(lastg_p=page, lastg_x=x, lastg_y=y, color);
+   GIL2VFX_draw_dot(lastg_p = page, lastg_x = x, lastg_y = y, color);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl draw_line(LONG argcnt, ULONG page, ULONG x1, ULONG y1, ULONG x2, ULONG y2,
-#pragma on (unreferenced)
-   ULONG color)
+#pragma off(unreferenced)
+void draw_line(int32_t argcnt, uint32_t page, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2,
+#pragma on(unreferenced)
+               uint32_t color)
 {
-   GIL2VFX_draw_line(lastg_p=page, x1, y1, lastg_x=x2, lastg_y=y2, color);
+   GIL2VFX_draw_line(lastg_p = page, x1, y1, lastg_x = x2, lastg_y = y2, color);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl line_to(LONG argcnt, ULONG x, ULONG y, ULONG color, ...)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void line_to(int32_t argcnt, uint32_t x, uint32_t y, uint32_t color, ...)
+#pragma on(unreferenced)
 {
-   ULONG i;
+   uint32_t i;
    va_list argptr;
-   ULONG cx,cy,cc,lx,ly;
+   uint32_t cx, cy, cc, lx, ly;
 
-   va_start(argptr,argcnt);
+   va_start(argptr, argcnt);
 
-   for (i=0;i<argcnt;i+=3)
-      {
-      cx = va_arg(argptr,ULONG);
-      cy = va_arg(argptr,ULONG);
-      cc = va_arg(argptr,ULONG);
+   for (i = 0; i < argcnt; i += 3)
+   {
+      cx = va_arg(argptr, uint32_t);
+      cy = va_arg(argptr, uint32_t);
+      cc = va_arg(argptr, uint32_t);
 
-      GIL2VFX_draw_line(lastg_p,lastg_x,lastg_y,lx=cx,ly=cy,cc);
+      GIL2VFX_draw_line(lastg_p, lastg_x, lastg_y, lx = cx, ly = cy, cc);
 
       lastg_x = lx;
       lastg_y = ly;
-      }
+   }
 
    va_end(argptr);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl draw_rectangle(LONG argcnt, ULONG wndnum, LONG x1, LONG y1, LONG x2,
-                          LONG y2, ULONG color)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void draw_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2,
+                    int32_t y2, uint32_t color)
+#pragma on(unreferenced)
 {
-   GIL2VFX_draw_rect(wndnum,x1,y1,x2,y2,color);
+   GIL2VFX_draw_rect(wndnum, x1, y1, x2, y2, color);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl fill_rectangle(LONG argcnt, ULONG wndnum, LONG x1, LONG y1, LONG x2,
-                          LONG y2, ULONG color)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void fill_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2,
+                    int32_t y2, uint32_t color)
+#pragma on(unreferenced)
 {
-   GIL2VFX_fill_rect(wndnum,x1,y1,x2,y2,color);
+   GIL2VFX_fill_rect(wndnum, x1, y1, x2, y2, color);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl hash_rectangle(LONG argcnt, ULONG wndnum, LONG x1, LONG y1, LONG x2,
-                          LONG y2, ULONG color)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void hash_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2,
+                    int32_t y2, uint32_t color)
+#pragma on(unreferenced)
 {
-   GIL2VFX_hash_rect(wndnum,x1,y1,x2,y2,color);
+   GIL2VFX_hash_rect(wndnum, x1, y1, x2, y2, color);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-ULONG cdecl get_bitmap_height(LONG argcnt, ULONG table, ULONG number)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t get_bitmap_height(int32_t argcnt, uint32_t table, uint32_t number)
+#pragma on(unreferenced)
 {
-   HRES handle;
-   ULONG h;
+   uint32_t handle;
+   uint32_t h;
 
-   handle = RTR_get_resource_handle(RTR,table,DA_DEFAULT);
+   handle = RTR_get_resource_handle(RTR, table, DA_DEFAULT);
 
-   RTR_lock(RTR,handle);
+   RTR_lock(RTR, handle);
 
    h = GIL2VFX_get_bitmap_height(RTR_addr(handle), number);
 
@@ -319,34 +316,34 @@ ULONG cdecl get_bitmap_height(LONG argcnt, ULONG table, ULONG number)
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl draw_bitmap(LONG argcnt, ULONG page, ULONG table, ULONG number,
-                       LONG x, LONG y, ULONG scale, ULONG flip,
-                       ULONG fade_table, ULONG fade_level)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void draw_bitmap(int32_t argcnt, uint32_t page, uint32_t table, uint32_t number,
+                 int32_t x, int32_t y, uint32_t scale, uint32_t flip,
+                 uint32_t fade_table, uint32_t fade_level)
+#pragma on(unreferenced)
 {
-   HRES handle;
-   static HRES last_handle = 0;
-   static ULONG last_table;
-   UBYTE *lookaside;
+   uint32_t handle;
+   static uint32_t last_handle = 0;
+   static uint32_t last_table;
+   uint8_t *lookaside;
 
    if (table == last_table)
       handle = last_handle;
    else
-      {
-      handle = RTR_get_resource_handle(RTR,table,DA_DEFAULT);
+   {
+      handle = RTR_get_resource_handle(RTR, table, DA_DEFAULT);
       last_handle = handle;
       last_table = table;
-      }
+   }
 
    if ((fade_level > 10) && (!scale))
       scale = 256;
 
-   lookaside = fade_tables[fade_table][fade_level]-first_color[fade_table];
+   lookaside = fade_tables[fade_table][fade_level] - first_color[fade_table];
 
-   RTR_lock(RTR,handle);
+   RTR_lock(RTR, handle);
 
-   GIL2VFX_draw_bitmap(page,x,y,flip,scale,lookaside,RTR_addr(handle),number);
+   GIL2VFX_draw_bitmap(page, x, y, flip, scale, lookaside, RTR_addr(handle), number);
 
    RTR_unlock(handle);
 }
@@ -365,28 +362,28 @@ void cdecl draw_bitmap(LONG argcnt, ULONG page, ULONG table, ULONG number,
 //
 /*********************************************************/
 
-#pragma off (unreferenced)
-ULONG cdecl visible_bitmap_rect(LONG argcnt, LONG x, LONG y, ULONG flip,
-                                ULONG table, ULONG number, WORD *array)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t visible_bitmap_rect(int32_t argcnt, int32_t x, int32_t y, uint32_t flip,
+                             uint32_t table, uint32_t number, int16_t *array)
+#pragma on(unreferenced)
 {
-   HRES handle;
-   ULONG array_offset;
-   BYTE *new_array;
-   WORD bounds[4];
-   ULONG result;
+   uint32_t handle;
+   uint32_t array_offset;
+   int8_t *new_array;
+   int16_t bounds[4];
+   uint32_t result;
 
-   array_offset = (ULONG) array - (ULONG) RTR_addr(objlist[current_this]);
+   array_offset = (uint32_t)array - (uint32_t)RTR_addr(objlist[current_this]);
 
-   handle = RTR_get_resource_handle(RTR,table,DA_DEFAULT);
+   handle = RTR_get_resource_handle(RTR, table, DA_DEFAULT);
 
-   RTR_lock(RTR,handle);
+   RTR_lock(RTR, handle);
 
-   result = GIL2VFX_visible_bitmap_rect(x,y,flip,RTR_addr(handle),number,bounds);
+   result = GIL2VFX_visible_bitmap_rect(x, y, flip, RTR_addr(handle), number, bounds);
 
-   new_array = add_ptr(RTR_addr(objlist[current_this]),array_offset);
+   new_array = add_ptr(RTR_addr(objlist[current_this]), array_offset);
 
-   far_memmove(new_array,bounds,sizeof(bounds));
+   far_memmove(new_array, bounds, sizeof(bounds));
 
    RTR_unlock(handle);
 
@@ -397,23 +394,23 @@ ULONG cdecl visible_bitmap_rect(LONG argcnt, LONG x, LONG y, ULONG flip,
 //
 // Set a palette color range from a palette resource file
 //
-// Copy "fade tables" from resource file; dynamically build 
+// Copy "fade tables" from resource file; dynamically build
 // special shade tables for blue/green/red/gray/white/etc. effects
 //
 /*********************************************************/
 
-#pragma off (unreferenced)
-void cdecl set_palette(LONG argcnt, ULONG region, ULONG resource)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void set_palette(int32_t argcnt, uint32_t region, uint32_t resource)
+#pragma on(unreferenced)
 {
-   HRES handle;
+   uint32_t handle;
    PAL_HDR *PHDR;
    RGB *array;
-   LONG i,j,k,n,f,m,dm,d;
-   UBYTE *fade;
+   int32_t i, j, k, n, f, m, dm, d;
+   uint8_t *fade;
 
-   handle = RTR_get_resource_handle(RTR,resource,DA_DEFAULT);
-   RTR_lock(RTR,handle);
+   handle = RTR_get_resource_handle(RTR, resource, DA_DEFAULT);
+   RTR_lock(RTR, handle);
 
    PHDR = RTR_addr(handle);
 
@@ -421,216 +418,217 @@ void cdecl set_palette(LONG argcnt, ULONG region, ULONG resource)
        (region == PAL_WALLS) ||
        (region == PAL_M1) ||
        (region == PAL_M2))
+   {
+      for (i = 0; i < 11; i++)
       {
-      for (i=0;i<11;i++)
-         {
-         fade = add_ptr(PHDR,PHDR->fade[i]);
+         fade = add_ptr(PHDR, PHDR->fade[i]);
 
-         for (j=0;j<PHDR->ncolors;j++)
+         for (j = 0; j < PHDR->ncolors; j++)
             fade_tables[region][i][j] = first_color[region] + fade[j];
-         }
       }
+   }
 
-   array = add_ptr(PHDR,PHDR->RGB);
+   array = add_ptr(PHDR, PHDR->RGB);
 
-   for (i=0;i<PHDR->ncolors;i++)
-      {
-      VFX_DAC_write(i+first_color[region],&array[i]);
+   for (i = 0; i < PHDR->ncolors; i++)
+   {
+      VFX_DAC_write(i + first_color[region], &array[i]);
 
-      if (!(i & 0x0f)) VFX_wait_vblank_leading();
-      }
+      if (!(i & 0x0f))
+         VFX_wait_vblank_leading();
+   }
 
    switch (region)
+   {
+   case PAL_FIXED:
+
+      for (n = 0, i = BLU_BEG; n < BLU_NUM; n++, i++)
+         blu_inten[n] = array[i].r + array[i].g + array[i].b;
+      for (n = 0, i = RED_BEG; n < RED_NUM; n++, i++)
+         red_inten[n] = array[i].r + array[i].g + array[i].b;
+      for (n = 0, i = GRN_BEG; n < GRN_NUM; n++, i++)
+         grn_inten[n] = array[i].r + array[i].g + array[i].b;
+      for (n = 0, i = GRY_BEG; n < GRY_NUM; n++, i++)
+         gry_inten[n] = array[i].r + array[i].g + array[i].b;
+      for (n = 0, i = BRN_BEG; n < BRN_NUM; n++, i++)
+         brn_inten[n] = array[i].r + array[i].g + array[i].b;
+
+      f = first_color[region];
+      n = num_colors[region];
+      for (i = 0; i < n; i++)
       {
-      case PAL_FIXED:
+         j = array[i].r + array[i].g + array[i].b;
 
-         for (n=0,i=BLU_BEG;n<BLU_NUM;n++,i++)
-            blu_inten[n] = array[i].r + array[i].g + array[i].b;
-         for (n=0,i=RED_BEG;n<RED_NUM;n++,i++)
-            red_inten[n] = array[i].r + array[i].g + array[i].b;
-         for (n=0,i=GRN_BEG;n<GRN_NUM;n++,i++)
-            grn_inten[n] = array[i].r + array[i].g + array[i].b;
-         for (n=0,i=GRY_BEG;n<GRY_NUM;n++,i++)
-            gry_inten[n] = array[i].r + array[i].g + array[i].b;
-         for (n=0,i=BRN_BEG;n<BRN_NUM;n++,i++)
-            brn_inten[n] = array[i].r + array[i].g + array[i].b;
-         
-         f = first_color[region];
-         n = num_colors[region];
-         for (i=0;i<n;i++)
+         m = 0;
+         dm = 32767;
+         for (k = 0; k < BLU_NUM; k++)
+         {
+            d = abs(j - blu_inten[k]);
+            if (d < dm)
             {
-            j = array[i].r + array[i].g + array[i].b;
-
-            m = 0;
-            dm = 32767;
-            for (k=0;k<BLU_NUM;k++)
-               {
-               d = abs(j-blu_inten[k]);
-               if (d < dm)
-                  {
-                  dm = d;
-                  m = k;
-                  }
-               }
-
-            F_blu[i] = BLU_BEG+m;
-
-            m = 0;
-            dm = 32767;
-            for (k=0;k<GRN_NUM;k++)
-               {
-               d = abs(j-grn_inten[k]);
-               if (d < dm)
-                  {
-                  dm = d;
-                  m = k;
-                  }
-               }
-
-            F_grn[i] = GRN_BEG+m;
-
-            m = 0;
-            dm = 32767;
-            for (k=0;k<RED_NUM;k++)
-               {
-               d = abs(j-red_inten[k]);
-               if (d < dm)
-                  {
-                  dm = d;
-                  m = k;
-                  }
-               }
-
-            F_red[i] = RED_BEG+m;
-
-            m = 0;
-            dm = 32767;
-            for (k=0;k<GRY_NUM;k++)
-               {
-               d = abs(j-gry_inten[k]);
-               if (d < dm)
-                  {
-                  dm = d;
-                  m = k;
-                  }
-               }
-
-            F_gry[i] = GRY_BEG+m;
+               dm = d;
+               m = k;
             }
-         break;
+         }
 
-      case PAL_M1:
-      case PAL_M2:
+         F_blu[i] = BLU_BEG + m;
 
-         f = first_color[region];
-         n = num_colors[region];
-         for (i=0;i<n;i++)
+         m = 0;
+         dm = 32767;
+         for (k = 0; k < GRN_NUM; k++)
+         {
+            d = abs(j - grn_inten[k]);
+            if (d < dm)
             {
-            j = array[i].r + array[i].g + array[i].b;
-
-            m = 0;
-            dm = 32767;
-            for (k=0;k<BRN_NUM;k++)
-               {
-               d = abs(j-brn_inten[k]);
-               if (d < dm)
-                  {
-                  dm = d;
-                  m = k;
-                  }
-               }
-
-            if (region == PAL_M1)
-               M1_brn[i] = BRN_BEG+m;
-            else
-               M2_brn[i] = BRN_BEG+m;
-
-            m = 0;
-            dm = 32767;
-            for (k=0;k<GRY_NUM;k++)
-               {
-               d = abs(j-gry_inten[k]);
-               if (d < dm)
-                  {
-                  dm = d;
-                  m = k;
-                  }
-               }
-
-            if (region == PAL_M1)
-               M1_gry[i] = GRY_BEG+m;
-            else
-               M2_gry[i] = GRY_BEG+m;
-
-            m = 0;
-            dm = 32767;
-            for (k=0;k<GRN_NUM;k++)
-               {
-               d = abs(j-grn_inten[k]);
-               if (d < dm)
-                  {
-                  dm = d;
-                  m = k;
-                  }
-               }
-
-            if (region == PAL_M1)
-               M1_grn[i] = GRN_BEG+m;
-            else
-               M2_grn[i] = GRN_BEG+m;
-
-            m = 0;
-            dm = 32767;
-            for (k=0;k<BLU_NUM;k++)
-               {
-               d = abs(j-blu_inten[k]);
-               if (d < dm)
-                  {
-                  dm = d;
-                  m = k;
-                  }
-               }
-
-            if (region == PAL_M1)
-               M1_blu[i] = BLU_BEG+m;
-            else
-               M2_blu[i] = BLU_BEG+m;
-
-            if (region == PAL_M1)
-               M1_wht[i] = FIX_WHT;
-            else
-               M2_wht[i] = FIX_WHT;
+               dm = d;
+               m = k;
             }
-         break;
+         }
+
+         F_grn[i] = GRN_BEG + m;
+
+         m = 0;
+         dm = 32767;
+         for (k = 0; k < RED_NUM; k++)
+         {
+            d = abs(j - red_inten[k]);
+            if (d < dm)
+            {
+               dm = d;
+               m = k;
+            }
+         }
+
+         F_red[i] = RED_BEG + m;
+
+         m = 0;
+         dm = 32767;
+         for (k = 0; k < GRY_NUM; k++)
+         {
+            d = abs(j - gry_inten[k]);
+            if (d < dm)
+            {
+               dm = d;
+               m = k;
+            }
+         }
+
+         F_gry[i] = GRY_BEG + m;
       }
+      break;
+
+   case PAL_M1:
+   case PAL_M2:
+
+      f = first_color[region];
+      n = num_colors[region];
+      for (i = 0; i < n; i++)
+      {
+         j = array[i].r + array[i].g + array[i].b;
+
+         m = 0;
+         dm = 32767;
+         for (k = 0; k < BRN_NUM; k++)
+         {
+            d = abs(j - brn_inten[k]);
+            if (d < dm)
+            {
+               dm = d;
+               m = k;
+            }
+         }
+
+         if (region == PAL_M1)
+            M1_brn[i] = BRN_BEG + m;
+         else
+            M2_brn[i] = BRN_BEG + m;
+
+         m = 0;
+         dm = 32767;
+         for (k = 0; k < GRY_NUM; k++)
+         {
+            d = abs(j - gry_inten[k]);
+            if (d < dm)
+            {
+               dm = d;
+               m = k;
+            }
+         }
+
+         if (region == PAL_M1)
+            M1_gry[i] = GRY_BEG + m;
+         else
+            M2_gry[i] = GRY_BEG + m;
+
+         m = 0;
+         dm = 32767;
+         for (k = 0; k < GRN_NUM; k++)
+         {
+            d = abs(j - grn_inten[k]);
+            if (d < dm)
+            {
+               dm = d;
+               m = k;
+            }
+         }
+
+         if (region == PAL_M1)
+            M1_grn[i] = GRN_BEG + m;
+         else
+            M2_grn[i] = GRN_BEG + m;
+
+         m = 0;
+         dm = 32767;
+         for (k = 0; k < BLU_NUM; k++)
+         {
+            d = abs(j - blu_inten[k]);
+            if (d < dm)
+            {
+               dm = d;
+               m = k;
+            }
+         }
+
+         if (region == PAL_M1)
+            M1_blu[i] = BLU_BEG + m;
+         else
+            M2_blu[i] = BLU_BEG + m;
+
+         if (region == PAL_M1)
+            M1_wht[i] = FIX_WHT;
+         else
+            M2_wht[i] = FIX_WHT;
+      }
+      break;
+   }
 
    RTR_unlock(handle);
 }
 
 /*********************************************************/
-void cdecl wait_vertical_retrace(void)
+void wait_vertical_retrace(void)
 {
    VFX_wait_vblank_leading();
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-ULONG cdecl read_palette(LONG argcnt, ULONG regnum)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t read_palette(int32_t argcnt, uint32_t regnum)
+#pragma on(unreferenced)
 {
    RGB triplet;
-   ULONG val;
+   uint32_t val;
 
    VFX_DAC_read(regnum, &triplet);
-   val = ((ULONG) triplet.r << 12) | ((ULONG) triplet.g << 6) | ((ULONG) triplet.b);
+   val = ((uint32_t)triplet.r << 12) | ((uint32_t)triplet.g << 6) | ((uint32_t)triplet.b);
 
    return val;
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl write_palette(LONG argcnt, ULONG regnum, ULONG value)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void write_palette(int32_t argcnt, uint32_t regnum, uint32_t value)
+#pragma on(unreferenced)
 {
    RGB triplet;
 
@@ -642,38 +640,38 @@ void cdecl write_palette(LONG argcnt, ULONG regnum, ULONG value)
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl pixel_fade(LONG argcnt, ULONG src_wnd, ULONG dest_wnd, ULONG intervals)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void pixel_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd, uint32_t intervals)
+#pragma on(unreferenced)
 {
-   GIL2VFX_pixel_fade(src_wnd,dest_wnd,intervals);
+   GIL2VFX_pixel_fade(src_wnd, dest_wnd, intervals);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl color_fade(LONG argcnt, ULONG src_wnd, ULONG dest_wnd)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void color_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd)
+#pragma on(unreferenced)
 {
-   GIL2VFX_color_fade(src_wnd,dest_wnd);
+   GIL2VFX_color_fade(src_wnd, dest_wnd);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl light_fade(LONG argcnt, ULONG src_wnd, ULONG color)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void light_fade(int32_t argcnt, uint32_t src_wnd, uint32_t color)
+#pragma on(unreferenced)
 {
-   GIL2VFX_light_fade(src_wnd,color);
+   GIL2VFX_light_fade(src_wnd, color);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-ULONG cdecl assign_window(LONG argcnt, ULONG owner, ULONG x1, ULONG y1,
-                          ULONG x2, ULONG y2)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t assign_window(int32_t argcnt, uint32_t owner, uint32_t x1, uint32_t y1,
+                       uint32_t x2, uint32_t y2)
+#pragma on(unreferenced)
 {
-   LONG window;
+   int32_t window;
 
-   window = GIL2VFX_assign_window(x1,y1,x2,y2);
+   window = GIL2VFX_assign_window(x1, y1, x2, y2);
 
    window_owner[window] = owner;
 
@@ -681,14 +679,14 @@ ULONG cdecl assign_window(LONG argcnt, ULONG owner, ULONG x1, ULONG y1,
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-ULONG cdecl assign_subwindow(LONG argcnt, ULONG owner, ULONG parent,
-                             ULONG x1, ULONG y1, ULONG x2, ULONG y2)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t assign_subwindow(int32_t argcnt, uint32_t owner, uint32_t parent,
+                          uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+#pragma on(unreferenced)
 {
-   LONG window;
+   int32_t window;
 
-   window = GIL2VFX_assign_subwindow(parent,x1,y1,x2,y2);
+   window = GIL2VFX_assign_subwindow(parent, x1, y1, x2, y2);
 
    window_owner[window] = owner;
 
@@ -696,90 +694,90 @@ ULONG cdecl assign_subwindow(LONG argcnt, ULONG owner, ULONG parent,
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl release_window(LONG argcnt, ULONG window)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void release_window(int32_t argcnt, uint32_t window)
+#pragma on(unreferenced)
 {
    GIL2VFX_release_window(window);
    window_owner[window] = -1;
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-ULONG cdecl get_x1(LONG argcnt, ULONG window)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t get_x1(int32_t argcnt, uint32_t window)
+#pragma on(unreferenced)
 {
    return GIL2VFX_get_x1(window);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-ULONG cdecl get_x2(LONG argcnt, ULONG window)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t get_x2(int32_t argcnt, uint32_t window)
+#pragma on(unreferenced)
 {
    return GIL2VFX_get_x2(window);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-ULONG cdecl get_y1(LONG argcnt, ULONG window)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t get_y1(int32_t argcnt, uint32_t window)
+#pragma on(unreferenced)
 {
    return GIL2VFX_get_y1(window);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-ULONG cdecl get_y2(LONG argcnt, ULONG window)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t get_y2(int32_t argcnt, uint32_t window)
+#pragma on(unreferenced)
 {
    return GIL2VFX_get_y2(window);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl set_x1(LONG argcnt, ULONG window, ULONG x1)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void set_x1(int32_t argcnt, uint32_t window, uint32_t x1)
+#pragma on(unreferenced)
 {
-   GIL2VFX_set_x1(window,x1);
+   GIL2VFX_set_x1(window, x1);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl set_x2(LONG argcnt, ULONG window, ULONG x2)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void set_x2(int32_t argcnt, uint32_t window, uint32_t x2)
+#pragma on(unreferenced)
 {
-   GIL2VFX_set_x2(window,x2);
+   GIL2VFX_set_x2(window, x2);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl set_y1(LONG argcnt, ULONG window, ULONG y1)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void set_y1(int32_t argcnt, uint32_t window, uint32_t y1)
+#pragma on(unreferenced)
 {
-   GIL2VFX_set_y1(window,y1);
+   GIL2VFX_set_y1(window, y1);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl set_y2(LONG argcnt, ULONG window, ULONG y2)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void set_y2(int32_t argcnt, uint32_t window, uint32_t y2)
+#pragma on(unreferenced)
 {
-   GIL2VFX_set_y2(window,y2);
+   GIL2VFX_set_y2(window, y2);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl wipe_window(LONG argcnt, ULONG window, ULONG color)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void wipe_window(int32_t argcnt, uint32_t window, uint32_t color)
+#pragma on(unreferenced)
 {
-   GIL2VFX_wipe_window(window,color);
+   GIL2VFX_wipe_window(window, color);
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl text_window(LONG argcnt, ULONG wndnum, ULONG wnd)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void text_window(int32_t argcnt, uint32_t wndnum, uint32_t wnd)
+#pragma on(unreferenced)
 {
    tw[wndnum].window = wnd;
 }
@@ -793,93 +791,93 @@ void cdecl text_window(LONG argcnt, ULONG wndnum, ULONG wnd)
 //
 /*********************************************************/
 
-#pragma off (unreferenced)
-void cdecl text_style(LONG argcnt, ULONG wndnum, ULONG font,
-                      ULONG justify)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void text_style(int32_t argcnt, uint32_t wndnum, uint32_t font,
+                uint32_t justify)
+#pragma on(unreferenced)
 {
-   HRES hfont;
+   uint32_t hfont;
    FONT *vfont;
 
    tw[wndnum].justify = justify;
 
-   hfont = (HRES) tw[wndnum].font;
+   hfont = (uint32_t)tw[wndnum].font;
 
    if (hfont != -1U)
-      {
+   {
       RTR_unlock(hfont);
-      }
+   }
 
-   tw[wndnum].font = (void *) RTR_get_resource_handle(RTR,font,DA_DEFAULT);
+   tw[wndnum].font = (void *)RTR_get_resource_handle(RTR, font, DA_DEFAULT);
 
-   RTR_lock(RTR,(HRES) tw[wndnum].font);
+   RTR_lock(RTR, (uint32_t)tw[wndnum].font);
 
-   vfont = (FONT *) RTR_addr((HRES) tw[wndnum].font);
+   vfont = (FONT *)RTR_addr((uint32_t)tw[wndnum].font);
 
    tw[wndnum].lookaside[vfont->font_background] = 255;
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl text_xy(LONG argcnt, ULONG wndnum, ULONG htab, ULONG vtab)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void text_xy(int32_t argcnt, uint32_t wndnum, uint32_t htab, uint32_t vtab)
+#pragma on(unreferenced)
 {
    tw[wndnum].htab = htab;
    tw[wndnum].vtab = vtab;
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-LONG cdecl get_text_x(LONG argcnt, ULONG wndnum)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+int32_t get_text_x(int32_t argcnt, uint32_t wndnum)
+#pragma on(unreferenced)
 {
    return tw[wndnum].htab;
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-LONG cdecl get_text_y(LONG argcnt, ULONG wndnum)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+int32_t get_text_y(int32_t argcnt, uint32_t wndnum)
+#pragma on(unreferenced)
 {
    return tw[wndnum].vtab;
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl home(LONG argcnt, ULONG wndnum)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void home(int32_t argcnt, uint32_t wndnum)
+#pragma on(unreferenced)
 {
-   HRES hfont;
+   uint32_t hfont;
 
-   hfont = (HRES) tw[wndnum].font;
+   hfont = (uint32_t)tw[wndnum].font;
    tw[wndnum].font = RTR_addr(hfont);
 
    GIL2VFX_select_text_window(&tw[wndnum]);
    GIL2VFX_home();
 
-   tw[wndnum].font = (void *) hfont;
+   tw[wndnum].font = (void *)hfont;
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl text_color(LONG argcnt, ULONG wndnum, ULONG current, ULONG new)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void text_color(int32_t argcnt, uint32_t wndnum, uint32_t current, uint32_t new)
+#pragma on(unreferenced)
 {
-   HRES hfont;
+   uint32_t hfont;
 
-   hfont = (HRES) tw[wndnum].font;
+   hfont = (uint32_t)tw[wndnum].font;
    tw[wndnum].font = RTR_addr(hfont);
 
    GIL2VFX_select_text_window(&tw[wndnum]);
-   GIL2VFX_remap_font_color(current,new);
+   GIL2VFX_remap_font_color(current, new);
 
-   tw[wndnum].font = (void *) hfont;
+   tw[wndnum].font = (void *)hfont;
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl text_refresh_window(LONG argcnt, ULONG wndnum, LONG wnd)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void text_refresh_window(int32_t argcnt, uint32_t wndnum, int32_t wnd)
+#pragma on(unreferenced)
 {
    tw_refresh[wndnum] = wnd;
 }
@@ -893,102 +891,109 @@ void cdecl text_refresh_window(LONG argcnt, ULONG wndnum, LONG wnd)
 //
 /*********************************************************/
 
-#pragma off (unreferenced)
-void cdecl vsprint(LONG argcnt, ULONG wndnum, BYTE *format, va_list argptr)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void vsprint(int32_t argcnt, uint32_t wndnum, int8_t *format, va_list argptr)
+#pragma on(unreferenced)
 {
-   HRES hfont,str;
-   BYTE c,*p,*s;
-   BYTE buff[32];
+   uint32_t hfont, str;
+   int8_t c, *p, *s;
+   int8_t buff[32];
 
-   hfont = (HRES) tw[wndnum].font;
+   hfont = (uint32_t)tw[wndnum].font;
    tw[wndnum].font = RTR_addr(hfont);
 
    GIL2VFX_select_text_window(&tw[wndnum]);
 
-   GIL2VFX_print(BUF,"");
-   txtbuf[0] = 0;       // bug in GIL?  GIL_print("") above should do this!
+   GIL2VFX_print(BUF, "");
+   txtbuf[0] = 0; // bug in GIL?  GIL_print("") above should do this!
 
    p = format;
 
    while ((c = *p++) != 0)
-      {
+   {
       if (c != '%')
-         {
-         GIL2VFX_print(APP,"%c",c);
+      {
+         GIL2VFX_print(APP, "%c", c);
          continue;
-         }
-
-      switch (c=(*p++))
-         {
-         case '0': case '1': case '2': case '3': case '4':
-         case '5': case '6': case '7': case '8': case '9':
-            GIL2VFX_remap_font_color(15,text_colors[c-'0']);
-            break;
-
-         case 'd':
-            GIL2VFX_print(APP,"%s",ltoa(va_arg(argptr,LONG),buff,10));
-            break;
-
-         case 'u':
-            GIL2VFX_print(APP,"%s",ultoa(va_arg(argptr,ULONG),buff,10));
-            break;
-
-         case 'x':
-         case 'X':
-            GIL2VFX_print(APP,"%s",ltoa(va_arg(argptr,LONG),buff,16));
-            break;
-
-         case 's':
-            str = RTR_get_resource_handle(RTR,va_arg(argptr,ULONG),
-               DA_DEFAULT);
-
-            RTR_lock(RTR,str);
-
-            s = RTR_addr(str);
-
-            switch (*(UWORD *) s)
-               {
-               case ':S':
-                  GIL2VFX_print(APP,"%s",&s[2]);
-                  break;
-
-               default:
-                  abend(MSG_SRRV);
-               }
-
-            RTR_unlock(str);
-
-            tw[wndnum].font = RTR_addr(hfont);
-            break;
-
-         case 'a':
-            GIL2VFX_print(APP,va_arg(argptr,BYTE *));
-            break;
-
-         case 'c':
-            GIL2VFX_print(APP,"%c",(UBYTE) (va_arg(argptr,ULONG) & 0xffL));
-            break;
-         }
       }
 
-   if ((txtbuf[sizeof(txtbuf)-1] != 0x69)
-        ||
-       (txtbuf[sizeof(txtbuf)-2] != 0x77))
+      switch (c = (*p++))
+      {
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+         GIL2VFX_remap_font_color(15, text_colors[c - '0']);
+         break;
+
+      case 'd':
+         GIL2VFX_print(APP, "%s", ltoa(va_arg(argptr, int32_t), buff, 10));
+         break;
+
+      case 'u':
+         GIL2VFX_print(APP, "%s", ultoa(va_arg(argptr, uint32_t), buff, 10));
+         break;
+
+      case 'x':
+      case 'X':
+         GIL2VFX_print(APP, "%s", ltoa(va_arg(argptr, int32_t), buff, 16));
+         break;
+
+      case 's':
+         str = RTR_get_resource_handle(RTR, va_arg(argptr, uint32_t),
+                                       DA_DEFAULT);
+
+         RTR_lock(RTR, str);
+
+         s = RTR_addr(str);
+
+         switch (*(uint16_t *)s)
+         {
+         case ':S':
+            GIL2VFX_print(APP, "%s", &s[2]);
+            break;
+
+         default:
+            abend(MSG_SRRV);
+         }
+
+         RTR_unlock(str);
+
+         tw[wndnum].font = RTR_addr(hfont);
+         break;
+
+      case 'a':
+         GIL2VFX_print(APP, va_arg(argptr, int8_t *));
+         break;
+
+      case 'c':
+         GIL2VFX_print(APP, "%c", (uint8_t)(va_arg(argptr, uint32_t) & 0xffL));
+         break;
+      }
+   }
+
+   if ((txtbuf[sizeof(txtbuf) - 1] != 0x69) ||
+       (txtbuf[sizeof(txtbuf) - 2] != 0x77))
       abend(MSG_TBO);
 
    GIL2VFX_print_buffer(0);
 
-   tw[wndnum].font = (void *) hfont;
+   tw[wndnum].font = (void *)hfont;
 
    if (tw_refresh[wndnum] != -1)
-      refresh_window(0,tw[wndnum].window,tw_refresh[wndnum]);
+      refresh_window(0, tw[wndnum].window, tw_refresh[wndnum]);
 }
 
 /*********************************************************/
 //
 // Warning: Strings > 256 characters long must _not_ contain
-// any '%s' specifiers, since these cause resource loads to 
+// any '%s' specifiers, since these cause resource loads to
 // occur in vsprint() which may move the original print() format
 // specifier string in memory.
 //
@@ -999,40 +1004,40 @@ void cdecl vsprint(LONG argcnt, ULONG wndnum, BYTE *format, va_list argptr)
 //
 /*********************************************************/
 
-void cdecl print(LONG argcnt, ULONG wndnum, ULONG format, ...)
+void print(int32_t argcnt, uint32_t wndnum, uint32_t format, ...)
 {
    va_list argptr;
-   HRES hstring;
-   BYTE *p;
-   UWORD *w;
+   uint32_t hstring;
+   int8_t *p;
+   uint16_t *w;
 
-   hstring = RTR_get_resource_handle(RTR,format,DA_DEFAULT);
+   hstring = RTR_get_resource_handle(RTR, format, DA_DEFAULT);
 
-   RTR_lock(RTR,hstring);
+   RTR_lock(RTR, hstring);
 
    p = RTR_addr(hstring);
 
-   w = (UWORD *) p;
+   w = (uint16_t *)p;
 
    switch (*w)
-      {
-      case ':S':
-         p += 2;
-         break;
+   {
+   case ':S':
+      p += 2;
+      break;
 
-      default:
-         abend(MSG_SRRP);
-      }
+   default:
+      abend(MSG_SRRP);
+   }
 
-   va_start(argptr,format);
+   va_start(argptr, format);
 
    if (strlen(p) < 256)
-      {
-      strcpy(strbuf,p);
+   {
+      strcpy(strbuf, p);
       p = strbuf;
-      }
+   }
 
-   vsprint(argcnt,wndnum,p,argptr);
+   vsprint(argcnt, wndnum, p, argptr);
 
    va_end(argptr);
 
@@ -1041,29 +1046,29 @@ void cdecl print(LONG argcnt, ULONG wndnum, ULONG format, ...)
 
 /*********************************************************/
 //
-// String print -- allows use of literal ASCII byte array as            
+// String print -- allows use of literal ASCII byte array as
 // format specifier, instead of string resource
 //
 // See note for print() above
 //
 /*********************************************************/
 
-void cdecl sprint(LONG argcnt, ULONG wndnum, BYTE *format, ...)
+void sprint(int32_t argcnt, uint32_t wndnum, int8_t *format, ...)
 {
    va_list argptr;
-   BYTE *p;
+   int8_t *p;
 
    p = format;
 
-   va_start(argptr,format);
+   va_start(argptr, format);
 
    if (strlen(p) < 256)
-      {
-      strcpy(strbuf,p);
+   {
+      strcpy(strbuf, p);
       p = strbuf;
-      }
+   }
 
-   vsprint(argcnt,wndnum,p,argptr);
+   vsprint(argcnt, wndnum, p, argptr);
 
    va_end(argptr);
 }
@@ -1075,57 +1080,57 @@ void cdecl sprint(LONG argcnt, ULONG wndnum, BYTE *format, ...)
 //
 /*********************************************************/
 
-void cdecl dprint(LONG argcnt, BYTE *format, ...)
+void dprint(int32_t argcnt, int8_t *format, ...)
 {
    va_list argptr;
-   BYTE *p;
+   int8_t *p;
 
    p = format;
 
-   va_start(argptr,format);
+   va_start(argptr, format);
 
-   text_color(0,0,15,DK_RED);
-   text_color(0,0,0,255);
+   text_color(0, 0, 15, DK_RED);
+   text_color(0, 0, 0, 255);
 
-   vsprint(argcnt,0,p,argptr);
+   vsprint(argcnt, 0, p, argptr);
 
    va_end(argptr);
 }
 
 /*********************************************************/
-void cdecl crout(LONG argcnt, ULONG wndnum)
+void crout(int32_t argcnt, uint32_t wndnum)
 {
-   sprint(argcnt,wndnum,"\n");
+   sprint(argcnt, wndnum, "\n");
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-ULONG cdecl char_width(LONG argcnt, ULONG wndnum, ULONG ch)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t char_width(int32_t argcnt, uint32_t wndnum, uint32_t ch)
+#pragma on(unreferenced)
 {
-   HRES hfont;
-   ULONG w;
+   uint32_t hfont;
+   uint32_t w;
 
-   hfont = (HRES) tw[wndnum].font;
+   hfont = (uint32_t)tw[wndnum].font;
    tw[wndnum].font = RTR_addr(hfont);
 
    GIL2VFX_select_text_window(&tw[wndnum]);
    w = GIL2VFX_char_width(ch);
 
-   tw[wndnum].font = (void *) hfont;
+   tw[wndnum].font = (void *)hfont;
 
    return w;
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-ULONG cdecl font_height(LONG argcnt, ULONG wndnum)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+uint32_t font_height(int32_t argcnt, uint32_t wndnum)
+#pragma on(unreferenced)
 {
-   HRES hfont;
-   ULONG w;
+   uint32_t hfont;
+   uint32_t w;
 
-   hfont = (HRES) tw[wndnum].font;
+   hfont = (uint32_t)tw[wndnum].font;
 
    w = ((FONT *)(RTR_addr(hfont)))->char_height;
 
@@ -1133,27 +1138,27 @@ ULONG cdecl font_height(LONG argcnt, ULONG wndnum)
 }
 
 /*********************************************************/
-#pragma off (unreferenced)
-void cdecl solid_bar_graph(LONG argcnt, LONG x0, LONG y0, LONG x1, LONG y1,
-                           ULONG lb_border, ULONG tr_border, ULONG bkgnd,
-                           ULONG grn, ULONG yel, ULONG red, LONG val,
-                           LONG min, LONG crit, LONG max)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void solid_bar_graph(int32_t argcnt, int32_t x0, int32_t y0, int32_t x1, int32_t y1,
+                     uint32_t lb_border, uint32_t tr_border, uint32_t bkgnd,
+                     uint32_t grn, uint32_t yel, uint32_t red, int32_t val,
+                     int32_t min, int32_t crit, int32_t max)
+#pragma on(unreferenced)
 {
-   LONG btop,bbtm,blft,brgt,grayx;
-   LONG range,point,width;
-   LONG color;
+   int32_t btop, bbtm, blft, brgt, grayx;
+   int32_t range, point, width;
+   int32_t color;
 
-   GIL2VFX_draw_line(PAGE2,x0,y0,x0,y1,lb_border);
-   GIL2VFX_draw_line(PAGE2,x0,y1,x1,y1,lb_border);
-   GIL2VFX_draw_line(PAGE2,x1,y1-1,x1,y0,tr_border);
-   GIL2VFX_draw_line(PAGE2,x1,y0,x0+1,y0,tr_border);
+   GIL2VFX_draw_line(PAGE2, x0, y0, x0, y1, lb_border);
+   GIL2VFX_draw_line(PAGE2, x0, y1, x1, y1, lb_border);
+   GIL2VFX_draw_line(PAGE2, x1, y1 - 1, x1, y0, tr_border);
+   GIL2VFX_draw_line(PAGE2, x1, y0, x0 + 1, y0, tr_border);
 
-   btop = y0+1;
-   bbtm = y1-1;
+   btop = y0 + 1;
+   bbtm = y1 - 1;
 
-   blft = x0+1;
-   brgt = x1-1;
+   blft = x0 + 1;
+   brgt = x1 - 1;
 
    width = brgt - blft;
 
@@ -1168,7 +1173,7 @@ void cdecl solid_bar_graph(LONG argcnt, LONG x0, LONG y0, LONG x1, LONG y1,
    grayx = blft + (point * width / range);
 
    if (grayx != brgt)
-      GIL2VFX_fill_rect(PAGE2,grayx,btop,brgt,bbtm,bkgnd);
+      GIL2VFX_fill_rect(PAGE2, grayx, btop, brgt, bbtm, bkgnd);
 
    if (val <= crit)
       color = red;
@@ -1176,22 +1181,21 @@ void cdecl solid_bar_graph(LONG argcnt, LONG x0, LONG y0, LONG x1, LONG y1,
       color = (val * 3 >= max) ? grn : yel;
 
    if ((val != min) && (grayx == blft))
-      grayx = blft+1;
+      grayx = blft + 1;
 
    if (grayx != blft)
-      GIL2VFX_fill_rect(PAGE2,blft,btop,grayx,bbtm,color);
+      GIL2VFX_fill_rect(PAGE2, blft, btop, grayx, bbtm, color);
 }
 
-#pragma off (unreferenced)
-void cdecl aprint(LONG argcnt, BYTE *format, ...)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void aprint(int32_t argcnt, int8_t *format, ...)
+#pragma on(unreferenced)
 {
    va_list argptr;
 
-   va_start(argptr,format);
+   va_start(argptr, format);
 
    vprintf(format, argptr);
 
    va_end(argptr);
 }
-

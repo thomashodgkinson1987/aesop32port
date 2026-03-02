@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <malloc.h>
+#include <stdint.h> // Tom: added
 
 #include "vfx.h"
 #include "dll.h"
@@ -14,50 +15,49 @@
 #include "mouse.h"
 #include "rtres.h"
 
-#define  MAX_WINDOWS    50
-#define  MAX_PANES      250
+#define MAX_WINDOWS 50
+#define MAX_PANES 250
 
-#define  FADE_INTERVALS 20
+#define FADE_INTERVALS 20
 
-WINDOW   windows[MAX_WINDOWS];
-PANE     panes[MAX_WINDOWS+MAX_PANES];
-BYTE     *bitmap_buffer;
+WINDOW windows[MAX_WINDOWS];
+PANE panes[MAX_WINDOWS + MAX_PANES];
+int8_t *bitmap_buffer;
 
-LONG     gil2vfx_active = FALSE;
+int32_t gil2vfx_active = FALSE;
 
 TEXTWINDOW *twptr;
 
 extern VFX_DESC *VFX;
-extern BYTE *pathname;
+extern int8_t *pathname;
 
-extern LONG eop_reached;
-extern LONG pending_flag;
+extern int32_t eop_reached;
+extern int32_t pending_flag;
 
-void GIL2VFX_copy_window(ULONG src, ULONG dst)
+void GIL2VFX_copy_window(uint32_t src, uint32_t dst)
 {
    if (gil2vfx_active != TRUE)
       return;
 
-   VFX_pane_copy(&panes[src],0,0,&panes[dst],0,0,NO_COLOR);
+   VFX_pane_copy(&panes[src], 0, 0, &panes[dst], 0, 0, NO_COLOR);
 }
 
-
-LONG GIL2VFX_assign_window(LONG x1, LONG y1, LONG x2, LONG y2)
+int32_t GIL2VFX_assign_window(int32_t x1, int32_t y1, int32_t x2, int32_t y2)
 {
-   LONG i;
+   int32_t i;
 
-   for (i=0;i<MAX_WINDOWS;i++)
-      {
+   for (i = 0; i < MAX_WINDOWS; i++)
+   {
       if (windows[i].buffer == NULL)
-         {
-         windows[i].buffer = mem_alloc((x2-x1+1) * (y2-y1+1));
+      {
+         windows[i].buffer = mem_alloc((x2 - x1 + 1) * (y2 - y1 + 1));
          // LUM WINDOW structure changes
-         //windows[i].x0 = x1;
-         //windows[i].y0 = y1;
-         //windows[i].x1 = x2;
-         //windows[i].y1 = y2;
+         // windows[i].x0 = x1;
+         // windows[i].y0 = y1;
+         // windows[i].x1 = x2;
+         // windows[i].y1 = y2;
          windows[i].x_max = x2;
-         windows[i].y_max = y2;         
+         windows[i].y_max = y2;
 
          panes[i].window = &windows[i];
          panes[i].x0 = x1;
@@ -66,8 +66,8 @@ LONG GIL2VFX_assign_window(LONG x1, LONG y1, LONG x2, LONG y2)
          panes[i].y1 = y2;
 
          return i;
-         }
       }
+   }
 
    abend(MSG_TFW);
    return -1;
@@ -75,28 +75,28 @@ LONG GIL2VFX_assign_window(LONG x1, LONG y1, LONG x2, LONG y2)
 
 void GIL2VFX_init()
 {
-   LONG dummy;
+   int32_t dummy;
 
-   void *DLL,*drvr;
-   LONG w,h;
+   void *DLL, *drvr;
+   int32_t w, h;
 
    //
    // Load the driver
    //
 
-   DLL = FILE_read("MCGA.DLL",NULL);
+   DLL = FILE_read("MCGA.DLL", NULL);
    if (DLL == NULL)
-      {
+   {
       printf("Missing or invalid 386FX driver\n");
       exit(1);
-      }
+   }
 
-   drvr = DLL_load(DLL,DLLMEM_ALLOC | DLLSRC_MEM,NULL);
-   if (drvr == NULL)     
-      {
+   drvr = DLL_load(DLL, DLLMEM_ALLOC | DLLSRC_MEM, NULL);
+   if (drvr == NULL)
+   {
       printf("Invalid DLL image\n");
       exit(1);
-      }
+   }
    free(DLL);
 
    //
@@ -120,14 +120,14 @@ void GIL2VFX_init()
 
    bitmap_buffer = mem_alloc(320 * 200);
 
-   windows[0].buffer = (void *) 0x0a0000;       // Page 1 = 0
+   windows[0].buffer = (void *)0x0a0000; // Page 1 = 0
    // LUM WINDOW structure changes
-   //windows[0].x0 = 0;
-   //windows[0].y0 = 0;
-   //windows[0].x1 = 319;
-   //windows[0].y1 = 199;
+   // windows[0].x0 = 0;
+   // windows[0].y0 = 0;
+   // windows[0].x1 = 319;
+   // windows[0].y1 = 199;
    windows[0].x_max = 319;
-   windows[0].y_max = 199;   
+   windows[0].y_max = 199;
 
    panes[0].window = &windows[0];
    panes[0].x0 = 0;
@@ -135,51 +135,49 @@ void GIL2VFX_init()
    panes[0].x1 = 319;
    panes[0].y1 = 199;
 
-   dummy = GIL2VFX_assign_window(0,0,319,199);  // Page 2 = 1
-
+   dummy = GIL2VFX_assign_window(0, 0, 319, 199); // Page 2 = 1
 }
 
 void GIL2VFX_shutdown_driver()
 {
-   ULONG i;
+   uint32_t i;
 
    if (gil2vfx_active != TRUE)
       return;
 
    gil2vfx_active = FALSE;
 
-   for (i=0;i<MAX_WINDOWS;i++)
-      {
+   for (i = 0; i < MAX_WINDOWS; i++)
+   {
       GIL2VFX_release_window(i);
-      }
+   }
 
    mem_free(bitmap_buffer);
 
    VFX_shutdown_driver();
 }
 
-
-void GIL2VFX_release_window(ULONG wnd)
+void GIL2VFX_release_window(uint32_t wnd)
 {
    if (wnd < MAX_WINDOWS)
-      {
+   {
       if (windows[wnd].buffer != NULL)
-         {
+      {
          mem_free(windows[wnd].buffer);
          windows[wnd].buffer = NULL;
-         }
       }
+   }
    GIL2VFX_release_subwindow(wnd);
 }
 
-LONG GIL2VFX_assign_subwindow(ULONG wnd,LONG x1, LONG y1, LONG x2, LONG y2)
+int32_t GIL2VFX_assign_subwindow(uint32_t wnd, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
 {
-   ULONG i;
+   uint32_t i;
 
-   for (i=MAX_WINDOWS;i<MAX_WINDOWS+MAX_PANES;i++)
-      {
+   for (i = MAX_WINDOWS; i < MAX_WINDOWS + MAX_PANES; i++)
+   {
       if (panes[i].window == NULL)
-         {
+      {
          if (wnd < MAX_WINDOWS)
             panes[i].window = &windows[wnd];
          else
@@ -191,171 +189,166 @@ LONG GIL2VFX_assign_subwindow(ULONG wnd,LONG x1, LONG y1, LONG x2, LONG y2)
          panes[i].y1 = y2;
 
          return i;
-         }
       }
+   }
 
    abend(MSG_TFSW);
 
    return -1;
 }
 
-void GIL2VFX_release_subwindow(ULONG wnd)
+void GIL2VFX_release_subwindow(uint32_t wnd)
 {
    panes[wnd].window = NULL;
 }
 
-LONG GIL2VFX_get_bitmap_width(void *shape_table, LONG shape_num)
+int32_t GIL2VFX_get_bitmap_width(void *shape_table, int32_t shape_num)
 {
    return (VFX_shape_bounds(shape_table, shape_num) >> 16);
 }
 
-LONG GIL2VFX_get_bitmap_height(void *shape_table, LONG shape_num)
+int32_t GIL2VFX_get_bitmap_height(void *shape_table, int32_t shape_num)
 {
-   return ((LONG) (WORD) VFX_shape_bounds(shape_table, shape_num) );
+   return ((int32_t)(int16_t)VFX_shape_bounds(shape_table, shape_num));
 }
 
-LONG GIL2VFX_visible_bitmap_rect(LONG x1, LONG y1, LONG mirror,
-                                 UBYTE *shapes, LONG shape_num,WORD *bounds)
+int32_t GIL2VFX_visible_bitmap_rect(int32_t x1, int32_t y1, int32_t mirror, uint8_t *shapes, int32_t shape_num, int16_t *bounds)
 {
-   LONG rectangle[4];
-   LONG bm_width, bm_height;
+   int32_t rectangle[4];
+   int32_t bm_width, bm_height;
 
    VFX_shape_visible_rectangle(shapes, shape_num, x1, y1, mirror, rectangle);
 
    if (mirror)
-      {
-      bm_width = VFX_shape_bounds(shapes,shape_num);
-      bm_height = (LONG) (WORD)bm_width;
+   {
+      bm_width = VFX_shape_bounds(shapes, shape_num);
+      bm_height = (int32_t)(int16_t)bm_width;
       bm_width = bm_width >> 16;
-      }
-
+   }
 
    if (mirror & X_MIRROR)
-      {
-      bounds[0] = (WORD) (bm_width + rectangle[0]);
-      bounds[2] = (WORD) (bm_width + rectangle[2]);
-      }
+   {
+      bounds[0] = (int16_t)(bm_width + rectangle[0]);
+      bounds[2] = (int16_t)(bm_width + rectangle[2]);
+   }
    else
-      {
-      bounds[0] = (WORD) rectangle[0];
-      bounds[2] = (WORD) rectangle[2];
-      }
-   
+   {
+      bounds[0] = (int16_t)rectangle[0];
+      bounds[2] = (int16_t)rectangle[2];
+   }
+
    if (mirror & Y_MIRROR)
-      {
-      bounds[1] = (WORD) (bm_height + rectangle[1]);
-      bounds[3] = (WORD) (bm_height + rectangle[3]);
-      }
+   {
+      bounds[1] = (int16_t)(bm_height + rectangle[1]);
+      bounds[3] = (int16_t)(bm_height + rectangle[3]);
+   }
    else
-      {
-      bounds[1] = (WORD) rectangle[1];
-      bounds[3] = (WORD) rectangle[3];
-      }
-   
+   {
+      bounds[1] = (int16_t)rectangle[1];
+      bounds[3] = (int16_t)rectangle[3];
+   }
 
-   bounds[0] = (bounds[0] > panes[0].x0) ? bounds[0] : (WORD) panes[0].x0;
-   bounds[1] = (bounds[1] > panes[0].y0) ? bounds[1] : (WORD) panes[0].y0;
+   bounds[0] = (bounds[0] > panes[0].x0) ? bounds[0] : (int16_t)panes[0].x0;
+   bounds[1] = (bounds[1] > panes[0].y0) ? bounds[1] : (int16_t)panes[0].y0;
 
-   bounds[2] = (bounds[2] < panes[0].x1) ? bounds[2] : (WORD) panes[0].x1;
-   bounds[3] = (bounds[3] < panes[0].y1) ? bounds[3] : (WORD) panes[0].y1;
+   bounds[2] = (bounds[2] < panes[0].x1) ? bounds[2] : (int16_t)panes[0].x1;
+   bounds[3] = (bounds[3] < panes[0].y1) ? bounds[3] : (int16_t)panes[0].y1;
 
-   if ( (bounds[0] > bounds[2]) || (bounds[1] > bounds[3]) )
-      return 0;            // Nothing visible
+   if ((bounds[0] > bounds[2]) || (bounds[1] > bounds[3]))
+      return 0; // Nothing visible
    else
       return 1;
 }
 
-void GIL2VFX_draw_bitmap(LONG wnd,LONG x, LONG y, LONG mirror, LONG scale,
-   UBYTE *fade_table, UBYTE *shapes, LONG shape_num)
+void GIL2VFX_draw_bitmap(int32_t wnd, int32_t x, int32_t y, int32_t mirror, int32_t scale, uint8_t *fade_table, uint8_t *shapes, int32_t shape_num)
 {
-   LONG xp = x - panes[wnd].x0;
-   LONG yp = y - panes[wnd].y0;
-   LONG x_scale, y_scale;
-   LONG flags;
-   LONG xs,ys;
+   int32_t xp = x - panes[wnd].x0;
+   int32_t yp = y - panes[wnd].y0;
+   int32_t x_scale, y_scale;
+   int32_t flags;
+   int32_t xs, ys;
 
    if (gil2vfx_active != TRUE)
       return;
 
-   if ( (scale == NULL) && (mirror == NO_MIRROR) )
-      {
+   if ((scale == NULL) && (mirror == NO_MIRROR))
+   {
       VFX_shape_draw(&panes[wnd], shapes, shape_num, xp, yp);
-      }
+   }
    else
-      {
+   {
       x_scale = ((scale) ? (scale << 8) : 0x10000);
       y_scale = ((scale) ? (scale << 8) : 0x10000);
 
       if (x_scale != 0x10000 || y_scale != 0x10000)
-         {
-         VFX_fixed_mul( VFX_shape_bounds(shapes, shape_num) & 0xffff0000,
-                        0x10000-x_scale, &xs);
-         VFX_fixed_mul( VFX_shape_bounds(shapes, shape_num) << 16,
-                        0x10000-y_scale, &ys);
+      {
+         VFX_fixed_mul(VFX_shape_bounds(shapes, shape_num) & 0xffff0000, 0x10000 - x_scale, &xs);
+         VFX_fixed_mul(VFX_shape_bounds(shapes, shape_num) << 16, 0x10000 - y_scale, &ys);
 
-         if (mirror & X_MIRROR) xs=-xs;
-         if (mirror & Y_MIRROR) ys=-ys;
+         if (mirror & X_MIRROR)
+            xs = -xs;
+         if (mirror & Y_MIRROR)
+            ys = -ys;
 
          xp += xs >> 17;
          yp += ys >> 17;
-         }
+      }
 
       switch (mirror)
-         {
-         case X_MIRROR:
-            x_scale = -x_scale;
-            xp += (VFX_shape_bounds(shapes, shape_num) >> 16);
-            break;
-         case Y_MIRROR:
-            y_scale = -y_scale;
-            yp += ((LONG)(WORD)VFX_shape_bounds(shapes, shape_num));
-            break;
-         case XY_MIRROR:
-            x_scale = -x_scale;
-            y_scale = -y_scale;
-            xp += (VFX_shape_bounds(shapes, shape_num) >> 16)-1;
-            yp += ((LONG)(WORD)VFX_shape_bounds(shapes, shape_num))-1;
-            break;
-         case NO_MIRROR:
-         default:
-            break;
-         }
+      {
+      case X_MIRROR:
+         x_scale = -x_scale;
+         xp += (VFX_shape_bounds(shapes, shape_num) >> 16);
+         break;
+      case Y_MIRROR:
+         y_scale = -y_scale;
+         yp += ((int32_t)(int16_t)VFX_shape_bounds(shapes, shape_num));
+         break;
+      case XY_MIRROR:
+         x_scale = -x_scale;
+         y_scale = -y_scale;
+         xp += (VFX_shape_bounds(shapes, shape_num) >> 16) - 1;
+         yp += ((int32_t)(int16_t)VFX_shape_bounds(shapes, shape_num)) - 1;
+         break;
+      case NO_MIRROR:
+      default:
+         break;
+      }
 
       if (fade_table != NULL && scale != 0)
-         {
+      {
          VFX_shape_lookaside(fade_table);
          flags = ST_XLAT;
-         }
+      }
       else
          flags = NULL;
 
-      VFX_shape_transform(&panes[wnd], shapes, shape_num, xp, yp,
-                          bitmap_buffer, 0, x_scale, y_scale, flags);
-      }
+      VFX_shape_transform(&panes[wnd], shapes, shape_num, xp, yp, bitmap_buffer, 0, x_scale, y_scale, flags);
+   }
 }
 
-LONG GIL2VFX_get_x1(ULONG wnd)
+int32_t GIL2VFX_get_x1(uint32_t wnd)
 {
    if (panes[wnd].window != NULL)
       return panes[wnd].x0;
    else
       return NULL;
 }
-LONG GIL2VFX_get_y1(ULONG wnd)
+int32_t GIL2VFX_get_y1(uint32_t wnd)
 {
    if (panes[wnd].window != NULL)
       return panes[wnd].y0;
    else
       return NULL;
 }
-LONG GIL2VFX_get_x2(ULONG wnd)
+int32_t GIL2VFX_get_x2(uint32_t wnd)
 {
    if (panes[wnd].window != NULL)
       return panes[wnd].x1;
    else
       return NULL;
 }
-LONG GIL2VFX_get_y2(ULONG wnd)
+int32_t GIL2VFX_get_y2(uint32_t wnd)
 {
    if (panes[wnd].window != NULL)
       return panes[wnd].y1;
@@ -363,24 +356,24 @@ LONG GIL2VFX_get_y2(ULONG wnd)
       return NULL;
 }
 
-void GIL2VFX_set_x1(ULONG wnd, LONG val)
+void GIL2VFX_set_x1(uint32_t wnd, int32_t val)
 {
    panes[wnd].x0 = val;
 }
-void GIL2VFX_set_y1(ULONG wnd, LONG val)
+void GIL2VFX_set_y1(uint32_t wnd, int32_t val)
 {
    panes[wnd].y0 = val;
 }
-void GIL2VFX_set_x2(ULONG wnd, LONG val)
+void GIL2VFX_set_x2(uint32_t wnd, int32_t val)
 {
    panes[wnd].x1 = val;
 }
-void GIL2VFX_set_y2(ULONG wnd, LONG val)
+void GIL2VFX_set_y2(uint32_t wnd, int32_t val)
 {
    panes[wnd].y1 = val;
 }
 
-void GIL2VFX_wipe_window(LONG wnd, LONG color)
+void GIL2VFX_wipe_window(int32_t wnd, int32_t color)
 {
    if (gil2vfx_active != TRUE)
       return;
@@ -388,21 +381,21 @@ void GIL2VFX_wipe_window(LONG wnd, LONG color)
    VFX_pane_wipe(&panes[wnd], color);
 }
 
-void GIL2VFX_draw_dot(LONG wnd, LONG x, LONG y, LONG color)
+void GIL2VFX_draw_dot(int32_t wnd, int32_t x, int32_t y, int32_t color)
 {
-   LONG xp = x - panes[wnd].x0;
-   LONG yp = y - panes[wnd].y0;
+   int32_t xp = x - panes[wnd].x0;
+   int32_t yp = y - panes[wnd].y0;
 
    if (gil2vfx_active != TRUE)
       return;
 
-   VFX_pixel_write(&panes[wnd], xp, yp, (UBYTE) color);
+   VFX_pixel_write(&panes[wnd], xp, yp, (uint8_t)color);
 }
 
-LONG GIL2VFX_read_dot(LONG wnd, LONG x, LONG y)
+int32_t GIL2VFX_read_dot(int32_t wnd, int32_t x, int32_t y)
 {
-   LONG xp = x - panes[wnd].x0;
-   LONG yp = y - panes[wnd].y0;
+   int32_t xp = x - panes[wnd].x0;
+   int32_t yp = y - panes[wnd].y0;
 
    if (gil2vfx_active != TRUE)
       return NULL;
@@ -410,13 +403,12 @@ LONG GIL2VFX_read_dot(LONG wnd, LONG x, LONG y)
    return VFX_pixel_read(&panes[wnd], xp, yp);
 }
 
-void GIL2VFX_draw_line(LONG wnd,LONG x1, LONG y1, LONG x2, LONG y2,
-      LONG color)
+void GIL2VFX_draw_line(int32_t wnd, int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t color)
 {
-   LONG x1p = x1 - panes[wnd].x0;
-   LONG y1p = y1 - panes[wnd].y0;
-   LONG x2p = x2 - panes[wnd].x0;
-   LONG y2p = y2 - panes[wnd].y0;
+   int32_t x1p = x1 - panes[wnd].x0;
+   int32_t y1p = y1 - panes[wnd].y0;
+   int32_t x2p = x2 - panes[wnd].x0;
+   int32_t y2p = y2 - panes[wnd].y0;
 
    if (gil2vfx_active != TRUE)
       return;
@@ -424,12 +416,12 @@ void GIL2VFX_draw_line(LONG wnd,LONG x1, LONG y1, LONG x2, LONG y2,
    VFX_line_draw(&panes[wnd], x1p, y1p, x2p, y2p, LD_DRAW, color);
 }
 
-void GIL2VFX_draw_rect(LONG wnd,LONG x1,LONG y1,LONG x2,LONG y2,LONG color)
+void GIL2VFX_draw_rect(int32_t wnd, int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t color)
 {
-   LONG x1p = x1 - panes[wnd].x0;
-   LONG y1p = y1 - panes[wnd].y0;
-   LONG x2p = x2 - panes[wnd].x0;
-   LONG y2p = y2 - panes[wnd].y0;
+   int32_t x1p = x1 - panes[wnd].x0;
+   int32_t y1p = y1 - panes[wnd].y0;
+   int32_t x2p = x2 - panes[wnd].x0;
+   int32_t y2p = y2 - panes[wnd].y0;
 
    if (gil2vfx_active != TRUE)
       return;
@@ -440,7 +432,7 @@ void GIL2VFX_draw_rect(LONG wnd,LONG x1,LONG y1,LONG x2,LONG y2,LONG color)
    VFX_line_draw(&panes[wnd], x1p, y2p, x1p, y1p, LD_DRAW, color);
 }
 
-void GIL2VFX_fill_rect(LONG wnd,LONG x1,LONG y1,LONG x2,LONG y2,LONG color)
+void GIL2VFX_fill_rect(int32_t wnd, int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t color)
 {
    PANE rpane;
 
@@ -456,12 +448,12 @@ void GIL2VFX_fill_rect(LONG wnd,LONG x1,LONG y1,LONG x2,LONG y2,LONG color)
    VFX_pane_wipe(&rpane, color);
 }
 
-void GIL2VFX_hash_rect(LONG wnd,LONG x1,LONG y1,LONG x2,LONG y2,LONG color)
+void GIL2VFX_hash_rect(int32_t wnd, int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t color)
 {
-   LONG x1p = x1 - panes[wnd].x0;
-   LONG y1p = y1 - panes[wnd].y0;
-   LONG x2p = x2 - panes[wnd].x0;
-   LONG y2p = y2 - panes[wnd].y0;
+   int32_t x1p = x1 - panes[wnd].x0;
+   int32_t y1p = y1 - panes[wnd].y0;
+   int32_t x2p = x2 - panes[wnd].x0;
+   int32_t y2p = y2 - panes[wnd].y0;
 
    if (gil2vfx_active != TRUE)
       return;
@@ -469,52 +461,52 @@ void GIL2VFX_hash_rect(LONG wnd,LONG x1,LONG y1,LONG x2,LONG y2,LONG color)
    VFX_rectangle_hash(&panes[wnd], x1p, y1p, x2p, y2p, color);
 }
 
-void GIL2VFX_light_fade(LONG src_wnd, LONG color)
+void GIL2VFX_light_fade(int32_t src_wnd, int32_t color)
 {
    RGB palette[256], clr;
-   LONG i;
+   int32_t i;
 
    if (gil2vfx_active != TRUE)
       return;
 
    VFX_DAC_read(color, &clr);
 
-   for (i=0;i<256;i++)
+   for (i = 0; i < 256; i++)
       palette[i] = clr;
 
    VFX_window_fade(panes[src_wnd].window, palette, FADE_INTERVALS);
 }
 
-void GIL2VFX_color_fade(LONG src_wnd, LONG dst_wnd)
+void GIL2VFX_color_fade(int32_t src_wnd, int32_t dst_wnd)
 {
    RGB palette[256], clr;
-   ULONG colors[256], num_colors;
-   LONG i;
+   uint32_t colors[256], num_colors;
+   int32_t i;
 
    if (gil2vfx_active != TRUE)
       return;
 
-   num_colors = VFX_color_scan(&panes[src_wnd], colors);   
+   num_colors = VFX_color_scan(&panes[src_wnd], colors);
 
-   for (i=0;i<256;i++)
-      {
+   for (i = 0; i < 256; i++)
+   {
       VFX_DAC_read(i, &palette[i]);
-      }
+   }
 
    clr = palette[*(panes[dst_wnd].window->buffer)];
-   for (i=0;i<num_colors;i++)
-      {
+   for (i = 0; i < num_colors; i++)
+   {
       VFX_DAC_write(colors[i], &clr);
-      }
+   }
 
-   VFX_pane_copy(&panes[src_wnd],0,0,&panes[dst_wnd],0,0,NO_COLOR);
+   VFX_pane_copy(&panes[src_wnd], 0, 0, &panes[dst_wnd], 0, 0, NO_COLOR);
 
-   VFX_window_refresh(&windows[0],0,0,VFX->scrn_width-1,VFX->scrn_height-1);
+   VFX_window_refresh(&windows[0], 0, 0, VFX->scrn_width - 1, VFX->scrn_height - 1);
 
    VFX_window_fade(panes[dst_wnd].window, &palette, FADE_INTERVALS);
 }
 
-void GIL2VFX_pixel_fade(LONG src_wnd, LONG dest_wnd, LONG intervals)
+void GIL2VFX_pixel_fade(int32_t src_wnd, int32_t dest_wnd, int32_t intervals)
 {
    if (gil2vfx_active != TRUE)
       return;
@@ -527,7 +519,7 @@ void GIL2VFX_select_text_window(TEXTWINDOW *tw)
    twptr = tw;
 }
 
-LONG cdecl GIL2VFX_char_width(LONG ch)
+int32_t GIL2VFX_char_width(int32_t ch)
 {
    return VFX_character_width(twptr->font, ch);
 }
@@ -538,50 +530,49 @@ void GIL2VFX_home(void)
       return;
 
    VFX_pane_wipe(&panes[twptr->window],
-      ((FONT *)(twptr->font))->font_background);
+                 ((FONT *)(twptr->font))->font_background);
 
    twptr->htab = panes[twptr->window].x0;
    twptr->vtab = panes[twptr->window].y0;
 }
 
-void GIL2VFX_remap_font_color(LONG current, LONG new)
+void GIL2VFX_remap_font_color(int32_t current, int32_t new)
 {
    twptr->lookaside[current] = new;
 }
 
-
-LONG GIL2VFX_test_overlap(LONG wnd, LONG x1, LONG y1, UBYTE *shapes, LONG shape_num)
+int32_t GIL2VFX_test_overlap(int32_t wnd, int32_t x1, int32_t y1, uint8_t *shapes, int32_t shape_num)
 {
-   LONG x2 = (x1 + (VFX_shape_resolution(shapes, shape_num) >> 16)    );
-   LONG y2 = (y1 + ((LONG)(WORD)VFX_shape_resolution(shapes, shape_num)));
+   int32_t x2 = (x1 + (VFX_shape_resolution(shapes, shape_num) >> 16));
+   int32_t y2 = (y1 + ((int32_t)(int16_t)VFX_shape_resolution(shapes, shape_num)));
 
-   if ( (x1 <= panes[wnd].x1) && (x2 >= panes[wnd].x0) &&
-        (y1 <= panes[wnd].y1) && (y2 >= panes[wnd].y0) )
+   if ((x1 <= panes[wnd].x1) && (x2 >= panes[wnd].x0) &&
+       (y1 <= panes[wnd].y1) && (y2 >= panes[wnd].y0))
       return 1;
    else
       return 0;
 }
 
-void cdecl GIL2VFX_print(LONG operation, const char *format, ...)
+void GIL2VFX_print(int32_t operation, const char *format, ...)
 {
-   va_list  arglist;
-   LONG     cw;
+   va_list arglist;
+   int32_t cw;
 
-   va_start(arglist,format);
-   
+   va_start(arglist, format);
+
    if (operation == BUF)
-      {
-      cw = vsprintf(twptr->txtbuf,format,arglist);
+   {
+      cw = vsprintf(twptr->txtbuf, format, arglist);
       twptr->txtpnt = twptr->txtbuf + cw;
-      }
+   }
    else if (operation == APP)
-      {
-      cw = vsprintf(twptr->txtpnt,format,arglist);
+   {
+      cw = vsprintf(twptr->txtpnt, format, arglist);
       twptr->txtpnt += cw;
-      }
+   }
 }
 
-void cdecl GIL2VFX_scroll_window(LONG wnd, LONG dx, LONG dy, LONG flags, LONG background)
+void GIL2VFX_scroll_window(int32_t wnd, int32_t dx, int32_t dy, int32_t flags, int32_t background)
 {
    if (gil2vfx_active != TRUE)
       return;
@@ -589,18 +580,18 @@ void cdecl GIL2VFX_scroll_window(LONG wnd, LONG dx, LONG dy, LONG flags, LONG ba
    VFX_pane_scroll(&panes[wnd], dx, dy, flags, background);
 }
 
-void cdecl GIL2VFX_print_buffer(LONG linenum)
+void GIL2VFX_print_buffer(int32_t linenum)
 {
    GIL2VFXA_print_buffer(&panes[twptr->window], linenum);
 }
 
-void cdecl GIL2VFX_cout(LONG c)
+void GIL2VFX_cout(int32_t c)
 {
-   LONG  cvtab,nvtab,htab;   
+   int32_t cvtab, nvtab, htab;
 
-   if (c==10)
-      {
-      htab = twptr->htab = panes[twptr->window].x0;    // Carriage Return
+   if (c == 10)
+   {
+      htab = twptr->htab = panes[twptr->window].x0; // Carriage Return
 
       cvtab = twptr->vtab - panes[twptr->window].y0;
       cvtab += twptr->font->char_height;
@@ -608,43 +599,42 @@ void cdecl GIL2VFX_cout(LONG c)
       nvtab = cvtab + twptr->font->char_height;
 
       if (nvtab > panes[twptr->window].y1 - panes[twptr->window].y0)
-         {
+      {
          if (twptr->continueFunction != NULL)
+         {
+            if ((twptr->continueFunction(twptr->htab)) == 0)
             {
-            if ( (twptr->continueFunction(twptr->htab)) == 0)
-               {
                twptr->htab = htab;
                return;
-               }
             }
+         }
          twptr->htab = htab;
 
          VFX_pane_scroll(&panes[twptr->window], 0, -twptr->font->char_height, PS_NOWRAP, twptr->font->font_background);
-         }
+      }
       else
-         {
+      {
          twptr->vtab += twptr->font->char_height;
-         }
       }
-   else if (c==13)
-      {
-      twptr->htab = panes[twptr->window].x0;    // Carriage Return
-      }  
+   }
+   else if (c == 13)
+   {
+      twptr->htab = panes[twptr->window].x0; // Carriage Return
+   }
    else
-      {
+   {
       twptr->htab += VFX_character_draw(&panes[twptr->window],
-                      twptr->htab - panes[twptr->window].x0,
-                      twptr->vtab - panes[twptr->window].y0,
-                      twptr->font, c, twptr->lookaside);
-      }
-
+                                        twptr->htab - panes[twptr->window].x0,
+                                        twptr->vtab - panes[twptr->window].y0,
+                                        twptr->font, c, twptr->lookaside);
+   }
 }
 
-void GIL2VFX_refresh_window(ULONG source, ULONG target)
+void GIL2VFX_refresh_window(uint32_t source, uint32_t target)
 {
-   //mouse_pane_refresh(&panes[source], &panes[target]);
-   // LUM the function parameter has changed
-   // check whether this is correct!
+   // mouse_pane_refresh(&panes[source], &panes[target]);
+   //  LUM the function parameter has changed
+   //  check whether this is correct!
    PANE *loTargetPane = &panes[target];
-   MOUSE_pane_refresh(&panes[source], loTargetPane->x0,loTargetPane->y0,loTargetPane->x1,loTargetPane->y1);
+   MOUSE_pane_refresh(&panes[source], loTargetPane->x0, loTargetPane->y0, loTargetPane->x1, loTargetPane->y1);
 }

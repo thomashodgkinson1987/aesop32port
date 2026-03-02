@@ -5,17 +5,9 @@
 #ifndef RTLINK_H
 #define RTLINK_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdint.h>
 
-HRES cdecl create_instance(RTR_class *RTR, ULONG object);
-void cdecl destroy_instance(RTR_class *RTR, HRES instance);
-
-#ifdef __cplusplus
-}
-#endif
+uint32_t create_instance(RTR_class *RTR, uint32_t object);
+void destroy_instance(RTR_class *RTR, uint32_t instance);
 
 #endif
-
-

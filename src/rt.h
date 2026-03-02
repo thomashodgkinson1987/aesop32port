@@ -5,60 +5,53 @@
 #ifndef RT_H
 #define RT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdint.h> // Tom: added
+#include <string.h> // Tom: added
 
-typedef struct                // fundamental stack value structure
+typedef struct // fundamental stack value structure
 {
-   ULONG val;
-   UWORD type;
-}
-STKVAL;
+   uint32_t val;
+   uint16_t type;
+} STKVAL;
 
 enum
 {
-   TYP_CRES,                  // data type: code resource address
-   TYP_SRES,                  // data type: string resource
-   TYP_VSHR,                  // data type: short integer variable
-   TYP_VLNG,                  // data type: long integer variable
-   TYP_SVAR,                  // data type: string variable
+   TYP_CRES, // data type: code resource address
+   TYP_SRES, // data type: string resource
+   TYP_VSHR, // data type: short integer variable
+   TYP_VLNG, // data type: long integer variable
+   TYP_SVAR, // data type: string variable
 };
 
-extern ULONG diag_flag;
-extern ULONG current_this;
-extern ULONG current_msg;
-extern ULONG current_index;
+extern uint32_t diag_flag;
+extern uint32_t current_this;
+extern uint32_t current_msg;
+extern uint32_t current_index;
 
 // Pointer and memory block management
 
-#define norm(x) ((void *) (x))
-#define add_offset(s,o) ((void *)((ULONG)(s) + (ULONG)(o)))
+#define norm(x) ((void *)(x))
 
-#define add_ptr(base,offset) ((void *)((ULONG)(base) + (ULONG)(offset)))
+#define add_offset(s, o) ((void *)((uint32_t)(s) + (uint32_t)(o)))
 
-#define ptr_dif(top,bot) (((BYTE *)(top) - (BYTE *)(bot)))
+#define add_ptr(base, offset) ((void *)((uint32_t)(base) + (uint32_t)(offset)))
 
-#define far_memmove(dest, src, len) ((void *)memmove((dest),(src),(len)))
+#define ptr_dif(top, bot) (((int8_t *)(top) - (int8_t *)(bot)))
+
+#define far_memmove(dest, src, len) ((void *)memmove((dest), (src), (len)))
 
 // Assorted speed-critical .ASM routines
 
-void *cdecl RTD_first(void *dictionary);
-void *cdecl RTD_iterate(void *base, void *cur, BYTE **tag, BYTE **def);
+void *RTD_first(void *dictionary);
+void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def);
 
-BYTE *cdecl RTD_lookup(HRES dictionary, void *key);
+int8_t *RTD_lookup(uint32_t dictionary, void *key);
 
 // Runtime interpreter calls
 
-void cdecl RT_init(RTR_class *RTR, ULONG stack_size, HRES *objlist);
-void cdecl RT_shutdown(void);
-void cdecl RT_arguments(void *base, ULONG size);
-LONG cdecl RT_execute(ULONG index, ULONG msg_num, ULONG vector);
-
-#ifdef __cplusplus
-}
-#endif
+void RT_init(RTR_class *RTR, uint32_t stack_size, uint32_t *objlist);
+void RT_shutdown(void);
+void RT_arguments(void *base, uint32_t size);
+int32_t RT_execute(uint32_t index, uint32_t msg_num, uint32_t vector);
 
 #endif
-
-

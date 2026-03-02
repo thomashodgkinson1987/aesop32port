@@ -1,25 +1,27 @@
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  TEST.H                                                                ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Sample AESOP code resource/attribute header file                      ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Project: Extensible State-Object Processor (AESOP/16)                 ÛÛ
-//ÛÛ   Author: John Miles                                                   ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  C source compatible with IBM PC ANSI C/C++ implementations            ÛÛ
-//ÛÛ  AESOP source compatible with AESOP/16 v1.0                            ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Copyright (C) 1992 Miles Design, Inc.                                 ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Miles Design, Inc.                                                    ÛÛ
-//ÛÛ  10926 Jollyville #308                                                 ÛÛ
-//ÛÛ  Austin, TX 78759                                                      ÛÛ
-//ÛÛ  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  TEST.H                                                                ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Sample AESOP code resource/attribute header file                      ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Project: Extensible State-Object Processor (AESOP/16)                 ï¿½ï¿½
+// ï¿½ï¿½   Author: John Miles                                                   ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  C source compatible with IBM PC ANSI C/C++ implementations            ï¿½ï¿½
+// ï¿½ï¿½  AESOP source compatible with AESOP/16 v1.0                            ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Copyright (C) 1992 Miles Design, Inc.                                 ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Miles Design, Inc.                                                    ï¿½ï¿½
+// ï¿½ï¿½  10926 Jollyville #308                                                 ï¿½ï¿½
+// ï¿½ï¿½  Austin, TX 78759                                                      ï¿½ï¿½
+// ï¿½ï¿½  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+#include <stdint.h> // Tom: added
 
 #ifdef __AESOP__
 
@@ -27,194 +29,172 @@
 
 #else
 
-void cdecl load_string(LONG argcnt, BYTE *array, ULONG string);
-void cdecl load_resource(LONG argcnt, BYTE *array, ULONG resource);
-void cdecl copy_string(LONG argcnt, BYTE *src, BYTE *dest);
-void cdecl string_force_lower(LONG argcnt, BYTE *dest);
-void cdecl string_force_upper(LONG argcnt, BYTE *dest);
-ULONG cdecl string_len(LONG argcnt, BYTE *string);
-ULONG cdecl string_compare(LONG argcnt, BYTE *str1, BYTE *str2);
-void cdecl beep(void);
-LONG cdecl strval(LONG argcnt, BYTE *string);
-LONG cdecl envval(LONG argcnt, BYTE *name);
-void cdecl pokemem(LONG argcnt, LONG *addr, LONG data);
-LONG cdecl peekmem(LONG argcnt, LONG *addr);
-ULONG cdecl rnd(LONG argcnt, ULONG low, ULONG high);
-ULONG cdecl dice(LONG argcnt, ULONG ndice, ULONG nsides, ULONG bonus);
-ULONG cdecl absv(LONG argcnt, LONG val);
-LONG cdecl minv(LONG argcnt, LONG val1, LONG val2);
-LONG cdecl maxv(LONG argcnt, LONG val1, LONG val2);
-void cdecl diagnose(LONG argcnt, ULONG dtype, ULONG parm);
-ULONG cdecl heapfree(void);
+void load_string(int32_t argcnt, int8_t *array, uint32_t string);
+void load_resource(int32_t argcnt, int8_t *array, uint32_t resource);
+void copy_string(int32_t argcnt, int8_t *src, int8_t *dest);
+void string_force_lower(int32_t argcnt, int8_t *dest);
+void string_force_upper(int32_t argcnt, int8_t *dest);
+uint32_t string_len(int32_t argcnt, int8_t *string);
+uint32_t string_compare(int32_t argcnt, int8_t *str1, int8_t *str2);
+void beep(void);
+int32_t strval(int32_t argcnt, int8_t *string);
+int32_t envval(int32_t argcnt, int8_t *name);
+void pokemem(int32_t argcnt, int32_t *addr, int32_t data);
+int32_t peekmem(int32_t argcnt, int32_t *addr);
+uint32_t rnd(int32_t argcnt, uint32_t low, uint32_t high);
+uint32_t dice(int32_t argcnt, uint32_t ndice, uint32_t nsides, uint32_t bonus);
+uint32_t absv(int32_t argcnt, int32_t val);
+int32_t minv(int32_t argcnt, int32_t val1, int32_t val2);
+int32_t maxv(int32_t argcnt, int32_t val1, int32_t val2);
+void diagnose(int32_t argcnt, uint32_t dtype, uint32_t parm);
+uint32_t heapfree(void);
 
-void cdecl notify(LONG argcnt, ULONG index, ULONG message, LONG event,
-   LONG parameter);
-void cdecl cancel(LONG argcnt, ULONG index, ULONG message, LONG event, 
-   LONG parameter);
-void cdecl drain_event_queue(void);
-void cdecl post_event(LONG argcnt, ULONG owner, LONG event, LONG parameter);
-void cdecl send_event(LONG argcnt, ULONG owner, LONG event, LONG parameter);
-ULONG cdecl peek_event(void);
-void cdecl dispatch_event(void);
-void cdecl flush_event_queue(LONG argcnt, LONG owner, LONG event, LONG parameter);
-void cdecl flush_input_events(void);
+void notify(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int32_t parameter);
+void cancel(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int32_t parameter);
+void drain_event_queue(void);
+void post_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter);
+void send_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter);
+uint32_t peek_event(void);
+void dispatch_event(void);
+void flush_event_queue(int32_t argcnt, int32_t owner, int32_t event, int32_t parameter);
+void flush_input_events(void);
 
-void cdecl init_interface(void);
-void cdecl shutdown_interface(void);
-void cdecl set_mouse_pointer(LONG argcnt, ULONG table, ULONG number, LONG hot_X,
-   LONG hot_Y, ULONG scale, ULONG fade_table, ULONG fade_level);
-void cdecl set_wait_pointer(LONG argcnt, ULONG number, LONG hot_X, LONG hot_Y);
-void cdecl standby_cursor(void);
-void cdecl resume_cursor(void);
-void cdecl show_mouse(void);
-void cdecl hide_mouse(void);
-ULONG cdecl mouse_XY(void);
-ULONG cdecl mouse_in_window(LONG argcnt, ULONG wnd);
-void cdecl lock_mouse(void);
-void cdecl unlock_mouse(void);
-void cdecl getkey(void);
+void init_interface(void);
+void shutdown_interface(void);
+void set_mouse_pointer(int32_t argcnt, uint32_t table, uint32_t number, int32_t hot_X, int32_t hot_Y, uint32_t scale, uint32_t fade_table, uint32_t fade_level);
+void set_wait_pointer(int32_t argcnt, uint32_t number, int32_t hot_X, int32_t hot_Y);
+void standby_cursor(void);
+void resume_cursor(void);
+void show_mouse(void);
+void hide_mouse(void);
+uint32_t mouse_XY(void);
+uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd);
+void lock_mouse(void);
+void unlock_mouse(void);
+void getkey(void);
 
-void cdecl init_graphics(void);
-void cdecl draw_dot(LONG argcnt, ULONG page, ULONG x, ULONG y, ULONG color);
-void cdecl draw_line(LONG argcnt, ULONG page,
-   ULONG x1, ULONG y1, ULONG x2, ULONG y2, ULONG color);
-void cdecl line_to(LONG argcnt, ULONG x, ULONG y, ULONG color, ...);
-void cdecl draw_rectangle(LONG argcnt, ULONG wndnum, LONG x1, LONG y1, LONG x2,
-   LONG y2, ULONG color);
-void cdecl fill_rectangle(LONG argcnt, ULONG wndnum, LONG x1, LONG y1, LONG x2,
-   LONG y2, ULONG color);
-void cdecl hash_rectangle(LONG argcnt, ULONG wndnum, LONG x1, LONG y1, LONG x2,
-   LONG y2, ULONG color);
-ULONG cdecl get_bitmap_height(LONG argcnt, ULONG table, ULONG number);
-void cdecl draw_bitmap(LONG argcnt, ULONG page, ULONG table, ULONG number,
-   LONG x, LONG y, ULONG scale, ULONG flip, ULONG fade_table, ULONG
-   fade_level);
-ULONG cdecl visible_bitmap_rect(LONG argcnt, LONG x, LONG y, 
-   ULONG flip, ULONG table, ULONG number, WORD *array);
-void cdecl set_palette(LONG argcnt, ULONG region, ULONG resource);
-void cdecl refresh_window(LONG argcnt, ULONG src, ULONG target);
-void cdecl wipe_window(LONG argcnt, ULONG window, ULONG color);
-void cdecl shutdown_graphics(void);
-void cdecl wait_vertical_retrace(void);
-ULONG cdecl read_palette(LONG argcnt, ULONG regnum);
-void cdecl write_palette(LONG argcnt, ULONG regnum, ULONG value);
-void cdecl pixel_fade(LONG argcnt, ULONG src_wnd, ULONG dest_wnd, ULONG intervals);
-void cdecl color_fade(LONG argcnt, ULONG src_wnd, ULONG dest_wnd);
-void cdecl light_fade(LONG argcnt, ULONG src_wnd, ULONG color);
+void init_graphics(void);
+void draw_dot(int32_t argcnt, uint32_t page, uint32_t x, uint32_t y, uint32_t color);
+void draw_line(int32_t argcnt, uint32_t page, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2, uint32_t color);
+void line_to(int32_t argcnt, uint32_t x, uint32_t y, uint32_t color, ...);
+void draw_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color);
+void fill_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color);
+void hash_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color);
+uint32_t get_bitmap_height(int32_t argcnt, uint32_t table, uint32_t number);
+void draw_bitmap(int32_t argcnt, uint32_t page, uint32_t table, uint32_t number, int32_t x, int32_t y, uint32_t scale, uint32_t flip, uint32_t fade_table, uint32_t fade_level);
+uint32_t visible_bitmap_rect(int32_t argcnt, int32_t x, int32_t y, uint32_t flip, uint32_t table, uint32_t number, int16_t *array);
+void set_palette(int32_t argcnt, uint32_t region, uint32_t resource);
+void refresh_window(int32_t argcnt, uint32_t src, uint32_t target);
+void wipe_window(int32_t argcnt, uint32_t window, uint32_t color);
+void shutdown_graphics(void);
+void wait_vertical_retrace(void);
+uint32_t read_palette(int32_t argcnt, uint32_t regnum);
+void write_palette(int32_t argcnt, uint32_t regnum, uint32_t value);
+void pixel_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd, uint32_t intervals);
+void color_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd);
+void light_fade(int32_t argcnt, uint32_t src_wnd, uint32_t color);
 
-ULONG cdecl assign_window(LONG argcnt, ULONG owner, ULONG x1, ULONG y1,
-   ULONG x2, ULONG y2);
-ULONG cdecl assign_subwindow(LONG argcnt, ULONG owner, ULONG parent,
-   ULONG x1, ULONG y1, ULONG x2, ULONG y2);
-void cdecl release_window(LONG argcnt, ULONG window);
-ULONG cdecl get_x1(LONG argcnt, ULONG window);
-ULONG cdecl get_x2(LONG argcnt, ULONG window);
-ULONG cdecl get_y1(LONG argcnt, ULONG window);
-ULONG cdecl get_y2(LONG argcnt, ULONG window);
-void cdecl set_x1(LONG argcnt, ULONG window, ULONG x1);
-void cdecl set_x2(LONG argcnt, ULONG window, ULONG x2);
-void cdecl set_y1(LONG argcnt, ULONG window, ULONG y1);
-void cdecl set_y2(LONG argcnt, ULONG window, ULONG y2);
+uint32_t assign_window(int32_t argcnt, uint32_t owner, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
+uint32_t assign_subwindow(int32_t argcnt, uint32_t owner, uint32_t parent, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
+void release_window(int32_t argcnt, uint32_t window);
+uint32_t get_x1(int32_t argcnt, uint32_t window);
+uint32_t get_x2(int32_t argcnt, uint32_t window);
+uint32_t get_y1(int32_t argcnt, uint32_t window);
+uint32_t get_y2(int32_t argcnt, uint32_t window);
+void set_x1(int32_t argcnt, uint32_t window, uint32_t x1);
+void set_x2(int32_t argcnt, uint32_t window, uint32_t x2);
+void set_y1(int32_t argcnt, uint32_t window, uint32_t y1);
+void set_y2(int32_t argcnt, uint32_t window, uint32_t y2);
 
-void cdecl text_window(LONG argcnt, ULONG wndnum, ULONG wnd);
-void cdecl text_style(LONG argcnt, ULONG wndnum, ULONG font, ULONG
-   justify);
-void cdecl text_xy(LONG argcnt, ULONG wndnum, ULONG htab, ULONG vtab);
-void cdecl text_color(LONG argcnt, ULONG wndnum, ULONG current, ULONG new);
-void cdecl text_refresh_window(LONG argcnt, ULONG wndnum, LONG wnd);
+void text_window(int32_t argcnt, uint32_t wndnum, uint32_t wnd);
+void text_style(int32_t argcnt, uint32_t wndnum, uint32_t font, uint32_t justify);
+void text_xy(int32_t argcnt, uint32_t wndnum, uint32_t htab, uint32_t vtab);
+void text_color(int32_t argcnt, uint32_t wndnum, uint32_t current, uint32_t new);
+void text_refresh_window(int32_t argcnt, uint32_t wndnum, int32_t wnd);
 
-LONG cdecl get_text_x(LONG argcnt, ULONG wndnum);
-LONG cdecl get_text_y(LONG argcnt, ULONG wndnum);
+int32_t get_text_x(int32_t argcnt, uint32_t wndnum);
+int32_t get_text_y(int32_t argcnt, uint32_t wndnum);
 
-void cdecl home(LONG argcnt, ULONG wndnum);
+void home(int32_t argcnt, uint32_t wndnum);
 
-void cdecl print(LONG argcnt, ULONG wndnum, ULONG format, ...);
-void cdecl sprint(LONG argcnt, ULONG wndnum, BYTE *format, ...);
-void cdecl dprint(LONG argcnt, BYTE *format, ...);
-void cdecl aprint(LONG argcnt, BYTE *format, ...);
-void cdecl crout(LONG argcnt, ULONG wndnum);
-ULONG cdecl char_width(LONG argcnt, ULONG wndnum, ULONG ch);
-ULONG cdecl font_height(LONG argcnt, ULONG wndnum);
+void print(int32_t argcnt, uint32_t wndnum, uint32_t format, ...);
+void sprint(int32_t argcnt, uint32_t wndnum, int8_t *format, ...);
+void dprint(int32_t argcnt, int8_t *format, ...);
+void aprint(int32_t argcnt, int8_t *format, ...);
+void crout(int32_t argcnt, uint32_t wndnum);
+uint32_t char_width(int32_t argcnt, uint32_t wndnum, uint32_t ch);
+uint32_t font_height(int32_t argcnt, uint32_t wndnum);
 
-void cdecl solid_bar_graph(LONG argcnt, LONG x0, LONG y0, LONG x1, LONG y1,
-   ULONG lb_border, ULONG tr_border, ULONG bkgnd, ULONG grn, ULONG yel,
-   ULONG red, LONG val, LONG min, LONG crit, LONG max);
+void solid_bar_graph(int32_t argcnt, int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t lb_border, uint32_t tr_border, uint32_t bkgnd, uint32_t grn, uint32_t yel, uint32_t red, int32_t val, int32_t min, int32_t crit, int32_t max);
 
-void cdecl init_sound(LONG argcnt, ULONG errprompt);
-void cdecl shutdown_sound(void);
-void cdecl load_sound_block(LONG argcnt, ULONG first_block, ULONG last_block,
-   ULONG *array);
-void cdecl sound_effect(LONG argcnt, ULONG index);
-void cdecl play_sequence(LONG argcnt, ULONG LA_version, ULONG AD_version, ULONG
-   PC_version);
-void cdecl load_music(void);
-void cdecl unload_music(void);
-void cdecl set_sound_status(LONG argcnt, ULONG status);
+void init_sound(int32_t argcnt, uint32_t errprompt);
+void shutdown_sound(void);
+void load_sound_block(int32_t argcnt, uint32_t first_block, uint32_t last_block, uint32_t *array);
+void sound_effect(int32_t argcnt, uint32_t index);
+void play_sequence(int32_t argcnt, uint32_t LA_version, uint32_t AD_version, uint32_t PC_version);
+void load_music(void);
+void unload_music(void);
+void set_sound_status(int32_t argcnt, uint32_t status);
 
-LONG cdecl create_object(LONG argcnt, ULONG name);
-LONG cdecl create_program(LONG argcnt, LONG index, ULONG name);
-LONG cdecl destroy_object(LONG argcnt, LONG index);
-void cdecl thrash_cache(void);
-ULONG cdecl flush_cache(LONG argcnt, ULONG goal);
+int32_t create_object(int32_t argcnt, uint32_t name);
+int32_t create_program(int32_t argcnt, int32_t index, uint32_t name);
+int32_t destroy_object(int32_t argcnt, int32_t index);
+void thrash_cache(void);
+uint32_t flush_cache(int32_t argcnt, uint32_t goal);
 
-LONG cdecl step_X(LONG argcnt, ULONG x, ULONG fdir, ULONG mtype, ULONG distance);
-LONG cdecl step_Y(LONG argcnt, ULONG y, ULONG fdir, ULONG mtype, ULONG distance);
-ULONG cdecl step_FDIR(LONG argcnt, ULONG fdir, ULONG mtype);
+int32_t step_X(int32_t argcnt, uint32_t x, uint32_t fdir, uint32_t mtype, uint32_t distance);
+int32_t step_Y(int32_t argcnt, uint32_t y, uint32_t fdir, uint32_t mtype, uint32_t distance);
+uint32_t step_FDIR(int32_t argcnt, uint32_t fdir, uint32_t mtype);
 
-LONG cdecl step_square_X(LONG argcnt, ULONG x, ULONG r, ULONG dir);
-LONG cdecl step_square_Y(LONG argcnt, ULONG y, ULONG r, ULONG dir);
-LONG cdecl step_region(LONG argcnt, ULONG r, ULONG dir);
+int32_t step_square_X(int32_t argcnt, uint32_t x, uint32_t r, uint32_t dir);
+int32_t step_square_Y(int32_t argcnt, uint32_t y, uint32_t r, uint32_t dir);
+int32_t step_region(int32_t argcnt, uint32_t r, uint32_t dir);
 
-ULONG cdecl distance(LONG argcnt, ULONG x1, ULONG y1, ULONG x2, ULONG y2);
-ULONG cdecl seek_direction(LONG argcnt, ULONG obj_x, ULONG obj_y, ULONG
-   dest_x, ULONG dest_y);
+uint32_t distance(int32_t argcnt, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
+uint32_t seek_direction(int32_t argcnt, uint32_t obj_x, uint32_t obj_y, uint32_t dest_x, uint32_t dest_y);
 
-ULONG cdecl spell_request(LONG argcnt, BYTE *stat, BYTE *cnt, ULONG typ, ULONG num);
-ULONG cdecl spell_list(LONG argcnt, BYTE *cnt, ULONG typ, ULONG lvl, BYTE *list, 
-   ULONG max);
-void cdecl magic_field(LONG argcnt, ULONG p, ULONG redfield, ULONG yelfield,
-   LONG sparkle);
-void cdecl do_dots(LONG argcnt, LONG view, LONG scrn, LONG exp_x, LONG exp_y,
-   LONG scale, LONG power, LONG dots, LONG life, LONG upval, BYTE *colors);
-void cdecl do_ice(LONG argcnt, LONG view, LONG scrn, LONG dots, LONG mag, 
-   LONG grav, LONG life, LONG colors);
+uint32_t spell_request(int32_t argcnt, int8_t *stat, int8_t *cnt, uint32_t typ, uint32_t num);
+uint32_t spell_list(int32_t argcnt, int8_t *cnt, uint32_t typ, uint32_t lvl, int8_t *list, uint32_t max);
+void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfield, int32_t sparkle);
+void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t exp_y, int32_t scale, int32_t power, int32_t dots, int32_t life, int32_t upval, int8_t *colors);
+void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t mag, int32_t grav, int32_t life, int32_t colors);
 
-void cdecl read_save_directory(void);
-BYTE *cdecl savegame_title(LONG argcnt, ULONG num);
-void cdecl write_save_directory(void);
+void read_save_directory(void);
+int8_t *savegame_title(int32_t argcnt, uint32_t num);
+void write_save_directory(void);
 
-ULONG cdecl save_game(LONG argcnt, ULONG slotnum, ULONG lvlnum);
-void cdecl suspend_game(LONG argcnt, ULONG cur_lvl);
-void cdecl resume_items(LONG argcnt, ULONG first, ULONG last, ULONG restoring);
-void cdecl resume_level(LONG argcnt, ULONG cur_lvl);
-void cdecl change_level(LONG argcnt, ULONG old_lvl, ULONG new_lvl);
-void cdecl restore_items(LONG argcnt, ULONG slotnum);
-void cdecl restore_level_objects(LONG argcnt, ULONG slotnum, ULONG lvlnum);
-void cdecl read_initial_items(void);
-void cdecl write_initial_tempfiles(void);
-void cdecl create_initial_binary_files(void);
-void cdecl launch(LONG argcnt, BYTE *dirname, BYTE *prgname, BYTE *argn1,
-   BYTE *argn2);
+uint32_t save_game(int32_t argcnt, uint32_t slotnum, uint32_t lvlnum);
+void suspend_game(int32_t argcnt, uint32_t cur_lvl);
+void resume_items(int32_t argcnt, uint32_t first, uint32_t last, uint32_t restoring);
+void resume_level(int32_t argcnt, uint32_t cur_lvl);
+void change_level(int32_t argcnt, uint32_t old_lvl, uint32_t new_lvl);
+void restore_items(int32_t argcnt, uint32_t slotnum);
+void restore_level_objects(int32_t argcnt, uint32_t slotnum, uint32_t lvlnum);
+void read_initial_items(void);
+void write_initial_tempfiles(void);
+void create_initial_binary_files(void);
+void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int8_t *argn2);
 
-void *cdecl open_transfer_file(LONG argcnt, BYTE *filename);
-void cdecl close_transfer_file(void);
-LONG cdecl player_attrib(LONG argcnt, ULONG plrnum, ULONG offset, ULONG size);
-LONG cdecl item_attrib(LONG argcnt, ULONG plrnum, ULONG invslot, ULONG attrib);
-LONG cdecl arrow_count(LONG argcnt, ULONG plrnum);
+void *open_transfer_file(int32_t argcnt, int8_t *filename);
+void close_transfer_file(void);
+int32_t player_attrib(int32_t argcnt, uint32_t plrnum, uint32_t offset, uint32_t size);
+int32_t item_attrib(int32_t argcnt, uint32_t plrnum, uint32_t invslot, uint32_t attrib);
+int32_t arrow_count(int32_t argcnt, uint32_t plrnum);
 
-//typedef void (cdecl *FARPROC)();
+// typedef void (cdecl *FARPROC)(); // Tom: TODO
+// Tom: `maybe typedef void (*FARPROC)(void);`
 #define code_resources FARPROC code_resources[] =
 #define PROCDEF (FARPROC)
 
-#endif   
+#endif
 
 #ifdef __AESOP__
 
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                       ÛÛ
-//ÛÛ AESOP resource attribute declarations ÛÛ
-//ÛÛ                                       ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½                                       ï¿½ï¿½
+//ï¿½ï¿½ AESOP resource attribute declarations ï¿½ï¿½
+//ï¿½ï¿½                                       ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 attrib sequence fixed,precious
 attrib sample fixed,precious
@@ -227,11 +207,11 @@ attrib file moveable,discardable
 
 #endif
 
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                    ÛÛ
-//ÛÛ AESOP/C code resource declarations ÛÛ
-//ÛÛ                                    ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½                                    ï¿½ï¿½
+//ï¿½ï¿½ AESOP/C code resource declarations ï¿½ï¿½
+//ï¿½ï¿½                                    ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 code_resources
 {
@@ -419,4 +399,3 @@ code_resources
    PROCDEF item_attrib,
    PROCDEF arrow_count,
 };
-

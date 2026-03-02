@@ -1,30 +1,31 @@
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  EVENT.C                                                               ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  AESOP event dispatcher and code resource handlers for Eye III engine  ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Version: 1.00 of 5-Oct-92 -- Initial version                          ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Project: Eye III                                                      ÛÛ
-//ÛÛ   Author: John Miles                                                   ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  C source compatible with Borland C++ v3.0 or later                    ÛÛ
-//ÛÛ  Large memory model (16-bit DOS)                                       ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Copyright (C) 1992 Miles Design, Inc.                                 ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Miles Design, Inc.                                                    ÛÛ
-//ÛÛ  10926 Jollyville #308                                                 ÛÛ
-//ÛÛ  Austin, TX 78759                                                      ÛÛ
-//ÛÛ  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  EVENT.C                                                               ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  AESOP event dispatcher and code resource handlers for Eye III engine  ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Version: 1.00 of 5-Oct-92 -- Initial version                          ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Project: Eye III                                                      ï¿½ï¿½
+// ï¿½ï¿½   Author: John Miles                                                   ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  C source compatible with Borland C++ v3.0 or later                    ï¿½ï¿½
+// ï¿½ï¿½  Large memory model (16-bit DOS)                                       ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Copyright (C) 1992 Miles Design, Inc.                                 ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Miles Design, Inc.                                                    ï¿½ï¿½
+// ï¿½ï¿½  10926 Jollyville #308                                                 ï¿½ï¿½
+// ï¿½ï¿½  Austin, TX 78759                                                      ï¿½ï¿½
+// ï¿½ï¿½  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h> // Tom: added
 
 #include "defs.h"
 #include "shared.h"
@@ -36,17 +37,17 @@
 #include "rtmsg.h"
 #include "modsnd32.h"
 
-LONG ENABLED;
+int32_t ENABLED;
 
 NREQ NR_list[NR_LSIZE];
-LONG NR_first[NUM_EVTYPES];
+int32_t NR_first[NUM_EVTYPES];
 
-LONG current_event_type;
+int32_t current_event_type;
 
 EVENT EV_queue[EV_QSIZE];
 
-ULONG EV_head;
-ULONG EV_tail;
+uint32_t EV_head;
+uint32_t EV_tail;
 
 static char *strs[] = {"SYS_FREE",
                        "SYS_TIMER",
@@ -97,50 +98,49 @@ void DISABLE(void)
 //
 /*********************************************************/
 
-LONG match_parameter(LONG event_type, LONG event_parameter,
-   LONG test_parameter)
+int32_t match_parameter(int32_t event_type, int32_t event_parameter, int32_t test_parameter)
 {
-   LONG match;
+   int32_t match;
 
    if (event_type == SYS_FREE)
       return 0;
 
-   if (test_parameter == -1L) return 1;
+   if (test_parameter == -1L)
+      return 1;
 
    switch (event_type)
-      {
-      case SYS_TIMER:
-         match = (event_parameter >= test_parameter);
-         break;
+   {
+   case SYS_TIMER:
+      match = (event_parameter >= test_parameter);
+      break;
 
-      default:
-         match = (event_parameter == test_parameter);
-         break;
-      }
+   default:
+      match = (event_parameter == test_parameter);
+      break;
+   }
 
    return match;
 }
 
-
 /*********************************************************/
-void cdecl init_notify_list(void)
+void init_notify_list(void)
 {
-   ULONG i;
+   uint32_t i;
 
    DISABLE();
 
-   for (i=0;i<NUM_EVTYPES;i++)
+   for (i = 0; i < NUM_EVTYPES; i++)
       NR_first[i] = -1;
 
    NR_first[SYS_FREE] = 0;
 
-   for (i=0;i<NR_LSIZE;i++)
-      {
-      NR_list[i].next = i+1;
-      NR_list[i].prev = i-1;
-      }
+   for (i = 0; i < NR_LSIZE; i++)
+   {
+      NR_list[i].next = i + 1;
+      NR_list[i].prev = i - 1;
+   }
 
-   NR_list[i-1].next = -1;
+   NR_list[i - 1].next = -1;
 
    ENABLE();
 }
@@ -153,10 +153,9 @@ void cdecl init_notify_list(void)
 //
 /*********************************************************/
 
-void cdecl add_notify_request(LONG client, LONG message, LONG event, LONG
-   parameter)
+void add_notify_request(int32_t client, int32_t message, int32_t event, int32_t parameter)
 {
-   LONG i,nxt,cur;
+   int32_t i, nxt, cur;
    NREQ *NR;
 
    DISABLE();
@@ -164,22 +163,22 @@ void cdecl add_notify_request(LONG client, LONG message, LONG event, LONG
    i = NR_first[SYS_FREE];
 
    if (i == -1)
-      {
+   {
       FILE *out;
 
       ENABLE();
 
-      out = fopen("event.dbg","w+t");
+      out = fopen("event.dbg", "w+t");
 
-      for (i=0;i<NR_LSIZE;i++)
-         fprintf(out,"Message %5u, Client %5u, Next %5u, Prev %5u, Stat %5u, Parm %ld\n",
-            NR_list[i].message,NR_list[i].client,NR_list[i].next,
-            NR_list[i].prev,NR_list[i].status,NR_list[i].parameter);
-            
+      for (i = 0; i < NR_LSIZE; i++)
+         fprintf(out, "Message %5u, Client %5u, Next %5u, Prev %5u, Stat %5u, Parm %ld\n",
+                 NR_list[i].message, NR_list[i].client, NR_list[i].next,
+                 NR_list[i].prev, NR_list[i].status, NR_list[i].parameter);
+
       fclose(out);
 
       abend(MSG_NNSL);
-      }
+   }
 
    NR = &NR_list[i];
 
@@ -194,94 +193,94 @@ void cdecl add_notify_request(LONG client, LONG message, LONG event, LONG
    nxt = NR_first[event];
 
    if (nxt == -1)
-      {
+   {
       NR_first[event] = i;
       NR->prev = -1;
-      }
+   }
    else
-      {
+   {
       while (nxt != -1)
          nxt = NR_list[cur = nxt].next;
 
       NR_list[cur].next = i;
       NR->prev = cur;
-      }
+   }
 
    ENABLE();
 }
 
 /*********************************************************/
 //
-// Cancel a specific notification request for a given entity or program  
+// Cancel a specific notification request for a given entity or program
 // object
 //
 /*********************************************************/
 
-void cdecl delete_notify_request(LONG client, LONG message, LONG event,
-   LONG parameter)
+void delete_notify_request(int32_t client, int32_t message, int32_t event, int32_t parameter)
 {
-   LONG nxt,cur,prev;
-   LONG fnxt,fcur;
+   int32_t nxt, cur, prev;
+   int32_t fnxt, fcur;
    NREQ *NR;
-   LONG all_events;
+   int32_t all_events;
 
    DISABLE();
 
-   if (event==-1U)
-      {
+   if (event == -1U)
+   {
       event = 1;
       all_events = 1;
-      }
+   }
    else
       all_events = 0;
 
    do
-      {
-      nxt = NR_first[event];                      // start at chain beginning
+   {
+      nxt = NR_first[event]; // start at chain beginning
 
-      while (nxt != -1)                           // while not at end of chain
-         {
-         cur = nxt;                               // get links
-         NR = &NR_list[cur];               
+      while (nxt != -1) // while not at end of chain
+      {
+         cur = nxt; // get links
+         NR = &NR_list[cur];
          nxt = NR->next;
          prev = NR->prev;
 
-         if (NR->client != client) continue;      // match specified parms
+         if (NR->client != client)
+            continue; // match specified parms
 
          if ((message != -1U) && (message != NR->message))
             continue;
 
-         if (!match_parameter(event,NR->parameter,parameter)) continue;
+         if (!match_parameter(event, NR->parameter, parameter))
+            continue;
 
-         NR->client = -1;                         // invalidate the NREQ
+         NR->client = -1; // invalidate the NREQ
          NR->status = (NR->status & ~NSX_TYPE) | SYS_FREE;
 
-         if (nxt != -1)                           // close its links
+         if (nxt != -1) // close its links
             NR_list[nxt].prev = prev;
 
-         if (prev != -1)                          
+         if (prev != -1)
             NR_list[prev].next = nxt;
          else
             NR_first[event] = nxt;
 
-         NR->next = -1;                           // append NREQ to FREE
-         fnxt = NR_first[SYS_FREE];               // chain...
+         NR->next = -1;             // append NREQ to FREE
+         fnxt = NR_first[SYS_FREE]; // chain...
          if (fnxt == -1)
-            {
+         {
             NR_first[SYS_FREE] = cur;
             NR->prev = -1;
-            }
+         }
          else
-            {
+         {
             while (fnxt != -1)
                fnxt = NR_list[fcur = fnxt].next;
 
             NR_list[fcur].next = cur;
             NR->prev = fcur;
-            }
          }
       }
-   while (all_events && (++event < NUM_EVTYPES));
+   } while (all_events && (++event < NUM_EVTYPES));
 
    ENABLE();
 }
@@ -293,77 +292,78 @@ void cdecl delete_notify_request(LONG client, LONG message, LONG event,
 //
 /*********************************************************/
 
-void cdecl cancel_entity_requests(LONG client)
+void cancel_entity_requests(int32_t client)
 {
-   LONG event,nxt,cur,prev;
-   LONG fnxt,fcur;
+   int32_t event, nxt, cur, prev;
+   int32_t fnxt, fcur;
    NREQ *NR;
 
    DISABLE();
 
-   for (event=1;event<NUM_EVTYPES;event++)        // for all event types...
-      {
-      nxt = NR_first[event];                      // start at chain beginning
+   for (event = 1; event < NUM_EVTYPES; event++) // for all event types...
+   {
+      nxt = NR_first[event]; // start at chain beginning
 
-      while (nxt != -1)                           // while not at end of chain
-         {
-         cur = nxt;                               // get links
-         NR = &NR_list[cur];               
+      while (nxt != -1) // while not at end of chain
+      {
+         cur = nxt; // get links
+         NR = &NR_list[cur];
          nxt = NR->next;
          prev = NR->prev;
 
-         if (client == -1)                        // for all clients?
-            {
-            if ((NR->client >= NUM_ENTITIES) ||   // yes, filter out all non-
-                (NR->client == -1))               // entity clients
-                  continue;
-            }
-         else                                     // else match specified
-            if (NR->client != client) continue;   // client
+         if (client == -1) // for all clients?
+         {
+            if ((NR->client >= NUM_ENTITIES) || // yes, filter out all non-
+                (NR->client == -1))             // entity clients
+               continue;
+         }
+         else // else match specified
+            if (NR->client != client)
+               continue; // client
 
-         NR->client = -1;                         // invalidate the NREQ
+         NR->client = -1; // invalidate the NREQ
          NR->status = (NR->status & ~NSX_TYPE) | SYS_FREE;
 
-         if (nxt != -1)                           // close its links
+         if (nxt != -1) // close its links
             NR_list[nxt].prev = prev;
 
-         if (prev != -1)                          
+         if (prev != -1)
             NR_list[prev].next = nxt;
          else
             NR_first[event] = nxt;
 
-         NR->next = -1;                           // append NREQ to FREE
-         fnxt = NR_first[SYS_FREE];               // chain...
+         NR->next = -1;             // append NREQ to FREE
+         fnxt = NR_first[SYS_FREE]; // chain...
          if (fnxt == -1)
-            {
+         {
             NR_first[SYS_FREE] = cur;
             NR->prev = -1;
-            }
+         }
          else
-            {
+         {
             while (fnxt != -1)
                fnxt = NR_list[fcur = fnxt].next;
 
             NR_list[fcur].next = cur;
             NR->prev = fcur;
-            }
          }
       }
+   }
 
    ENABLE();
 }
 
 /*********************************************************/
-void cdecl init_event_queue(void)
+void init_event_queue(void)
 {
    EV_head = 0;
    EV_tail = 0;
 }
 
 /*********************************************************/
-EVENT *cdecl find_event(LONG type, LONG parameter)
+EVENT *find_event(int32_t type, int32_t parameter)
 {
-   ULONG t;
+   uint32_t t;
    EVENT *EV;
 
    DISABLE();
@@ -371,51 +371,53 @@ EVENT *cdecl find_event(LONG type, LONG parameter)
    t = EV_tail;
 
    while (t != EV_head)
-      {
+   {
       EV = &EV_queue[t];
       t = ++t % EV_QSIZE;
 
       if (EV->type != type)
          continue;
 
-      if (!match_parameter(EV->type,EV->parameter,parameter)) continue;
+      if (!match_parameter(EV->type, EV->parameter, parameter))
+         continue;
 
       ENABLE();
       return EV;
-      }
+   }
 
    ENABLE();
    return NULL;
 }
 
 /*********************************************************/
-void cdecl remove_event(LONG type, LONG parameter, LONG owner)
+void remove_event(int32_t type, int32_t parameter, int32_t owner)
 {
-   ULONG t;
+   uint32_t t;
    EVENT *EV;
 
    DISABLE();
 
-   for (t=0;t<EV_QSIZE;t++)
-      {
+   for (t = 0; t < EV_QSIZE; t++)
+   {
       EV = &EV_queue[t];
-     
+
       if ((owner != -1) && (EV->owner != owner))
          continue;
 
       if ((type != -1) && (EV->type != type))
          continue;
 
-      if (!match_parameter(EV->type,EV->parameter,parameter)) continue;
+      if (!match_parameter(EV->type, EV->parameter, parameter))
+         continue;
 
       EV->type = SYS_FREE;
-      }
+   }
 
    ENABLE();
 }
 
 /*********************************************************/
-void cdecl add_event(LONG type, LONG parameter, LONG owner)
+void add_event(int32_t type, int32_t parameter, int32_t owner)
 {
    DISABLE();
 
@@ -432,7 +434,7 @@ void cdecl add_event(LONG type, LONG parameter, LONG owner)
 }
 
 /*********************************************************/
-EVENT *cdecl next_event(void)
+EVENT *next_event(void)
 {
    EVENT *EV;
 
@@ -448,17 +450,17 @@ EVENT *cdecl next_event(void)
 }
 
 /*********************************************************/
-EVENT *cdecl fetch_event(void)
+EVENT *fetch_event(void)
 {
    EVENT *EV;
-   
+
    DISABLE();
-   
+
    if (EV_tail != EV_head)
-      {
+   {
       EV = &EV_queue[EV_tail];
       EV_tail = ++EV_tail % EV_QSIZE;
-      }
+   }
    else
       EV = NULL;
 
@@ -468,17 +470,17 @@ EVENT *cdecl fetch_event(void)
 }
 
 /*********************************************************/
-EVENT *cdecl scan_event_range(LONG first_type, LONG last_type)
+EVENT *scan_event_range(int32_t first_type, int32_t last_type)
 {
    EVENT *EV;
-   ULONG t;
+   uint32_t t;
 
    DISABLE();
 
    t = EV_tail;
 
    while (t != EV_head)
-      {
+   {
       EV = &EV_queue[t];
       t = ++t % EV_QSIZE;
 
@@ -487,22 +489,22 @@ EVENT *cdecl scan_event_range(LONG first_type, LONG last_type)
 
       ENABLE();
       return EV;
-      }
+   }
 
    ENABLE();
    return NULL;
 }
 
 /*********************************************************/
-void cdecl dump_event_queue(void)
+void dump_event_queue(void)
 {
    EVENT *e;
 
    while ((e = fetch_event()) != NULL)
       if (e->type <= SYS_KEYDOWN)
-         printf("Event %s, parameter %ld\n",strs[e->type],e->parameter);
+         printf("Event %s, parameter %ld\n", strs[e->type], e->parameter);
       else
-         printf("User event, parameter %ld\n",e->parameter);
+         printf("User event, parameter %ld\n", e->parameter);
 }
 
 /*********************************************************/
@@ -512,10 +514,9 @@ void cdecl dump_event_queue(void)
 //
 /*********************************************************/
 
-#pragma off (unreferenced)
-void cdecl notify(LONG argcnt, ULONG index, ULONG message, LONG event,
-   LONG parameter)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void notify(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int32_t parameter)
+#pragma on(unreferenced)
 {
    add_notify_request(index, message, event, parameter);
 }
@@ -526,10 +527,9 @@ void cdecl notify(LONG argcnt, ULONG index, ULONG message, LONG event,
 //
 /*********************************************************/
 
-#pragma off (unreferenced)
-void cdecl cancel(LONG argcnt, ULONG index, ULONG message, LONG event,
-   LONG parameter)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void cancel(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int32_t parameter)
+#pragma on(unreferenced)
 {
    delete_notify_request(index, message, event, parameter);
 }
@@ -540,7 +540,7 @@ void cdecl cancel(LONG argcnt, ULONG index, ULONG message, LONG event,
 //
 /*********************************************************/
 
-ULONG cdecl peek_event(void)
+uint32_t peek_event(void)
 {
    EVENT *EV;
 
@@ -571,28 +571,27 @@ ULONG cdecl peek_event(void)
 // Fetch the next event from the FIFO queue and fulfill any of its
 // notification requests
 //
-// System and input events are reentered into the queue if any application 
-// events are pending; this prevents user- and system-level actions from 
+// System and input events are reentered into the queue if any application
+// events are pending; this prevents user- and system-level actions from
 // pre-empting or invalidating application responses to earlier actions
 //
 // Stop processing notification chain if current event cancels request
 //
 /*********************************************************/
 
-void cdecl dispatch_event(void)
+void dispatch_event(void)
 {
    EVENT *EV;
    NREQ *NR;
-   LONG nxt;
-   LONG typ;
-   LONG par;
-   LONG own;
+   int32_t nxt;
+   int32_t typ;
+   int32_t par;
+   int32_t own;
    static struct
-      {
-      LONG parameter;
-      LONG owner;
-      }
-   event_message_descriptor;
+   {
+      int32_t parameter;
+      int32_t owner;
+   } event_message_descriptor;
 
    PollMod();
 
@@ -608,11 +607,11 @@ void cdecl dispatch_event(void)
 
    if ((typ >= FIRST_SYS_EVENT) &&
        (typ <= LAST_SYS_EVENT) &&
-       (scan_event_range(FIRST_APP_EVENT,LAST_APP_EVENT) != NULL))
-      {
-      add_event((LONG) typ,(LONG) par,(LONG) own);
+       (scan_event_range(FIRST_APP_EVENT, LAST_APP_EVENT) != NULL))
+   {
+      add_event((int32_t)typ, (int32_t)par, (int32_t)own);
       return;
-      }
+   }
 
    event_message_descriptor.parameter = par;
    event_message_descriptor.owner = own;
@@ -621,22 +620,24 @@ void cdecl dispatch_event(void)
 
    nxt = NR_first[typ];
    while (nxt != -1)
-      {
+   {
       NR = &NR_list[nxt];
       nxt = NR->next;
 
-      if ((NR->status & NSX_TYPE) != typ) break;
-      if  (NR->client == -1)              break;
-      if  (typ != current_event_type)     break;
+      if ((NR->status & NSX_TYPE) != typ)
+         break;
+      if (NR->client == -1)
+         break;
+      if (typ != current_event_type)
+         break;
 
-      if (match_parameter((LONG)typ,(LONG)par,(LONG)NR->parameter))
-         {
-         RT_arguments(&event_message_descriptor,
-            sizeof(event_message_descriptor));
+      if (match_parameter((int32_t)typ, (int32_t)par, (int32_t)NR->parameter))
+      {
+         RT_arguments(&event_message_descriptor, sizeof(event_message_descriptor));
 
-         RT_execute((LONG)NR->client,(LONG)NR->message,-1U);
-         }
+         RT_execute((int32_t)NR->client, (int32_t)NR->message, -1U);
       }
+   }
 }
 
 /*********************************************************/
@@ -645,23 +646,24 @@ void cdecl dispatch_event(void)
 //
 /*********************************************************/
 
-void cdecl drain_event_queue(void)
+void drain_event_queue(void)
 {
-   while (peek_event()) dispatch_event();
+   while (peek_event())
+      dispatch_event();
 }
 
 /*********************************************************/
 //
-// Place an explicit event in the event queue and return to 
+// Place an explicit event in the event queue and return to
 // caller
 //
 /*********************************************************/
 
-#pragma off (unreferenced)
-void cdecl post_event(LONG argcnt, ULONG owner, LONG event, LONG parameter)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void post_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter)
+#pragma on(unreferenced)
 {
-   add_event(event,parameter,owner);
+   add_event(event, parameter, owner);
 }
 
 /*********************************************************/
@@ -671,11 +673,11 @@ void cdecl post_event(LONG argcnt, ULONG owner, LONG event, LONG parameter)
 //
 /*********************************************************/
 
-#pragma off (unreferenced)
-void cdecl send_event(LONG argcnt, ULONG owner, LONG event, LONG parameter)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void send_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter)
+#pragma on(unreferenced)
 {
-   add_event(event,parameter,owner);
+   add_event(event, parameter, owner);
    drain_event_queue();
 }
 
@@ -686,11 +688,11 @@ void cdecl send_event(LONG argcnt, ULONG owner, LONG event, LONG parameter)
 //
 /*********************************************************/
 
-#pragma off (unreferenced)
-void cdecl flush_event_queue(LONG argcnt, LONG owner, LONG event, LONG parameter)
-#pragma on (unreferenced)
+#pragma off(unreferenced)
+void flush_event_queue(int32_t argcnt, int32_t owner, int32_t event, int32_t parameter)
+#pragma on(unreferenced)
 {
-   remove_event(event,parameter,owner);
+   remove_event(event, parameter, owner);
 }
 
 /*********************************************************/
@@ -702,16 +704,13 @@ void cdecl flush_event_queue(LONG argcnt, LONG owner, LONG event, LONG parameter
 //
 /*********************************************************/
 
-void cdecl flush_input_events(void)
+void flush_input_events(void)
 {
-   LONG i;
+   int32_t i;
 
-   for (i=FIRST_INPUT_EVENT;i<=LAST_INPUT_EVENT;i++)
-      remove_event(i,-1,-1);
+   for (i = FIRST_INPUT_EVENT; i <= LAST_INPUT_EVENT; i++)
+      remove_event(i, -1, -1);
 
-   if ((current_event_type >= FIRST_INPUT_EVENT)
-        &&
-       (current_event_type <= LAST_INPUT_EVENT))
+   if ((current_event_type >= FIRST_INPUT_EVENT) && (current_event_type <= LAST_INPUT_EVENT))
       current_event_type = SYS_FREE;
 }
-

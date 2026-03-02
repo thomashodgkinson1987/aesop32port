@@ -5,6 +5,8 @@
 #ifndef RTRES_H
 #define RTRES_H
 
+#include <stdint.h>
+
 #define MAX_OBJ_TYPES 2450 // # of possible resource names
 #define DIR_BLK 256        // # of cache directory entries/block
 #define OD_SIZE 128        // # of entries/ordinal file directory block
@@ -73,9 +75,9 @@ typedef struct OD_block
 
 typedef struct // name directory entry
 {
-   uint32_t OE; // public
-   HRES thunk;  // public
-   HRES handle; // public
+   uint32_t OE;     // public
+   uint32_t thunk;  // public
+   uint32_t handle; // public
 } ND_entry;
 
 typedef struct
@@ -95,7 +97,7 @@ typedef struct
    uint32_t free;
    void *last_F;
 
-   HRES name_dir;
+   uint32_t name_dir;
    int16_t nd_entries;
 } RTR_class;
 
@@ -119,37 +121,37 @@ typedef struct
 extern RTR_class *LNK;
 extern RTR_class *RTR;
 
-RTR_class *cdecl RTR_construct(void *base, uint32_t size, uint32_t nnames, int8_t *filename);
-void cdecl RTR_destroy(RTR_class *RTR, uint32_t flags);
+RTR_class *RTR_construct(void *base, uint32_t size, uint32_t nnames, int8_t *filename);
+void RTR_destroy(RTR_class *RTR, uint32_t flags);
 
-uint32_t cdecl RTR_force_discard(RTR_class *RTR, uint32_t goal);
+uint32_t RTR_force_discard(RTR_class *RTR, uint32_t goal);
 
-HRES cdecl RTR_alloc(RTR_class *RTR, uint32_t bytes, uint32_t attrib);
-void cdecl RTR_free(RTR_class *RTR, HRES entry);
+uint32_t RTR_alloc(RTR_class *RTR, uint32_t bytes, uint32_t attrib);
+void RTR_free(RTR_class *RTR, uint32_t entry);
 
-void cdecl RTR_lock(RTR_class *RTR, HRES entry);
-void cdecl RTR_unlock(HRES entry);
+void RTR_lock(RTR_class *RTR, uint32_t entry);
+void RTR_unlock(uint32_t entry);
 
-uint32_t cdecl RTR_size(HRES entry);
+uint32_t RTR_size(uint32_t entry);
 
-HRES cdecl RTR_get_resource_handle(RTR_class *RTR, uint32_t resource, uint32_t attrib);
-void cdecl RTR_free_resource(RTR_class *RTR, uint32_t resource);
+uint32_t RTR_get_resource_handle(RTR_class *RTR, uint32_t resource, uint32_t attrib);
+void RTR_free_resource(RTR_class *RTR, uint32_t resource);
 
-HRES cdecl RTR_load_resource(RTR_class *RTR, uint32_t resource, uint32_t attrib);
-void cdecl RTR_read_resource(RTR_class *RTR, void *dest, uint32_t len);
-uint32_t cdecl RTR_seek(RTR_class *RTR, uint32_t rnum);
+uint32_t RTR_load_resource(RTR_class *RTR, uint32_t resource, uint32_t attrib);
+void RTR_read_resource(RTR_class *RTR, void *dest, uint32_t len);
+uint32_t RTR_seek(RTR_class *RTR, uint32_t rnum);
 
 #ifndef RTR_addr
-void *cdecl RTR_addr(HRES entry);
+void *RTR_addr(uint32_t entry);
 #endif
-void cdecl RTR_fixup(void **ptr, HRES entry);
+void RTR_fixup(void **ptr, uint32_t entry);
 
-ND_entry *cdecl RTR_search_name_dir(RTR_class *RTR, uint32_t resource);
+ND_entry *RTR_search_name_dir(RTR_class *RTR, uint32_t resource);
 
-int8_t *cdecl ASCII_name(uint32_t name);
-void cdecl RTR_dump(RTR_class *RTR);
+int8_t *ASCII_name(uint32_t name);
+void RTR_dump(RTR_class *RTR);
 
-void cdecl RTR_HRES_chksum(int8_t *situation);
-uint32_t cdecl RTR_chksum(HRES entry);
+void RTR_HRES_chksum(int8_t *situation);
+uint32_t RTR_chksum(uint32_t entry);
 
 #endif

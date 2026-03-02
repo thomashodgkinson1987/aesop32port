@@ -5,25 +5,19 @@
 #ifndef RTCODE_H
 #define RTCODE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdint.h>
 
-void cdecl diagnose(LONG argcnt, ULONG dtype, ULONG parm);
+void diagnose(int32_t argcnt, uint32_t dtype, uint32_t parm);
 
-typedef void (cdecl *FARPROC)();
+// typedef void(cdecl *FARPROC)(); // Tom: commented out, new version below
+typedef void (*FARPROC)(void); // Tom: added
+
 extern FARPROC code_resources[];
 
-ULONG cdecl absv(LONG argcnt, LONG val);
-ULONG cdecl rnd(LONG argcnt, ULONG low, ULONG high);
-LONG cdecl envval(LONG argcnt, BYTE *name);
+uint32_t absv(int32_t argcnt, int32_t val);
+uint32_t rnd(int32_t argcnt, uint32_t low, uint32_t high);
+int32_t envval(int32_t argcnt, int8_t *name);
 
-void cdecl beep(void);
-
-#ifdef __cplusplus
-}
-#endif
+void beep(void);
 
 #endif
-
-

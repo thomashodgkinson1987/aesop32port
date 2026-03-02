@@ -5,60 +5,54 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdint.h>
 
-#define EV_QSIZE 128             // max # of queued events (circular)
-#define NR_LSIZE 768             // max # of event notification requests
+#define EV_QSIZE 128 // max # of queued events (circular)
+#define NR_LSIZE 768 // max # of event notification requests
 
-#define NSX_IN_REGION  0x100     // notification status flags (high word)
+#define NSX_IN_REGION 0x100 // notification status flags (high word)
 #define NSX_OUT_REGION 0x200
-#define NSX_TYPE       0x00FF    // notification event type mask (low word)
+#define NSX_TYPE 0x00FF // notification event type mask (low word)
 
 typedef struct NREQ
 {
-   LONG  next;
-   LONG  prev;
-   LONG  client;
-   ULONG message;
-   LONG  parameter;
-   LONG  status;
-}
-NREQ;                            // notification request list entry
+   int32_t next;
+   int32_t prev;
+   int32_t client;
+   uint32_t message;
+   int32_t parameter;
+   int32_t status;
+} NREQ; // notification request list entry
 
 typedef struct
 {
-   LONG type;
-   LONG owner;
-   LONG parameter;
-}
-EVENT;
+   int32_t type;
+   int32_t owner;
+   int32_t parameter;
+} EVENT;
 
-extern LONG ENABLED;
+extern int32_t ENABLED;
 
 extern NREQ NR_list[NR_LSIZE];
-extern LONG NR_first[NUM_EVTYPES];
+extern int32_t NR_first[NUM_EVTYPES];
 
-extern LONG current_event_type;
+extern int32_t current_event_type;
 
 //
 // Internal calls
 //
 
-void cdecl init_notify_list(void);
-void cdecl add_notify_request(LONG client, LONG message, LONG event, LONG
-   parameter);
-void cdecl delete_notify_request(LONG client, LONG message, LONG event,
-   LONG parameter);
-void cdecl cancel_entity_requests(LONG client);
-void cdecl init_event_queue(void);
-EVENT *cdecl find_event(LONG type, LONG parameter);
-void cdecl remove_event(LONG type, LONG parameter, LONG owner);
-void cdecl add_event(LONG type, LONG parameter, LONG owner);
-EVENT *cdecl next_event(void);
-EVENT *cdecl fetch_event(void);
-void cdecl dump_event_queue(void);
+void init_notify_list(void);
+void add_notify_request(int32_t client, int32_t message, int32_t event, int32_t parameter);
+void delete_notify_request(int32_t client, int32_t message, int32_t event, int32_t parameter);
+void cancel_entity_requests(int32_t client);
+void init_event_queue(void);
+EVENT *find_event(int32_t type, int32_t parameter);
+void remove_event(int32_t type, int32_t parameter, int32_t owner);
+void add_event(int32_t type, int32_t parameter, int32_t owner);
+EVENT *next_event(void);
+EVENT *fetch_event(void);
+void dump_event_queue(void);
 
 void DISABLE(void);
 void ENABLE(void);
@@ -67,21 +61,13 @@ void ENABLE(void);
 // AESOP code resource calls
 //
 
-void cdecl notify(LONG argcnt, ULONG index, ULONG message, LONG event,
-   LONG parameter);
-void cdecl cancel(LONG argcnt, ULONG index, ULONG message, LONG event,
-   LONG parameter);
-void cdecl drain_event_queue(void);
-void cdecl post_event(LONG argcnt, ULONG owner, LONG event, LONG parameter);
-void cdecl send_event(LONG argcnt, ULONG owner, LONG event, LONG parameter);
-ULONG cdecl peek_event(void);
-void cdecl dispatch_event(void);
-void cdecl flush_event_queue(LONG argcnt, LONG owner, LONG event, LONG parameter);
-
-#ifdef __cplusplus
-}
-#endif
+void notify(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int32_t parameter);
+void cancel(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int32_t parameter);
+void drain_event_queue(void);
+void post_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter);
+void send_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter);
+uint32_t peek_event(void);
+void dispatch_event(void);
+void flush_event_queue(int32_t argcnt, int32_t owner, int32_t event, int32_t parameter);
 
 #endif
-
-

@@ -5,6 +5,8 @@
 #ifndef RTSYSTEM_H
 #define RTSYSTEM_H
 
+#include <stdint.h>
+
 #define TF_BUFSIZE 4096 // size of buffer allocated by file functions
 
 typedef struct

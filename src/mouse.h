@@ -1,37 +1,35 @@
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  MOUSE.H: C type definitions & mouse API prototypes                    ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Source compatible with 32-bit 80386 C/C++                             ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  V1.00 of  9-Jul-93: Initial release                                   ÛÛ
-//ÛÛ   1.10 of 24-Jan-94: Added MOUSE_pane_refresh()                        ÛÛ
-//ÛÛ   1.11 of 15-Feb-94: Upper-case MOUSE_ function names                  ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Project: 386FX Sound & Light(TM)                                      ÛÛ
-//ÛÛ   Author: John Miles                                                   ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Copyright (C) 1992-1994 Non-Linear Arts, Inc.                         ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  Non-Linear Arts, Inc.                                                 ÛÛ
-//ÛÛ  3415 Greystone #200                                                   ÛÛ
-//ÛÛ  Austin, TX 78731                                                      ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛ  (512) 346-9595 / FAX (512) 346-9596 / BBS (512) 454-9990              ÛÛ
-//ÛÛ                                                                        ÛÛ
-//ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  MOUSE.H: C type definitions & mouse API prototypes                    ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Source compatible with 32-bit 80386 C/C++                             ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  V1.00 of  9-Jul-93: Initial release                                   ï¿½ï¿½
+// ï¿½ï¿½   1.10 of 24-Jan-94: Added MOUSE_pane_refresh()                        ï¿½ï¿½
+// ï¿½ï¿½   1.11 of 15-Feb-94: Upper-case MOUSE_ function names                  ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Project: 386FX Sound & Light(TM)                                      ï¿½ï¿½
+// ï¿½ï¿½   Author: John Miles                                                   ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Copyright (C) 1992-1994 Non-Linear Arts, Inc.                         ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  Non-Linear Arts, Inc.                                                 ï¿½ï¿½
+// ï¿½ï¿½  3415 Greystone #200                                                   ï¿½ï¿½
+// ï¿½ï¿½  Austin, TX 78731                                                      ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½  (512) 346-9595 / FAX (512) 346-9596 / BBS (512) 454-9990              ï¿½ï¿½
+// ï¿½ï¿½                                                                        ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 #ifndef MOUSE_H
 #define MOUSE_H
 
+#include <stdint.h>
+
 #ifndef VFX_H
 #include "vfx.h"
-#endif
-
-#ifdef __cplusplus
-extern "C" {
 #endif
 
 //
@@ -41,42 +39,32 @@ extern "C" {
 
 #define MAX_MOUSE_BUFFER_SIZE 16384
 
-extern LONG MOUSE_init(LONG xsize, LONG ysize, LONG background);
+extern int32_t MOUSE_init(int32_t xsize, int32_t ysize, int32_t background);
 extern void MOUSE_shutdown(void);
 
 extern void MOUSE_show(void);
 extern void MOUSE_hide(void);
-extern void MOUSE_set_pointer(void *table, LONG shape);
-extern void MOUSE_status(LONG *mx, LONG *my, LONG *ml, LONG *mr, LONG *mc);
-extern void MOUSE_force_move(LONG new_x, LONG new_y);
+extern void MOUSE_set_pointer(void *table, int32_t shape);
+extern void MOUSE_status(int32_t *mx, int32_t *my, int32_t *ml, int32_t *mr, int32_t *mc);
+extern void MOUSE_force_move(int32_t new_x, int32_t new_y);
 
-extern void MOUSE_register_mouse_event_callback(void cdecl (*fn)
-   (LONG x, LONG y));
-extern void MOUSE_register_button_event_callback(void cdecl (*fn)
-   (LONG left, LONG right, LONG center));
-extern void MOUSE_register_watchdog_callback(LONG cdecl (*fn)
-   (RECT *area));
+extern void MOUSE_register_mouse_event_callback(void cdecl (*fn)(int32_t x, int32_t y));
+extern void MOUSE_register_button_event_callback(void cdecl (*fn)(int32_t left, int32_t right, int32_t center));
+extern void MOUSE_register_watchdog_callback(int32_t cdecl (*fn)(RECT *area));
 
 extern void MOUSE_lock(void);
 extern void MOUSE_unlock(void);
 extern void MOUSE_hold(void);
 extern void MOUSE_release(void);
 
-extern LONG MOUSE_visible_area(RECT *area);
-extern LONG MOUSE_shape_in_area(RECT *area);
+extern int32_t MOUSE_visible_area(RECT *area);
+extern int32_t MOUSE_shape_in_area(RECT *area);
 
 extern void __cdecl MOUSE_serve(void);
 
-extern void MOUSE_window_refresh(WINDOW *target, LONG x0, LONG y0, 
-   LONG x1, LONG y1);
-extern void MOUSE_pane_refresh(PANE *target, LONG x0, LONG y0, 
-   LONG x1, LONG y1);
+extern void MOUSE_window_refresh(WINDOW *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1);
+extern void MOUSE_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1);
 
 extern void MOUSE_pane_list_refresh(PANE_LIST *list);
 
-#ifdef __cplusplus
-}
 #endif
-
-#endif
-

@@ -40,9 +40,9 @@
 #include <termios.h>  // Tom: added
 #include <signal.h>   // Tom: added
 
-#include "vfx.h"
-#include "ail32.h"
-#include "gil2vfx.h"
+// #include "vfx.h" // Tom: commented out
+// #include "ail32.h" // Tom: commented out
+// #include "gil2vfx.h" // Tom: commented out
 
 #include "defs.h"
 #include "shared.h"
@@ -58,6 +58,17 @@
 
 #include <fcntl.h> // Tom: added
 
+void breakpoint(void)
+{
+#if defined(__linux__) || defined(__APPLE__)
+   raise(SIGTRAP);
+#elif defined(_WIN32)
+   __debugbreak();
+#endif
+}
+
+// #pragma aux breakpoint = "int 3"; // Tom: commented out
+
 // Tom: replacement for the old DOS <io.h> filelength() function
 int32_t filelength(int16_t handle)
 {
@@ -70,32 +81,6 @@ int32_t filelength(int16_t handle)
 
    return (int32_t)file_info.st_size;
 }
-
-// Tom: added
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
-
-// Tom: added
-#ifndef S_IREAD
-#define S_IREAD S_IRUSR
-#endif
-
-// Tom: added
-#ifndef S_IWRITE
-#define S_IWRITE S_IWUSR
-#endif
-
-void breakpoint(void)
-{
-#if defined(__linux__) || defined(__APPLE__)
-   raise(SIGTRAP);
-#elif defined(_WIN32)
-   __debugbreak();
-#endif
-}
-
-// #pragma aux breakpoint = "int 3"; // Tom: commented out
 
 uint32_t headroom;
 uint32_t checksum;

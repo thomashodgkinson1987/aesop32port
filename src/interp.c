@@ -23,15 +23,15 @@
 // ��                                                                        ��
 // ����������������������������������������������������������������������������
 
-#include <stdint.h>
+#include <stdint.h> // Tom: added
 #include <stdio.h>
 #include <stdlib.h>
-//#include <conio.h>
+// #include <conio.h> // Tom: commented out
 #include <ctype.h>
 #include <string.h>
-//#include <dos.h>
+// #include <dos.h> // Tom: commented out
 
-//#include "ail32.h"
+// #include "ail32.h" // Tom: commented out
 
 #include "defs.h"
 #include "shared.h"
@@ -186,7 +186,7 @@ void main(int argc, char *argv[])
    RT_shutdown();
 
    mem_shutdown();
-   AIL_shutdown(MSG_AIL);
+   // AIL_shutdown(MSG_AIL); // Tom: commented out
 
    if (envval(0, (int8_t *)"AESOP_DIAG") == 1)
    {
