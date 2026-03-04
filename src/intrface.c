@@ -301,53 +301,83 @@ static void mouse_button_event_handler(int32_t left, int32_t right, int32_t cent
 /*********************************************************/
 void init_interface(void) // Tom: TODO
 {
-   union REGS inregs, outregs;
+   // Tom: added new version
 
    in_BIOS = 0;
    heartbeat = 0L;
 
-   inregs.w.ax = 0;
-   int386(0x33, &inregs, &outregs);
+   pointer_set = UINT32_MAX;
+   pointer_set_entry = UINT32_MAX;
+   ptr_valid = 0;
+   wait_ptr_valid = 0;
+   wait_ptr_state = 0;
 
-   if (outregs.w.ax == 0xffff)
-   {
-      pointer_set = -1U;
-      pointer_set_entry = -1L;
-      ptr_valid = 0;
-      wait_ptr_valid = 0;
-      wait_ptr_state = 0;
+   // LUM the parameters have changed ("background" added)
+   MOUSE_init(VFX->scrn_width, VFX->scrn_height, 1);
 
-      // LUM the parameters have changed ("background" added)
-      MOUSE_init(VFX->scrn_width, VFX->scrn_height, 1);
+   MOUSE_register_mouse_event_callback(mouse_event_handler);
+   MOUSE_register_button_event_callback(mouse_button_event_handler);
 
-      MOUSE_register_mouse_event_callback(mouse_event_handler);
-      MOUSE_register_button_event_callback(mouse_button_event_handler);
-
-      inregs.x.eax = 3;
-      int386(0x33, &inregs, &outregs);
-
-      point_X = last_X = last_cursor_X = outregs.w.cx >> 3;
-      point_Y = last_Y = last_cursor_Y = outregs.w.dx >> 3;
-      btn_left = last_left = outregs.w.bx & 1;
-      btn_right = last_right = outregs.w.bx & 2;
-   }
-   else
-   {
-      GIL2VFX_shutdown_driver();
-      abend(MSG_MMR);
-   }
+   point_X = last_X = last_cursor_X = 0;
+   point_Y = last_Y = last_cursor_Y = 0;
+   btn_left = last_left = 0;
+   btn_right = last_right = 0;
 
    htimer = AIL_register_timer(timer_callback);
    AIL_set_timer_frequency(htimer, 60);
    AIL_start_timer(htimer);
 
    interface_active = 1;
+
+   // Tom: commented out original version below, see above for new version
+
+   // union REGS inregs, outregs;
+
+   // in_BIOS = 0;
+   // heartbeat = 0L;
+
+   // inregs.w.ax = 0;
+   // int386(0x33, &inregs, &outregs);
+
+   // if (outregs.w.ax == 0xffff)
+   // {
+   //    pointer_set = -1U;
+   //    pointer_set_entry = -1L;
+   //    ptr_valid = 0;
+   //    wait_ptr_valid = 0;
+   //    wait_ptr_state = 0;
+
+   //    // LUM the parameters have changed ("background" added)
+   //    MOUSE_init(VFX->scrn_width, VFX->scrn_height, 1);
+
+   //    MOUSE_register_mouse_event_callback(mouse_event_handler);
+   //    MOUSE_register_button_event_callback(mouse_button_event_handler);
+
+   //    inregs.x.eax = 3;
+   //    int386(0x33, &inregs, &outregs);
+
+   //    point_X = last_X = last_cursor_X = outregs.w.cx >> 3;
+   //    point_Y = last_Y = last_cursor_Y = outregs.w.dx >> 3;
+   //    btn_left = last_left = outregs.w.bx & 1;
+   //    btn_right = last_right = outregs.w.bx & 2;
+   // }
+   // else
+   // {
+   //    GIL2VFX_shutdown_driver();
+   //    abend(MSG_MMR);
+   // }
+
+   // htimer = AIL_register_timer(timer_callback);
+   // AIL_set_timer_frequency(htimer, 60);
+   // AIL_start_timer(htimer);
+
+   // interface_active = 1;
 }
 
 /*********************************************************/
 void shutdown_interface(void) // Tom: TODO
 {
-   union REGS inregs, outregs;
+   // Tom: added new version
 
    if (!interface_active)
       return;
@@ -359,13 +389,32 @@ void shutdown_interface(void) // Tom: TODO
 
    MOUSE_shutdown();
 
-   inregs.w.ax = 0;
-   int386(0x33, &inregs, &outregs);
-
-   if (pointer_set != -1U)
+   if (pointer_set != UINT32_MAX)
    {
       RTR_unlock(pointer_set);
    }
+
+   // Tom: commented out old version, new version above
+
+   // union REGS inregs, outregs;
+
+   // if (!interface_active)
+   //    return;
+   // interface_active = 0;
+
+   // AIL_release_timer_handle(htimer);
+
+   // hide_mouse();
+
+   // MOUSE_shutdown();
+
+   // inregs.w.ax = 0;
+   // int386(0x33, &inregs, &outregs);
+
+   // if (pointer_set != -1U)
+   // {
+   //    RTR_unlock(pointer_set);
+   // }
 }
 
 /*********************************************************/
