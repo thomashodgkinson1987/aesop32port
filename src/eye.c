@@ -81,11 +81,10 @@ int8_t DY_offset[6][4] = {{0, 0, 0, 0},
 extern int8_t txtbuf[2400]; // used as dot buffer -- needs 8 * MAXDOTS words
 
 /*********************************************************/
-#pragma off(unreferenced)
 int32_t step_X(int32_t argcnt, uint32_t x, uint32_t fdir, uint32_t mtype, uint32_t distance)
-#pragma on(unreferenced)
 {
    int8_t xx = (int8_t)x;
+   (void)argcnt; // Tom: added
 
    if (!distance)
       return x;
@@ -114,11 +113,10 @@ int32_t step_X(int32_t argcnt, uint32_t x, uint32_t fdir, uint32_t mtype, uint32
    return xx;
 }
 
-#pragma off(unreferenced)
 int32_t step_Y(int32_t argcnt, uint32_t y, uint32_t fdir, uint32_t mtype, uint32_t distance)
-#pragma on(unreferenced)
 {
    int8_t yy = (int8_t)y;
+   (void)argcnt; // Tom: added
 
    if (!distance)
       return y;
@@ -147,11 +145,10 @@ int32_t step_Y(int32_t argcnt, uint32_t y, uint32_t fdir, uint32_t mtype, uint32
    return yy;
 }
 
-#pragma off(unreferenced)
 uint32_t step_FDIR(int32_t argcnt, uint32_t fdir, uint32_t mtype)
-#pragma on(unreferenced)
 {
    uint8_t f = (uint8_t)fdir;
+   (void)argcnt; // Tom: added
 
    switch (mtype)
    {
@@ -166,10 +163,10 @@ uint32_t step_FDIR(int32_t argcnt, uint32_t fdir, uint32_t mtype)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 int32_t step_square_X(int32_t argcnt, uint32_t x, uint32_t r, uint32_t dir)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    switch (dir)
    {
    case DIR_E:
@@ -183,10 +180,10 @@ int32_t step_square_X(int32_t argcnt, uint32_t x, uint32_t r, uint32_t dir)
    return x;
 }
 
-#pragma off(unreferenced)
 int32_t step_square_Y(int32_t argcnt, uint32_t y, uint32_t r, uint32_t dir)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    switch (dir)
    {
    case DIR_N:
@@ -200,10 +197,10 @@ int32_t step_square_Y(int32_t argcnt, uint32_t y, uint32_t r, uint32_t dir)
    return y;
 }
 
-#pragma off(unreferenced)
 int32_t step_region(int32_t argcnt, uint32_t r, uint32_t dir)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    switch (dir)
    {
    case DIR_N:
@@ -221,9 +218,7 @@ int32_t step_region(int32_t argcnt, uint32_t r, uint32_t dir)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 uint32_t distance(int32_t argcnt, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
-#pragma on(unreferenced)
 {
    uint32_t dx, dy, root;
    int32_t num;
@@ -231,6 +226,7 @@ uint32_t distance(int32_t argcnt, uint32_t x1, uint32_t y1, uint32_t x2, uint32_
        {
            0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225, 256,
            289, 324, 361, 400, 441, 484, 529, 576, 625, 676, 729, 784, 841, 900, 961};
+   (void)argcnt; // Tom: added
 
    dx = absv(0, x1 - x2);
    dy = absv(0, y1 - y2);
@@ -260,11 +256,10 @@ uint32_t distance(int32_t argcnt, uint32_t x1, uint32_t y1, uint32_t x2, uint32_
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 uint32_t seek_direction(int32_t argcnt, uint32_t cur_x, uint32_t cur_y, uint32_t dest_x, uint32_t dest_y)
-#pragma on(unreferenced)
 {
    int32_t dx, dy;
+   (void)argcnt; // Tom: added
 
    dx = dest_x - cur_x;
    dy = dest_y - cur_y;
@@ -310,12 +305,11 @@ uint32_t seek_direction(int32_t argcnt, uint32_t cur_x, uint32_t cur_y, uint32_t
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 uint32_t spell_request(int32_t argcnt, int8_t *stat, int8_t *cnt, uint32_t typ, uint32_t num)
-#pragma on(unreferenced)
 {
    uint32_t i, toff;
-   int n, h; // // LUM changed to int (original BYTE) lead to a warning in on condition below
+   int n, h;     // LUM changed to int (original BYTE) lead to a warning in on condition below
+   (void)argcnt; // Tom: added
 
    toff = typ ? 110 : 10;
 
@@ -344,13 +338,11 @@ uint32_t spell_request(int32_t argcnt, int8_t *stat, int8_t *cnt, uint32_t typ, 
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
-uint32_t spell_list(int32_t argcnt, int8_t *cnt, uint32_t typ, uint32_t lvl, int8_t *list,
-                    uint32_t max)
-#pragma on(unreferenced)
+uint32_t spell_list(int32_t argcnt, int8_t *cnt, uint32_t typ, uint32_t lvl, int8_t *list, uint32_t max)
 {
    uint32_t i, l, num;
-   int m, n, j; // LUM changed to int (original BYTE) lead to a warning in on condition below
+   int m, n, j;  // LUM changed to int (original BYTE) lead to a warning in on condition below
+   (void)argcnt; // Tom: added
 
    l = (10 * (lvl - 1));
    num = 0;
@@ -380,22 +372,20 @@ uint32_t spell_list(int32_t argcnt, int8_t *cnt, uint32_t typ, uint32_t lvl, int
 /*=========================================================================*/
 /*      MAGIC_FIELD:                                                                                                                                                            */
 /*                                                                                                                                                                                                      */
-/*              This routine draws a magic field around the desired character.                  */
-/*              (Munged from Eye II)                                                                   */
+/*              This routine draws a magic field around the desired character. */
+/*              (Munged from Eye II)                                           */
 /*                                                                                                                                                                                                      */
 /*      INPUTS: pl, red, yel                                                   */
 /*      RETURNS:        none                                                                                                                                                            */
 /*=========================================================================*/
 
-#pragma off(unreferenced)
-void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfield,
-                 int32_t sparkle)
-#pragma on(unreferenced)
+void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfield, int32_t sparkle)
 {
    static uint8_t _x[] = {8, 80};
    static int8_t _y[] = {2, 54, 106};
    int16_t red, yel, color;
    int16_t x, y, lp, save;
+   (void)argcnt; // Tom: added
 
    red = 0x23;
    yel = 0x37;
@@ -464,10 +454,10 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
 /*=========================================================================*/
 /*      COORD_IN_REGION:                                                                                                                                                        */
 /*                                                                                                                                                                                                      */
-/*              This routine tests to see if two coordinates passed to it are in the    */
+/*              This routine tests to see if two coordinates passed to it are in the      */
 /*      region passed to it.                                                                                                                                            */
 /*                                                                                                                                                                                                      */
-/*      INPUTS: int16_t testx,int16_t testy,int16_t left x,int16_t top y,int16_t right x,              */
+/*      INPUTS: int16_t testx,int16_t testy,int16_t left x,int16_t top y,int16_t right x, */
 /*                              int16_t bottom y                                                                                                                                   */
 /*      RETURNS:        none                                                                                                                                                            */
 /*=========================================================================*/
@@ -477,7 +467,7 @@ int32_t Coord_In_Region(int32_t x, int32_t y, int32_t x1, int32_t y1, int32_t x2
       return (0); /* if it exceeds x bound then false     */
    if ((y < y1) || (y > y2))
       return (0); /* if it exceeds y bound then false     */
-   return (1);    /* otherwise its true                                   */
+   return (1);    /* otherwise its true                   */
 }
 
 /*********************************************************/
@@ -486,10 +476,7 @@ int32_t Coord_In_Region(int32_t x, int32_t y, int32_t x1, int32_t y1, int32_t x2
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
-void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t exp_y,
-             int32_t scale, int32_t power, int32_t dots, int32_t life, int32_t upval, int8_t *colors)
-#pragma on(unreferenced)
+void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t exp_y, int32_t scale, int32_t power, int32_t dots, int32_t life, int32_t upval, int8_t *colors)
 {
    static int16_t _floor[] =
        {
@@ -498,11 +485,11 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
            79,
            63,
        };
-
    static int i, pixcol, active, cx, cy, px, py, mask;
    int16_t *xpos, *ypos, *xvel, *yvel, *color, *colcnt, *colidx, *dotbuffer;
    int16_t lside, rside, top, bottom;
    int16_t roof, floor, lwall, rwall;
+   (void)argcnt; // Tom: added
 
    hide_mouse();
 
@@ -610,22 +597,20 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
 /*=========================================================================*/
 /*      DO_ICE:                                                                                                                                                                         */
 /*                                                                                                                                                                                                      */
-/*              Ice special effect for the cone of cold spell.  It is way cool.         */
-/*              (at least according to its original Westwood implementer)            */
+/*              Ice special effect for the cone of cold spell.  It is way cool. */
+/*              (at least according to its original Westwood implementer)       */
 /*                                                                                                                                                                                                      */
 /*      INPUTS: as below                                                                                                                                                        */
 /*      RETURNS:        none                                                                                                                                                            */
 /*                                                                                                                                                                                                      */
 /*=========================================================================*/
 
-#pragma off(unreferenced)
-void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t mag,
-            int32_t grav, int32_t life, int8_t *colors)
-#pragma on(unreferenced)
+void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t mag, int32_t grav, int32_t life, int8_t *colors)
 {
    int16_t i, pixcol, active, cx, cy, px, py, mask, count;
    int16_t *xpos, *ypos, *xvel, *yvel, *color, *colcnt, *colidx, *delay, *dotbuffer;
    int16_t m, v, grav78, t;
+   (void)argcnt; // Tom: added
 
    hide_mouse();
 
@@ -806,10 +791,10 @@ void read_save_directory(void)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 int8_t *savegame_title(int32_t argcnt, uint32_t num)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    return savegame_dir[num];
 }
 
@@ -820,10 +805,10 @@ int8_t *savegame_title(int32_t argcnt, uint32_t num)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void set_savegame_title(int32_t argcnt, int8_t *string, uint32_t num)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    strcpy(savegame_dir[num], string);
 }
 
@@ -917,11 +902,10 @@ void remove_temporary_save_files(void)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 uint32_t save_game(int32_t argcnt, uint32_t slotnum, uint32_t lvlnum)
-#pragma on(unreferenced)
 {
    uint32_t lvl;
+   (void)argcnt; // Tom: added
 
    if (slotnum == 0)
       abend(MSG_IASS0);
@@ -960,10 +944,10 @@ uint32_t save_game(int32_t argcnt, uint32_t slotnum, uint32_t lvlnum)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void suspend_game(int32_t argcnt, uint32_t cur_lvl)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    if (!save_range(itm_tmp, SAVETYPE, FIRST_ITEM, LAST_ITEM))
       abend(MSG_CNSI);
 
@@ -984,10 +968,10 @@ void suspend_game(int32_t argcnt, uint32_t cur_lvl)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void resume_level(int32_t argcnt, uint32_t cur_lvl)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    set_save_lvlnum(cur_lvl);
 
    restore_range(lvl_tmp, FIRST_LVL_OBJ, LAST_LVL_OBJ, 1);
@@ -1009,10 +993,10 @@ void resume_level(int32_t argcnt, uint32_t cur_lvl)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void resume_items(int32_t argcnt, uint32_t first, uint32_t last, uint32_t restoring)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    release_owned_windows(-1);
    cancel_entity_requests(-1);
 
@@ -1031,10 +1015,10 @@ void resume_items(int32_t argcnt, uint32_t first, uint32_t last, uint32_t restor
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void change_level(int32_t argcnt, uint32_t old_lvl, uint32_t new_lvl)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    set_save_lvlnum(old_lvl);
 
    if (!save_range(lvl_tmp, SAVETYPE, FIRST_LVL_OBJ, LAST_LVL_OBJ))
@@ -1061,10 +1045,10 @@ void change_level(int32_t argcnt, uint32_t old_lvl, uint32_t new_lvl)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void restore_items(int32_t argcnt, uint32_t slotnum)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    set_save_slotnum(slotnum);
 
    release_owned_windows(-1);
@@ -1086,11 +1070,10 @@ void restore_items(int32_t argcnt, uint32_t slotnum)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void restore_level_objects(int32_t argcnt, uint32_t slotnum, uint32_t lvlnum)
-#pragma on(unreferenced)
 {
    uint32_t lvl;
+   (void)argcnt; // Tom: added
 
    set_save_slotnum(slotnum);
    set_save_lvlnum(lvlnum);
@@ -1203,10 +1186,7 @@ void create_initial_binary_files(void)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
-void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1,
-            int8_t *argn2)
-#pragma on(unreferenced)
+void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int8_t *argn2)
 {
    typedef struct
    {
@@ -1217,6 +1197,7 @@ void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1,
 
    stag *s;
    int8_t dir[128];
+   (void)argcnt; // Tom: added
 
    s = *(stag **)0x4fa;
 
