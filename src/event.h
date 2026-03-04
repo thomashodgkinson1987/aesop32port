@@ -5,7 +5,7 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include <stdint.h>
+#include <stdint.h> // Tom: added (I think)
 
 #define EV_QSIZE 128 // max # of queued events (circular)
 #define NR_LSIZE 768 // max # of event notification requests

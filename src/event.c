@@ -514,10 +514,10 @@ void dump_event_queue(void)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void notify(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int32_t parameter)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    add_notify_request(index, message, event, parameter);
 }
 
@@ -527,10 +527,10 @@ void notify(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void cancel(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int32_t parameter)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    delete_notify_request(index, message, event, parameter);
 }
 
@@ -550,7 +550,7 @@ uint32_t peek_event(void)
 
 #if 0
    if (kbhit())
-      {
+   {
       hide_mouse();
       lock_mouse();
       GIL_set_video_mode(3);
@@ -558,9 +558,9 @@ uint32_t peek_event(void)
       getch();
       GIL_set_video_mode(19);
       unlock_mouse();
-      refresh_window(0,PAGE2,PAGE1);
+      refresh_window(0, PAGE2, PAGE1);
       show_mouse();
-      }
+   }
 #endif
 
    return (EV != NULL);
@@ -659,10 +659,10 @@ void drain_event_queue(void)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void post_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    add_event(event, parameter, owner);
 }
 
@@ -673,10 +673,10 @@ void post_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void send_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    add_event(event, parameter, owner);
    drain_event_queue();
 }
@@ -688,10 +688,10 @@ void send_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void flush_event_queue(int32_t argcnt, int32_t owner, int32_t event, int32_t parameter)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    remove_event(event, parameter, owner);
 }
 
