@@ -8,6 +8,8 @@
 #include <stdint.h> // Tom: added
 #include <string.h> // Tom: added
 
+#include "rtres.h" // Tom: added
+
 typedef struct // fundamental stack value structure
 {
    uint32_t val;
@@ -42,10 +44,14 @@ extern uint32_t current_index;
 
 // Assorted speed-critical .ASM routines
 
-void *RTD_first(void *dictionary);
-void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def); // Tom: TODO
+// void *RTD_first(void *dictionary); // Tom: original
+uint32_t *RTD_first(void *dictionary);
 
-int8_t *RTD_lookup(uint32_t dictionary, void *key); // Tom: TODO
+// void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def); // Tom: original
+uint32_t *RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def); // Tom: new
+
+// int8_t *RTD_lookup(uint32_t dictionary, void *key); // Tom: original
+int8_t *RTD_lookup(uint32_t dictionary, uint8_t *key); // Tom: new
 
 // Runtime interpreter calls
 

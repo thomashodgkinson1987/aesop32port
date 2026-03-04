@@ -47,7 +47,8 @@ static uint32_t *objlist_ptr;
 
 /* Dictionary Functions */
 
-uint8_t *RTD_lookup(uint32_t HRES, uint8_t *Key)
+// uint8_t *RTD_lookup(uint32_t HRES, uint8_t *Key) // Tom: see header
+int8_t *RTD_lookup(uint32_t HRES, uint8_t *Key) // Tom: modified
 {
     uint8_t *dict = (uint8_t *)RTR_addr(HRES);
     uint32_t hash_size = *(uint16_t *)dict;
@@ -97,7 +98,8 @@ uint8_t *RTD_lookup(uint32_t HRES, uint8_t *Key)
         {
             if (memcmp(edi, Key, tag_len) == 0)
             {
-                return edi + tag_len + 2; /* Return Definition string */
+                // return edi + tag_len + 2; /* Return Definition string */ // Tom: old version
+                return (int8_t *)(edi + tag_len + 2); /* Return Definition string */ // Tom: new version
             }
         }
 
@@ -108,7 +110,8 @@ uint8_t *RTD_lookup(uint32_t HRES, uint8_t *Key)
     }
 }
 
-uint32_t RTD_first(void *dictionary)
+// uint32_t RTD_first(void *dictionary) // Tom: original
+uint32_t *RTD_first(void *dictionary) // Tom: new
 {
     uint8_t *esi = (uint8_t *)dictionary;
     uint32_t hash_size = *(uint16_t *)esi;
@@ -118,10 +121,12 @@ uint32_t RTD_first(void *dictionary)
     if (*(uint16_t *)esi == 0)
         return 0;
 
-    return (uint32_t)(esi - (uint8_t *)dictionary);
+    // return (uint32_t)(esi - (uint8_t *)dictionary); // Tom: see below - header matching
+    return (uint32_t *)(esi - (uint8_t *)dictionary); // Tom: new
 }
 
-uint32_t RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def)
+// uint32_t RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def) // Tom: original
+uint32_t *RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def) // Tom: new
 {
     if (cur == 0)
         return 0;
@@ -146,7 +151,8 @@ uint32_t RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def)
     *def = (int8_t *)esi;
     esi += def_len;
 
-    return (uint32_t)(esi - (uint8_t *)base);
+    // return (uint32_t)(esi - (uint8_t *)base); // Tom: original
+    return (uint32_t *)(esi - (uint8_t *)base); // Tom: new
 }
 
 /* Subsystem Control Functions */
@@ -175,7 +181,7 @@ void RT_arguments(void *Base, uint32_t Bytes)
 int32_t RT_execute(uint32_t Index, uint32_t Message, uint32_t Vector)
 {
     uint32_t h_prg;
-    uint8_t **h_thunk;
+    // uint8_t **h_thunk; // Tom: removed, not used?
     uint8_t *ptr_thunk;
     void **h_instance;
     VALUE *fptr;
