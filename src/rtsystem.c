@@ -150,8 +150,8 @@ int8_t *str_alloc(int8_t *str)
 {
    int8_t *ptr;
 
-   ptr = mem_alloc(strlen(str) + 1);
-   strcpy(ptr, str);
+   ptr = mem_alloc(strlen((char *)str) + 1);
+   strcpy((char *)ptr, (char *)str);
 
    return ptr;
 }
@@ -201,29 +201,46 @@ int32_t ascnum(int8_t *string)
    if (*string == '\'')
       return (int32_t)(*(string + 1));
 
-   switch (*(uint16_t *)string)
+   // Tom: added new version, see below commented out block for old version
+
+   if (string[0] == '0' && string[1] == 'x')
    {
-   case 'x0':
       base = 16;
       string += 2;
-      break;
-   case 'b0':
+   }
+   else if (string[0] == '0' && string[1] == 'b')
+   {
       base = 2;
       string += 2;
-      break;
-   default:
+   }
+   else
+   {
       base = 10;
-      break;
    }
 
-   if (base == 10)
-      if (isdigit(*string))
-         return neg ? -atol(string) : atol(string);
-      else
-         return -1;
+   // Tom: commented out, see new version above
+   // switch (*(uint16_t *)string)
+   // {
+   // case 'x0':
+   //    base = 16;
+   //    string += 2;
+   //    break;
+   // case 'b0':
+   //    base = 2;
+   //    string += 2;
+   //    break;
+   // default:
+   //    base = 10;
+   //    break;
+   // }
+
+   if (base == 10 && isdigit(*string))
+      return neg ? -atol((char *)string) : atol((char *)string);
+   else
+      return -1;
 
    total = 0;
-   len = strlen(string);
+   len = strlen((char *)string);
 
    for (i = 0; i < len; i++)
    {
@@ -293,14 +310,14 @@ void abend(char *msg, ...)
          // write error
          fprintf(loErrorFile, "The AESOP/32 engine terminated with the error:\n");
          fprintf(loErrorFile, "%s\n", loErrorBuffer);
-         if (envval(0, "AESOP_DIAG") == 1)
+         if (envval(0, (int8_t *)"AESOP_DIAG") == 1)
          {
             fprintf(loErrorFile, MSG_MIE, current_msg, current_index, current_event_type);
          }
          fclose(loErrorFile);
       }
 
-      if (envval(0, "AESOP_DIAG") == 1)
+      if (envval(0, (int8_t *)"AESOP_DIAG") == 1)
       {
          printf(MSG_MIE, current_msg, current_index, current_event_type);
       }
@@ -338,7 +355,7 @@ TF_class *TF_construct(int8_t *filename, int16_t oflag)
    else
       oflag = O_RDONLY;
 
-   file = open(filename, oflag | O_BINARY, S_IREAD | S_IWRITE);
+   file = open((char *)filename, oflag | O_BINARY, S_IREAD | S_IWRITE);
    if (file == -1)
       return NULL;
 
@@ -475,7 +492,7 @@ int16_t TF_readln(TF_class *TF, int8_t *buffer, int16_t maxlen)
                return 0;
 
       buffer[b] = 0;
-   } while (!strlen(buffer));
+   } while (!strlen((char *)buffer));
 
    return 1;
 }
@@ -514,7 +531,7 @@ int16_t TF_writeln(TF_class *TF, int8_t *buffer)
 
 int16_t delete_file(int8_t *filename)
 {
-   if (!unlink(filename))
+   if (!unlink((char *)filename))
       return 1;
 
    if (errno == ENOENT)
@@ -539,12 +556,12 @@ int16_t copy_file(int8_t *src_filename, int8_t *dest_filename)
    int16_t status;
    int16_t s, d, n;
 
-   s = open(src_filename, O_RDONLY | O_BINARY);
+   s = open((char *)src_filename, O_RDONLY | O_BINARY);
 
    if (s == -1)
       return 0;
 
-   d = open(dest_filename, O_BINARY | O_CREAT | O_TRUNC | O_WRONLY,
+   d = open((char *)dest_filename, O_BINARY | O_CREAT | O_TRUNC | O_WRONLY,
             S_IREAD | S_IWRITE);
 
    if (d == -1)
@@ -596,11 +613,12 @@ int16_t copy_file(int8_t *src_filename, int8_t *dest_filename)
 int32_t file_size(int8_t *filename)
 {
    int16_t handle;
-   uint32_t len;
+   // uint32_t len; // Tom: commented out, `filelength` takes `int32_t`
+   int32_t len; // Tom: added
 
    disk_err = 0;
 
-   handle = open(filename, O_RDONLY | O_BINARY);
+   handle = open((char *)filename, O_RDONLY | O_BINARY);
    if (handle == -1)
    {
       disk_err = FILE_NOT_FOUND;
@@ -629,12 +647,21 @@ int8_t *read_file(int8_t *filename, void *dest)
 
    disk_err = 0;
 
-   len = file_size(filename);
-   if (len == -1)
+   // Tom: added, old version below - new version has 2 calls to `file_size` instead of 1
+   if (file_size(filename) == -1)
    {
       disk_err = FILE_NOT_FOUND;
       return NULL;
    }
+   len = file_size(filename);
+
+   // Tom: commented out
+   // len = file_size(filename);
+   // if (len == -1)
+   // {
+   //    disk_err = FILE_NOT_FOUND;
+   //    return NULL;
+   // }
 
    buf = mem = (dest == NULL) ? mem_alloc(len) : dest;
 
@@ -644,7 +671,7 @@ int8_t *read_file(int8_t *filename, void *dest)
       return NULL;
    }
 
-   handle = open(filename, O_RDONLY | O_BINARY);
+   handle = open((char *)filename, O_RDONLY | O_BINARY);
    if (handle == -1)
    {
       mem_free(mem);
@@ -689,7 +716,7 @@ int16_t write_file(int8_t *filename, void *buf, uint32_t len)
 
    disk_err = 0;
 
-   handle = open(filename, O_CREAT | O_RDWR | O_TRUNC | O_BINARY, S_IREAD | S_IWRITE);
+   handle = open((char *)filename, O_CREAT | O_RDWR | O_TRUNC | O_BINARY, S_IREAD | S_IWRITE);
    if (handle == -1)
    {
       disk_err = CANT_WRITE_FILE;
@@ -742,7 +769,7 @@ int16_t append_file(int8_t *filename, void *buf, uint32_t len)
 
    disk_err = 0;
 
-   handle = open(filename, O_APPEND | O_RDWR | O_BINARY);
+   handle = open((char *)filename, O_APPEND | O_RDWR | O_BINARY);
    if (handle == -1)
    {
       disk_err = FILE_NOT_FOUND;

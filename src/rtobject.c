@@ -34,6 +34,7 @@
 // #include <io.h> // Tom: commented out
 #include <errno.h>
 #include <sys/stat.h> // Tom: replaced `\` with `/`
+#include <unistd.h>   // Tom: added for write
 
 #include "defs.h"
 #include "shared.h"
@@ -383,6 +384,8 @@ void dump_static_context(uint32_t index, TF_class *TF)
 int32_t readln(TF_class *TF, int8_t *buffer, int32_t maxlen)
 {
    int32_t status;
+   (void)buffer; // Tom: added
+   (void)maxlen; // Tom: added
 
    do
       status = TF_readln(TF, linbuf, sizeof(linbuf));
@@ -412,7 +415,8 @@ CDESC *read_context_descriptor(TF_class *TF)
 
    num = &linbuf[6];
 
-   c.size = -1U;
+   // c.size = -1U; // Tom: commented out, new version below
+   c.size = UINT16_MAX; // Tom: added, old version above
    c.slot = (uint16_t)ascnum(num);
 
    name = (int8_t *)strchr((char *)num, '"');
@@ -719,9 +723,10 @@ void restore_range(int8_t *filename, uint32_t first, uint32_t last, uint32_t res
    CDESC stat_C;
    CDESC *CD;
 
-   uint16_t CDslot; // object list index
-   uint32_t CDname; // code object name
-   uint16_t CDsize; // size of instance data (unused in text files)
+   // Tom: commented out below, not used?
+   // uint16_t CDslot; // object list index
+   // uint32_t CDname; // code object name
+   // uint16_t CDsize; // size of instance data (unused in text files)
 
    txttype = 0;
    bad = 0;
@@ -769,13 +774,16 @@ void restore_range(int8_t *filename, uint32_t first, uint32_t last, uint32_t res
       if ((bad) || (CD->slot != index))
          abend(MSG_CFCAE, index); //"Context file corrupt at entry %u"
 
-      CDslot = CD->slot;
-      CDname = CD->name;
-      CDsize = CD->size;
+      // Tom: commented out below, not used?
+      // CDslot = CD->slot;
+      // CDname = CD->name;
+      // CDsize = CD->size;
 
-      if (CD->name == (uint32_t)-1L)
+      // if (CD->name == (uint32_t)-1L) // Tom: commented out, new version below
+      if (CD->name == UINT32_MAX)
       {
-         if (cur != -1)
+         // if (cur != -1) // Tom: commented out, might have originally had -1L
+         if (cur != UINT32_MAX) // Tom: added
          {
             destroy_object(0, index);
          }
@@ -783,7 +791,8 @@ void restore_range(int8_t *filename, uint32_t first, uint32_t last, uint32_t res
          continue;
       }
 
-      if (cur != -1)
+      // if (cur != -1) // Tom: commented out, original might have been -1L
+      if (cur != UINT32_MAX) // Tom: added
       {
          sel = (HD_entry *)cur;
 
@@ -873,11 +882,16 @@ void translate_file(int8_t *TXT_filename, int8_t *BIN_filename, uint32_t first, 
    if (TF == NULL)
       abend(MSG_COIFFT); //"Couldn't open input file for translation"
 
-   for (index = first; index <= last; index++)
+   // Tom: original line commented out
+   // for (index = first; index <= last; index++)
+   for (index = (int32_t)first; index <= (int32_t)last; index++) // Tom: added
    {
       CD = read_context_descriptor(TF);
-      if ((CD == NULL) || (CD->slot != index))
+      // if ((CD == NULL) || (CD->slot != index)) // Tom: original line
+      if ((CD == NULL) || (CD->slot != (uint16_t)index)) // Tom: added
+      {
          abend(MSG_CTCFE, index); //"Couldn't translate context file entry %u"
+      }
 
       CD_out.name = CD->name;
       CD_out.slot = index;

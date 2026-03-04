@@ -129,7 +129,8 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
    thdr.MV_list = sizeof(THDR);
    thdr.SD_list = sizeof(THDR);
-   thdr.max_msg = -1U;
+   // thdr.max_msg = -1U; // Tom: commented out, new version below
+   thdr.max_msg = UINT16_MAX; // Tom: added
    thdr.nprgs = 0;
    thdr.isize = sizeof(IHDR);
    thdr.use_cnt = 0;
@@ -144,7 +145,8 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
    depth = 0;
    class = object;
 
-   while (class != -1L)
+   // while (class != -1L) // Tom: commented out, new version below
+   while (class != UINT32_MAX) // Tom: added
    {
       code[depth] = RTR_get_resource_handle(RTR, class, DA_DEFAULT);
 
@@ -230,7 +232,8 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
    *(THDR *)RTR_addr(thunk) = thdr;
 
-   SD = (SD_entry *)thdr.SD_list;
+   // SD = (SD_entry *)thdr.SD_list; // Tom: commented out, new possibly broken version below
+   SD = (SD_entry *)((uint32_t)thdr.SD_list); // Tom: added
 
    i = depth - 1;
    j = 0;
@@ -248,7 +251,8 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
       SD_offset[i] = n;
 
-      XR = (void *)m;
+      // XR = (void *)m; // Tom: commented out, new possibly broken version below
+      XR = (void *)((uint32_t)m);
 
       dict = RTD_first(RTR_addr(impt[i]));
       while ((dict = RTD_iterate(RTR_addr(impt[i]), dict, &tag, &def)) != NULL)
@@ -284,7 +288,8 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
             index = sizeof(IHDR);
             found = 0;
 
-            while (xclass != -1L)
+            // while (xclass != -1L) // Tom: commented out, new version below
+            while (xclass != UINT32_MAX)
             {
                xcode = RTR_get_resource_handle(RTR, xclass, DA_DEFAULT);
 

@@ -35,7 +35,7 @@
 #include "rt.h"
 #include "rtsystem.h"
 #include "rtmsg.h"
-#include "modsnd32.h"
+// #include "modsnd32.h" // Tom: commented out
 
 int32_t ENABLED;
 
@@ -170,10 +170,17 @@ void add_notify_request(int32_t client, int32_t message, int32_t event, int32_t 
 
       out = fopen("event.dbg", "w+t");
 
+      // Tom: added, might need changing back?
       for (i = 0; i < NR_LSIZE; i++)
-         fprintf(out, "Message %5u, Client %5u, Next %5u, Prev %5u, Stat %5u, Parm %ld\n",
+         fprintf(out, "Message %5u, Client %5u, Next %5u, Prev %5u, Stat %5u, Parm %5u\n",
                  NR_list[i].message, NR_list[i].client, NR_list[i].next,
                  NR_list[i].prev, NR_list[i].status, NR_list[i].parameter);
+
+      // Tom: commented out, new version above
+      // for (i = 0; i < NR_LSIZE; i++)
+      //    fprintf(out, "Message %5u, Client %5u, Next %5u, Prev %5u, Stat %5u, Parm %ld\n",
+      //            NR_list[i].message, NR_list[i].client, NR_list[i].next,
+      //            NR_list[i].prev, NR_list[i].status, NR_list[i].parameter);
 
       fclose(out);
 
@@ -225,7 +232,8 @@ void delete_notify_request(int32_t client, int32_t message, int32_t event, int32
 
    DISABLE();
 
-   if (event == -1U)
+   // if (event == -1U) // Tom: commented out, new version below
+   if (event == INT32_MAX) // Tom: added
    {
       event = 1;
       all_events = 1;
@@ -247,7 +255,8 @@ void delete_notify_request(int32_t client, int32_t message, int32_t event, int32
          if (NR->client != client)
             continue; // match specified parms
 
-         if ((message != -1U) && (message != NR->message))
+         // if ((message != -1U) && (message != NR->message)) // Tom: commented out, new version below
+         if ((message != INT32_MAX) && (message != (int32_t)NR->message)) // Tom: added
             continue;
 
          if (!match_parameter(event, NR->parameter, parameter))
@@ -373,7 +382,8 @@ EVENT *find_event(int32_t type, int32_t parameter)
    while (t != EV_head)
    {
       EV = &EV_queue[t];
-      t = ++t % EV_QSIZE;
+      // t = ++t % EV_QSIZE; // Tom: commented out, new version below
+      t = (t + 1) % EV_QSIZE; // Tom: added
 
       if (EV->type != type)
          continue;
@@ -425,10 +435,14 @@ void add_event(int32_t type, int32_t parameter, int32_t owner)
    EV_queue[EV_head].owner = owner;
    EV_queue[EV_head].parameter = parameter;
 
-   EV_head = ++EV_head % EV_QSIZE;
+   // EV_head = ++EV_head % EV_QSIZE; // Tom: commented out, new version below
+   EV_head = (EV_head + 1) % EV_QSIZE; // Tom: added
 
    if (EV_head == EV_tail)
-      EV_tail = ++EV_tail % EV_QSIZE;
+   {
+      // EV_tail = ++EV_tail % EV_QSIZE; // Tom: commented out, new version below
+      EV_tail = (EV_tail + 1) % EV_QSIZE;
+   }
 
    ENABLE();
 }
@@ -459,7 +473,8 @@ EVENT *fetch_event(void)
    if (EV_tail != EV_head)
    {
       EV = &EV_queue[EV_tail];
-      EV_tail = ++EV_tail % EV_QSIZE;
+      // EV_tail = ++EV_tail % EV_QSIZE; // Tom: commented out, new version below
+      EV_tail = (EV_tail + 1) % EV_QSIZE; // Tom: added
    }
    else
       EV = NULL;
@@ -482,7 +497,8 @@ EVENT *scan_event_range(int32_t first_type, int32_t last_type)
    while (t != EV_head)
    {
       EV = &EV_queue[t];
-      t = ++t % EV_QSIZE;
+      // t = ++t % EV_QSIZE; // Tom: commented out, new version below
+      t = (t + 1) % EV_QSIZE; // Tom: added
 
       if ((EV->type < first_type) || (EV->type > last_type))
          continue;
@@ -500,11 +516,19 @@ void dump_event_queue(void)
 {
    EVENT *e;
 
+   // Tom: added, old version commented out below
    while ((e = fetch_event()) != NULL)
       if (e->type <= SYS_KEYDOWN)
-         printf("Event %s, parameter %ld\n", strs[e->type], e->parameter);
+         printf("Event %s, parameter %d\n", strs[e->type], e->parameter);
       else
-         printf("User event, parameter %ld\n", e->parameter);
+         printf("User event, parameter %d\n", e->parameter);
+
+   // Tom: commented out, new version above
+   // while ((e = fetch_event()) != NULL)
+   //    if (e->type <= SYS_KEYDOWN)
+   //       printf("Event %s, parameter %ld\n", strs[e->type], e->parameter);
+   //    else
+   //       printf("User event, parameter %ld\n", e->parameter);
 }
 
 /*********************************************************/
@@ -544,7 +568,7 @@ uint32_t peek_event(void)
 {
    EVENT *EV;
 
-   PollMod();
+   // PollMod(); // Tom: commented out (see modsnd32.h)
 
    EV = next_event();
 
@@ -593,7 +617,7 @@ void dispatch_event(void)
       int32_t owner;
    } event_message_descriptor;
 
-   PollMod();
+   // PollMod(); // Tom: commented out (see modsnd32.h)
 
    if ((EV = fetch_event()) == NULL)
       return;

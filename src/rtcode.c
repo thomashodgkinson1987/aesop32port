@@ -119,15 +119,26 @@ void load_string(int32_t argcnt, int8_t *array, uint32_t string)
 
    ptr = RTR_addr(handle);
 
-   switch (*(uint16_t *)ptr)
+   // Tom: added, old version below
+   if (ptr[0] == 'S' && ptr[1] == ':')
    {
-   case ':S':
-      far_memmove(new_array, ptr + 2, RTR_size(handle) - 2L);
-      break;
-
-   default:
+      far_memmove(new_array, ptr + 2, RTR_size(handle) - 2L); // Tom: remove L?
+   }
+   else
+   {
       abend(MSG_SRRLS);
    }
+
+   // Tom: commented out, new version above
+   // switch (*(uint16_t *)ptr)
+   // {
+   // case ':S':
+   //    far_memmove(new_array, ptr + 2, RTR_size(handle) - 2L);
+   //    break;
+
+   // default:
+   //    abend(MSG_SRRLS);
+   // }
 
    RTR_unlock(handle);
 }
