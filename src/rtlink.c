@@ -161,12 +161,10 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
       exports[depth] = prg.exports;
 
-      impt[depth] = RTR_get_resource_handle(LNK, prg.imports,
-                                            DA_TEMPORARY | DA_EVANESCENT);
+      impt[depth] = RTR_get_resource_handle(LNK, prg.imports, DA_TEMPORARY | DA_EVANESCENT);
       RTR_lock(LNK, impt[depth]);
 
-      expt[depth] = RTR_get_resource_handle(LNK, prg.exports,
-                                            DA_TEMPORARY | DA_EVANESCENT);
+      expt[depth] = RTR_get_resource_handle(LNK, prg.exports, DA_TEMPORARY | DA_EVANESCENT);
       RTR_lock(LNK, expt[depth]);
 
       //
@@ -288,8 +286,7 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
             while (xclass != -1L)
             {
-               xcode = RTR_get_resource_handle(RTR, xclass,
-                                               DA_DEFAULT);
+               xcode = RTR_get_resource_handle(RTR, xclass, DA_DEFAULT);
 
                if (!xcode)
                   abend(MSG_FPNF, xclass); //"Friend program %lu not found"
@@ -303,8 +300,7 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
                if (!found)
                {
-                  xexpt = RTR_get_resource_handle(LNK, xprg.exports,
-                                                  DA_TEMPORARY | DA_EVANESCENT);
+                  xexpt = RTR_get_resource_handle(LNK, xprg.exports, DA_TEMPORARY | DA_EVANESCENT);
 
                   RTR_lock(LNK, xexpt);
                   tag = tag - tagbase + (int8_t *)RTR_addr(impt[i]);

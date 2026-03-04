@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <malloc.h>
+#include <malloc.h> // Tom: TODO why is this included
 #include <stdint.h> // Tom: added
 
 #include "vfx.h"

@@ -263,11 +263,10 @@ static void mouse_event_handler(int32_t px, int32_t py)
    entry = 0;
 }
 /*********************************************************/
-#pragma off(unreferenced)
 static void mouse_button_event_handler(int32_t left, int32_t right, int32_t center)
-#pragma on(unreferenced)
 {
    static int32_t entry = 0;
+   (void)center; // Tom: added
 
    if (entry)
       return;
@@ -300,7 +299,7 @@ static void mouse_button_event_handler(int32_t left, int32_t right, int32_t cent
 }
 
 /*********************************************************/
-void init_interface(void)
+void init_interface(void) // Tom: TODO
 {
    union REGS inregs, outregs;
 
@@ -346,7 +345,7 @@ void init_interface(void)
 }
 
 /*********************************************************/
-void shutdown_interface(void)
+void shutdown_interface(void) // Tom: TODO
 {
    union REGS inregs, outregs;
 
@@ -370,9 +369,7 @@ void shutdown_interface(void)
 }
 
 /*********************************************************/
-void set_mouse_pointer(int32_t argcnt, uint32_t table, uint32_t number, int32_t hot_X,
-                       int32_t hot_Y, uint32_t scale, uint32_t fade_table,
-                       uint32_t fade_level)
+void set_mouse_pointer(int32_t argcnt, uint32_t table, uint32_t number, int32_t hot_X, int32_t hot_Y, uint32_t scale, uint32_t fade_table, uint32_t fade_level)
 {
    ND_entry *entry;
 
@@ -426,10 +423,10 @@ void set_mouse_pointer(int32_t argcnt, uint32_t table, uint32_t number, int32_t 
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void set_wait_pointer(int32_t argcnt, uint32_t number, int32_t hot_X, int32_t hot_Y)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    if (number == -1L)
    {
       wait_ptr_valid = 0;
@@ -459,8 +456,7 @@ void standby_cursor(void)
       save_hot_X = cur_hot_X;
       save_hot_Y = cur_hot_Y;
 
-      set_mouse_pointer(0, cur_table, wait_number, wait_hot_X, wait_hot_Y,
-                        pointer_scale, pointer_fade_table, pointer_fade_level);
+      set_mouse_pointer(0, cur_table, wait_number, wait_hot_X, wait_hot_Y, pointer_scale, pointer_fade_table, pointer_fade_level);
    }
 }
 
@@ -480,8 +476,7 @@ void resume_cursor(void)
    --wait_ptr_state;
 
    if (wait_ptr_state == 0)
-      set_mouse_pointer(0, cur_table, save_number, save_hot_X, save_hot_Y,
-                        pointer_scale, pointer_fade_table, pointer_fade_level);
+      set_mouse_pointer(0, cur_table, save_number, save_hot_X, save_hot_Y, pointer_scale, pointer_fade_table, pointer_fade_level);
 }
 
 /*********************************************************/
@@ -540,11 +535,10 @@ uint32_t mouse_XY(void)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd)
-#pragma on(unreferenced)
 {
    uint32_t stat;
+   (void)argcnt; // Tom: added
 
    stat = ((point_X >= GIL2VFX_get_x1(wnd)) &&
            (point_X <= GIL2VFX_get_x2(wnd)) &&
@@ -562,10 +556,10 @@ uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void refresh_window(int32_t argcnt, uint32_t src, uint32_t target)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_refresh_window(src, target);
 }
 

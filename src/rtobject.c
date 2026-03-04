@@ -47,6 +47,29 @@
 #include "event.h"
 #include "graphics.h"
 
+// Tom: drop-in replacement for DOS ltoa()
+char *ltoa(long val, char *buffer, int radix)
+{
+   if (radix == 10)
+   {
+      sprintf(buffer, "%ld", val);
+   }
+   else if (radix == 16)
+   {
+      sprintf(buffer, "%lx", val);
+   }
+   else if (radix == 8)
+   {
+      sprintf(buffer, "%lo", val);
+   }
+   else
+   {
+      // Fallback for weird bases (like base 2)
+      sprintf(buffer, "%ld", val);
+   }
+   return buffer;
+}
+
 extern uint32_t check_on;
 
 //
@@ -120,11 +143,10 @@ void create_SOP_instance(uint32_t name, int32_t index)
 //
 /***************************************************/
 
-#pragma off(unreferenced)
 int32_t create_object(int32_t argcnt, uint32_t name)
-#pragma on(unreferenced)
 {
    int32_t index;
+   (void)argcnt; // Tom: added
 
    index = find_free_entry(0, NUM_ENTITIES);
 
@@ -143,10 +165,10 @@ int32_t create_object(int32_t argcnt, uint32_t name)
 //
 /***************************************************/
 
-#pragma off(unreferenced)
 int32_t create_program(int32_t argcnt, int32_t index, uint32_t name)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    if (index == -1)
       index = find_free_entry(NUM_ENTITIES, NUM_OBJECTS);
 
@@ -165,11 +187,10 @@ int32_t create_program(int32_t argcnt, int32_t index, uint32_t name)
 //
 /***************************************************/
 
-#pragma off(unreferenced)
 int32_t destroy_object(int32_t argcnt, int32_t index)
-#pragma on(unreferenced)
 {
    int32_t rtn;
+   (void)argcnt; // Tom: added
 
    rtn = RT_execute(index, MSG_DESTROY, -1U);
 
@@ -210,10 +231,10 @@ void thrash_cache(void)
 //
 /***************************************************/
 
-#pragma off(unreferenced)
 uint32_t flush_cache(int32_t argcnt, uint32_t goal)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    return RTR_force_discard(RTR, goal);
 }
 
@@ -235,6 +256,9 @@ void dump_static_context(uint32_t index, TF_class *TF)
    uint8_t *dict;
    int8_t type, *tag, *def, *size;
    void *inst, *d;
+
+   // Tom: new version?
+   // sprintf((char *)linbuf, "Entry %u: ", index);
 
    strcpy((char *)linbuf, "Entry ");
    ltoa(index, (char *)(&linbuf[6]), 10);
@@ -356,9 +380,7 @@ void dump_static_context(uint32_t index, TF_class *TF)
 //
 /***************************************************/
 
-#pragma off(unreferenced)
 int32_t readln(TF_class *TF, int8_t *buffer, int32_t maxlen)
-#pragma on(unreferenced)
 {
    int32_t status;
 

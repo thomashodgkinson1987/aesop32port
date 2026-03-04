@@ -227,30 +227,27 @@ void release_owned_windows(int32_t owner)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void draw_dot(int32_t argcnt, uint32_t page, uint32_t x, uint32_t y, uint32_t color)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
    GIL2VFX_draw_dot(lastg_p = page, lastg_x = x, lastg_y = y, color);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
-void draw_line(int32_t argcnt, uint32_t page, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2,
-#pragma on(unreferenced)
-               uint32_t color)
+void draw_line(int32_t argcnt, uint32_t page, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2, uint32_t color)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_draw_line(lastg_p = page, x1, y1, lastg_x = x2, lastg_y = y2, color);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
-void line_to(int32_t argcnt, uint32_t x, uint32_t y, uint32_t color, ...)
-#pragma on(unreferenced)
+void line_to(int32_t argcnt, uint32_t x, uint32_t y, uint32_t color, ...) // Tom: TODO
 {
    uint32_t i;
    va_list argptr;
    uint32_t cx, cy, cc, lx, ly;
+   (void)argcnt; // Tom: added
 
    va_start(argptr, argcnt);
 
@@ -270,37 +267,34 @@ void line_to(int32_t argcnt, uint32_t x, uint32_t y, uint32_t color, ...)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
-void draw_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2,
-                    int32_t y2, uint32_t color)
-#pragma on(unreferenced)
+void draw_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_draw_rect(wndnum, x1, y1, x2, y2, color);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
-void fill_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2,
-                    int32_t y2, uint32_t color)
-#pragma on(unreferenced)
+void fill_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_fill_rect(wndnum, x1, y1, x2, y2, color);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
-void hash_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2,
-                    int32_t y2, uint32_t color)
-#pragma on(unreferenced)
+void hash_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_hash_rect(wndnum, x1, y1, x2, y2, color);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 uint32_t get_bitmap_height(int32_t argcnt, uint32_t table, uint32_t number)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    uint32_t handle;
    uint32_t h;
 
@@ -316,16 +310,13 @@ uint32_t get_bitmap_height(int32_t argcnt, uint32_t table, uint32_t number)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
-void draw_bitmap(int32_t argcnt, uint32_t page, uint32_t table, uint32_t number,
-                 int32_t x, int32_t y, uint32_t scale, uint32_t flip,
-                 uint32_t fade_table, uint32_t fade_level)
-#pragma on(unreferenced)
+void draw_bitmap(int32_t argcnt, uint32_t page, uint32_t table, uint32_t number, int32_t x, int32_t y, uint32_t scale, uint32_t flip, uint32_t fade_table, uint32_t fade_level)
 {
    uint32_t handle;
    static uint32_t last_handle = 0;
    static uint32_t last_table;
    uint8_t *lookaside;
+   (void)argcnt; // Tom: added
 
    if (table == last_table)
       handle = last_handle;
@@ -362,18 +353,16 @@ void draw_bitmap(int32_t argcnt, uint32_t page, uint32_t table, uint32_t number,
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
-uint32_t visible_bitmap_rect(int32_t argcnt, int32_t x, int32_t y, uint32_t flip,
-                             uint32_t table, uint32_t number, int16_t *array)
-#pragma on(unreferenced)
+uint32_t visible_bitmap_rect(int32_t argcnt, int32_t x, int32_t y, uint32_t flip, uint32_t table, uint32_t number, int16_t *array)
 {
    uint32_t handle;
    uint32_t array_offset;
    int8_t *new_array;
    int16_t bounds[4];
    uint32_t result;
+   (void)argcnt; // Tom: added
 
-   array_offset = (uint32_t)array - (uint32_t)RTR_addr(objlist[current_this]);
+   array_offset = (uint32_t)array - (uint32_t)RTR_addr(objlist[current_this]); // Tom: TODO
 
    handle = RTR_get_resource_handle(RTR, table, DA_DEFAULT);
 
@@ -399,15 +388,14 @@ uint32_t visible_bitmap_rect(int32_t argcnt, int32_t x, int32_t y, uint32_t flip
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void set_palette(int32_t argcnt, uint32_t region, uint32_t resource)
-#pragma on(unreferenced)
 {
    uint32_t handle;
    PAL_HDR *PHDR;
    RGB *array;
    int32_t i, j, k, n, f, m, dm, d;
    uint8_t *fade;
+   (void)argcnt; // Tom: added
 
    handle = RTR_get_resource_handle(RTR, resource, DA_DEFAULT);
    RTR_lock(RTR, handle);
@@ -612,12 +600,11 @@ void wait_vertical_retrace(void)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 uint32_t read_palette(int32_t argcnt, uint32_t regnum)
-#pragma on(unreferenced)
 {
    RGB triplet;
    uint32_t val;
+   (void)argcnt; // Tom: added
 
    VFX_DAC_read(regnum, &triplet);
    val = ((uint32_t)triplet.r << 12) | ((uint32_t)triplet.g << 6) | ((uint32_t)triplet.b);
@@ -626,11 +613,10 @@ uint32_t read_palette(int32_t argcnt, uint32_t regnum)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void write_palette(int32_t argcnt, uint32_t regnum, uint32_t value)
-#pragma on(unreferenced)
 {
    RGB triplet;
+   (void)argcnt; // Tom: added
 
    triplet.r = value >> 12;
    triplet.g = (value >> 6) & 63L;
@@ -640,36 +626,34 @@ void write_palette(int32_t argcnt, uint32_t regnum, uint32_t value)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void pixel_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd, uint32_t intervals)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_pixel_fade(src_wnd, dest_wnd, intervals);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void color_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_color_fade(src_wnd, dest_wnd);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void light_fade(int32_t argcnt, uint32_t src_wnd, uint32_t color)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_light_fade(src_wnd, color);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
-uint32_t assign_window(int32_t argcnt, uint32_t owner, uint32_t x1, uint32_t y1,
-                       uint32_t x2, uint32_t y2)
-#pragma on(unreferenced)
+uint32_t assign_window(int32_t argcnt, uint32_t owner, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
    int32_t window;
+   (void)argcnt; // Tom: added
 
    window = GIL2VFX_assign_window(x1, y1, x2, y2);
 
@@ -679,12 +663,10 @@ uint32_t assign_window(int32_t argcnt, uint32_t owner, uint32_t x1, uint32_t y1,
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
-uint32_t assign_subwindow(int32_t argcnt, uint32_t owner, uint32_t parent,
-                          uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
-#pragma on(unreferenced)
+uint32_t assign_subwindow(int32_t argcnt, uint32_t owner, uint32_t parent, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
    int32_t window;
+   (void)argcnt; // Tom: added
 
    window = GIL2VFX_assign_subwindow(parent, x1, y1, x2, y2);
 
@@ -694,91 +676,91 @@ uint32_t assign_subwindow(int32_t argcnt, uint32_t owner, uint32_t parent,
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void release_window(int32_t argcnt, uint32_t window)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_release_window(window);
    window_owner[window] = -1;
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 uint32_t get_x1(int32_t argcnt, uint32_t window)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    return GIL2VFX_get_x1(window);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 uint32_t get_x2(int32_t argcnt, uint32_t window)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    return GIL2VFX_get_x2(window);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 uint32_t get_y1(int32_t argcnt, uint32_t window)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    return GIL2VFX_get_y1(window);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 uint32_t get_y2(int32_t argcnt, uint32_t window)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    return GIL2VFX_get_y2(window);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void set_x1(int32_t argcnt, uint32_t window, uint32_t x1)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_set_x1(window, x1);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void set_x2(int32_t argcnt, uint32_t window, uint32_t x2)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_set_x2(window, x2);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void set_y1(int32_t argcnt, uint32_t window, uint32_t y1)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_set_y1(window, y1);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void set_y2(int32_t argcnt, uint32_t window, uint32_t y2)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_set_y2(window, y2);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void wipe_window(int32_t argcnt, uint32_t window, uint32_t color)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    GIL2VFX_wipe_window(window, color);
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void text_window(int32_t argcnt, uint32_t wndnum, uint32_t wnd)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    tw[wndnum].window = wnd;
 }
 
@@ -791,13 +773,11 @@ void text_window(int32_t argcnt, uint32_t wndnum, uint32_t wnd)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
-void text_style(int32_t argcnt, uint32_t wndnum, uint32_t font,
-                uint32_t justify)
-#pragma on(unreferenced)
+void text_style(int32_t argcnt, uint32_t wndnum, uint32_t font, uint32_t justify)
 {
    uint32_t hfont;
    FONT *vfont;
+   (void)argcnt; // Tom: added
 
    tw[wndnum].justify = justify;
 
@@ -818,36 +798,35 @@ void text_style(int32_t argcnt, uint32_t wndnum, uint32_t font,
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void text_xy(int32_t argcnt, uint32_t wndnum, uint32_t htab, uint32_t vtab)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    tw[wndnum].htab = htab;
    tw[wndnum].vtab = vtab;
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 int32_t get_text_x(int32_t argcnt, uint32_t wndnum)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    return tw[wndnum].htab;
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 int32_t get_text_y(int32_t argcnt, uint32_t wndnum)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    return tw[wndnum].vtab;
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void home(int32_t argcnt, uint32_t wndnum)
-#pragma on(unreferenced)
 {
    uint32_t hfont;
+   (void)argcnt; // Tom: added
 
    hfont = (uint32_t)tw[wndnum].font;
    tw[wndnum].font = RTR_addr(hfont);
@@ -859,11 +838,10 @@ void home(int32_t argcnt, uint32_t wndnum)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void text_color(int32_t argcnt, uint32_t wndnum, uint32_t current, uint32_t new)
-#pragma on(unreferenced)
 {
    uint32_t hfont;
+   (void)argcnt; // Tom: added
 
    hfont = (uint32_t)tw[wndnum].font;
    tw[wndnum].font = RTR_addr(hfont);
@@ -875,10 +853,10 @@ void text_color(int32_t argcnt, uint32_t wndnum, uint32_t current, uint32_t new)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 void text_refresh_window(int32_t argcnt, uint32_t wndnum, int32_t wnd)
-#pragma on(unreferenced)
 {
+   (void)argcnt; // Tom: added
+
    tw_refresh[wndnum] = wnd;
 }
 
@@ -891,13 +869,12 @@ void text_refresh_window(int32_t argcnt, uint32_t wndnum, int32_t wnd)
 //
 /*********************************************************/
 
-#pragma off(unreferenced)
 void vsprint(int32_t argcnt, uint32_t wndnum, int8_t *format, va_list argptr)
-#pragma on(unreferenced)
 {
    uint32_t hfont, str;
    int8_t c, *p, *s;
    int8_t buff[32];
+   (void)argcnt; // Tom: added
 
    hfont = (uint32_t)tw[wndnum].font;
    tw[wndnum].font = RTR_addr(hfont);
@@ -946,8 +923,7 @@ void vsprint(int32_t argcnt, uint32_t wndnum, int8_t *format, va_list argptr)
          break;
 
       case 's':
-         str = RTR_get_resource_handle(RTR, va_arg(argptr, uint32_t),
-                                       DA_DEFAULT);
+         str = RTR_get_resource_handle(RTR, va_arg(argptr, uint32_t), DA_DEFAULT);
 
          RTR_lock(RTR, str);
 
@@ -1104,12 +1080,11 @@ void crout(int32_t argcnt, uint32_t wndnum)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 uint32_t char_width(int32_t argcnt, uint32_t wndnum, uint32_t ch)
-#pragma on(unreferenced)
 {
    uint32_t hfont;
    uint32_t w;
+   (void)argcnt; // Tom: added
 
    hfont = (uint32_t)tw[wndnum].font;
    tw[wndnum].font = RTR_addr(hfont);
@@ -1123,12 +1098,11 @@ uint32_t char_width(int32_t argcnt, uint32_t wndnum, uint32_t ch)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
 uint32_t font_height(int32_t argcnt, uint32_t wndnum)
-#pragma on(unreferenced)
 {
    uint32_t hfont;
    uint32_t w;
+   (void)argcnt; // Tom: added
 
    hfont = (uint32_t)tw[wndnum].font;
 
@@ -1138,16 +1112,12 @@ uint32_t font_height(int32_t argcnt, uint32_t wndnum)
 }
 
 /*********************************************************/
-#pragma off(unreferenced)
-void solid_bar_graph(int32_t argcnt, int32_t x0, int32_t y0, int32_t x1, int32_t y1,
-                     uint32_t lb_border, uint32_t tr_border, uint32_t bkgnd,
-                     uint32_t grn, uint32_t yel, uint32_t red, int32_t val,
-                     int32_t min, int32_t crit, int32_t max)
-#pragma on(unreferenced)
+void solid_bar_graph(int32_t argcnt, int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t lb_border, uint32_t tr_border, uint32_t bkgnd, uint32_t grn, uint32_t yel, uint32_t red, int32_t val, int32_t min, int32_t crit, int32_t max)
 {
    int32_t btop, bbtm, blft, brgt, grayx;
    int32_t range, point, width;
    int32_t color;
+   (void)argcnt; // Tom: added
 
    GIL2VFX_draw_line(PAGE2, x0, y0, x0, y1, lb_border);
    GIL2VFX_draw_line(PAGE2, x0, y1, x1, y1, lb_border);
@@ -1187,11 +1157,10 @@ void solid_bar_graph(int32_t argcnt, int32_t x0, int32_t y0, int32_t x1, int32_t
       GIL2VFX_fill_rect(PAGE2, blft, btop, grayx, bbtm, color);
 }
 
-#pragma off(unreferenced)
 void aprint(int32_t argcnt, int8_t *format, ...)
-#pragma on(unreferenced)
 {
    va_list argptr;
+   (void)argcnt; // Tom: added
 
    va_start(argptr, format);
 

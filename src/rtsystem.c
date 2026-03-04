@@ -39,6 +39,7 @@
 #include <time.h>     // Tom: added
 #include <termios.h>  // Tom: added
 #include <signal.h>   // Tom: added
+#include <fcntl.h>    // Tom: added
 
 // #include "vfx.h" // Tom: commented out
 // #include "ail32.h" // Tom: commented out
@@ -55,8 +56,6 @@
 #include "event.h"
 #include "sound.h"
 #include "graphics.h"
-
-#include <fcntl.h> // Tom: added
 
 void breakpoint(void)
 {
@@ -109,7 +108,7 @@ void mem_shutdown(void)
 
 uint32_t mem_avail(void)
 {
-   return 256 * 1024 * 1024; // Tom: hardcoded available memory
+   return 32 * 1024 * 1024; // Tom: hardcoded available memory
 
    // Tom: original code below
 
@@ -313,8 +312,8 @@ void abend(char *msg, ...)
 
    if (!recover)
    {
-      shutdown_sound();
-      shutdown_interface();
+      // shutdown_sound(); // Tom: commented out
+      shutdown_interface(); // Tom: TODO
       // AIL_shutdown("Abend"); // Tom: commented out
       // GIL2VFX_shutdown_driver(); // Tom: commented out
 

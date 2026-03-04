@@ -25,6 +25,7 @@
 
 #ifdef __AESOP__
 
+// Tom: TODO what is this for
 #define PROCDEF
 
 #else
@@ -187,6 +188,8 @@ int32_t arrow_count(int32_t argcnt, uint32_t plrnum);
 #define PROCDEF (FARPROC)
 
 #endif
+
+// Tom: TODO what is all of this below
 
 #ifdef __AESOP__
 

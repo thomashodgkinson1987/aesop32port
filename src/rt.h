@@ -43,9 +43,9 @@ extern uint32_t current_index;
 // Assorted speed-critical .ASM routines
 
 void *RTD_first(void *dictionary);
-void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def);
+void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def); // Tom: TODO
 
-int8_t *RTD_lookup(uint32_t dictionary, void *key);
+int8_t *RTD_lookup(uint32_t dictionary, void *key); // Tom: TODO
 
 // Runtime interpreter calls
 
