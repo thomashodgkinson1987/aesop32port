@@ -93,7 +93,8 @@ uint32_t heap_size;
 int8_t *pathname;
 
 /*************************************************************/
-void main(int argc, char *argv[])
+// void main(int argc, char *argv[]) // Tom: commented out, new version below
+int main(int argc, char *argv[]) // Tom: added
 {
    int8_t RES_name[256];
    int8_t code_name[256];
@@ -155,7 +156,8 @@ void main(int argc, char *argv[])
 
    HROED = RTR_get_resource_handle(RTR, ROED, DA_TEMPORARY | DA_EVANESCENT);
    RTR_lock(RTR, HROED);
-   code = ascnum(RTD_lookup(HROED, code_name));
+   // code = ascnum(RTD_lookup(HROED, code_name)); // Tom: commented out, new version below, might be broken
+   code = ascnum(RTD_lookup(HROED, (uint8_t *)code_name)); // Tom: added
    RTR_unlock(HROED);
 
    if (code == (uint32_t)-1L)
@@ -190,9 +192,16 @@ void main(int argc, char *argv[])
 
    if (envval(0, (int8_t *)"AESOP_DIAG") == 1)
    {
-      printf("%lu bytes in heap\n", heap_size);
-      printf("%lu bytes left\n", mem_headroom());
+      // Tom: added 2 new lines below, old version commented out below
+      printf("%u bytes in heap\n", heap_size);
+      printf("%u bytes left\n", mem_headroom());
+
+      // Tom: commented out, new versions above
+      // printf("%lu bytes in heap\n", heap_size);
+      // printf("%lu bytes left\n", mem_headroom());
    }
 
    exit(rtn);
+
+   return 0;
 }
