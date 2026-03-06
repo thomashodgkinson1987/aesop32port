@@ -263,12 +263,34 @@ void beep(void)
 void pokemem(int32_t argcnt, int32_t *addr, int32_t data)
 {
    (void)argcnt; // Tom: added
+   if (addr == NULL)
+   {
+      printf("[TOM] pokemem: attempt to write %d to NULL address, ignoring\n", data);
+      return;
+   }
+   printf("[TOM] pokemem: addr=%p data=%d\n", (void *)addr, data);
    *addr = data;
 }
 
 int32_t peekmem(int32_t argcnt, int32_t *addr)
 {
+   static int first_call = 1;
    (void)argcnt; // Tom: added
+
+   if (first_call)
+   {
+      first_call = 0;
+      printf("[TOM] peekmem: first call (addr=%p), returning 'CINE' magic cookie\n", (void *)addr);
+      return 0x43494e45; // "CINE"
+   }
+
+   if (addr == NULL)
+   {
+      printf("[TOM] peekmem: attempt to read from NULL address, returning 0\n");
+      return 0;
+   }
+
+   printf("[TOM] peekmem: addr=%p\n", (void *)addr);
    return *addr;
 }
 
