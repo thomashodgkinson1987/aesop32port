@@ -39,7 +39,7 @@
 #include "graphics.h" // for dprint()
 // #include "modsnd32.h" // Tom: commented out
 
-#define FAST_LOCK 1 // user field = resource name if 0, file offset if 1
+#define FAST_LOCK 0 // user field = resource name if 0, file offset if 1
 
 /******************************************/
 //
@@ -458,7 +458,7 @@ static void RTR_init_dir(RTR_class *RTR, uint32_t first)
       RTR->dir[j].flags = DA_FREE | DA_DISCARDED;
       RTR->dir[j].history = 0;
       RTR->dir[j].locks = 0;
-      RTR->dir[j].user = -1;
+      RTR->dir[j].user = UINT32_MAX;
       RTR->dir[j].seg = 0;
    }
 }
@@ -641,7 +641,8 @@ RTR_class *RTR_construct(void *base, uint32_t size, uint32_t nnames, int8_t *fil
 
    RTR->cur_blk = UINT32_MAX;
 
-   RTR->name_dir = RTR_alloc(RTR, (uint32_t)((uint32_t)nnames * sizeof(ND_entry)), DA_FIXED | DA_PRECIOUS);
+   //RTR->name_dir = RTR_alloc(RTR, (uint32_t)((uint32_t)nnames * sizeof(ND_entry)), DA_FIXED | DA_PRECIOUS); // Tom: commented out
+   RTR->name_dir = RTR_alloc(RTR, nnames * sizeof(ND_entry), DA_FIXED | DA_PRECIOUS); // Tom: new version
    RTR->nd_entries = 0;
 
    return RTR;
@@ -987,7 +988,7 @@ uint32_t RTR_get_resource_handle(RTR_class *RTR, uint32_t resource, uint32_t att
    ND_entry *dir;
    void *dest, *src;
    uint32_t nbytes;
-printf("%u : %u : %u\n", RTR->name_dir, resource, attrib);
+   printf("[TOM] RTR_get_resource_handle: resource=%u attrib=%u\n", resource, attrib);
    dir = RTR_search_name_dir(RTR, resource);
 
    if (dir == NULL)

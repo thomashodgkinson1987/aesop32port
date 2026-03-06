@@ -99,7 +99,7 @@ void init_object_list(void)
    int32_t i;
 
    for (i = 0; i < NUM_OBJECTS; i++)
-      objlist[i] = -1;
+      objlist[i] = UINT32_MAX;
 }
 
 /***************************************************/
@@ -114,7 +114,7 @@ int32_t find_free_entry(int32_t min, int32_t end)
    int32_t i;
 
    for (i = min; i < end; i++)
-      if (objlist[i] == -1U)
+      if (objlist[i] == UINT32_MAX)
          break;
 
    if (i == end)
@@ -132,7 +132,7 @@ int32_t find_free_entry(int32_t min, int32_t end)
 void create_SOP_instance(uint32_t name, int32_t index)
 {
    objlist[index] = create_instance(RTR, name);
-printf("here\n");
+
    RT_execute(index, MSG_CREATE, UINT32_MAX);
 }
 

@@ -120,6 +120,16 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
    uint32_t def_off;
    uint32_t *XR_ptr, *CR_ptr;
 
+   // Tom: added these to zero local arrays
+
+   memset(code, 0, sizeof(code));
+   memset(impt, 0, sizeof(impt));
+   memset(expt, 0, sizeof(expt));
+   memset(exports, 0, sizeof(exports));
+   memset(s_S, 0, sizeof(s_S));
+   memset(x_S, 0, sizeof(x_S));
+   memset(SD_offset, 0, sizeof(SD_offset));
+
    //
    // Load programs and dictionaries, calculate thunk size
    //
@@ -153,7 +163,9 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
       RTR_lock(RTR, code[depth]);
 
-      prg = *(PRG_HDR *)RTR_addr(code[depth]);
+      // prg = *(PRG_HDR *)RTR_addr(code[depth]); // Tom: commented out, original broken?
+      // prg = *((PRG_HDR *)code[depth]); // Tom: this gives a better result but still doesn't look right?
+      prg = *(PRG_HDR *)(*(uint32_t *)code[depth]); // Tom: this is the original but unrolled (no macro)
 
       ++thdr.nprgs;
       tsize += sizeof(SD_entry);
@@ -161,7 +173,9 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
       exports[depth] = prg.exports;
 
+      // Tom: prg.imports should be a resource number here?
       impt[depth] = RTR_get_resource_handle(LNK, prg.imports, DA_TEMPORARY | DA_EVANESCENT);
+      printf("before RTR_lock\n");
       RTR_lock(LNK, impt[depth]);
 
       expt[depth] = RTR_get_resource_handle(LNK, prg.exports, DA_TEMPORARY | DA_EVANESCENT);
@@ -416,7 +430,7 @@ uint32_t create_instance(RTR_class *RTR, uint32_t object)
 
    entry = RTR_search_name_dir(RTR, object);
 
-   if ((entry == NULL) || (entry->thunk == -1U))
+   if ((entry == NULL) || (entry->thunk == UINT32_MAX))
    {
       thunk = construct_thunk(RTR, RTR, object);
 
