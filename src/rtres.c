@@ -39,7 +39,7 @@
 #include "graphics.h" // for dprint()
 // #include "modsnd32.h" // Tom: commented out
 
-#define FAST_LOCK 0 // user field = resource name if 0, file offset if 1
+#define FAST_LOCK 1 // user field = resource name if 0, file offset if 1
 
 /******************************************/
 //

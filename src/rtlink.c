@@ -163,9 +163,7 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
       RTR_lock(RTR, code[depth]);
 
-      // prg = *(PRG_HDR *)RTR_addr(code[depth]); // Tom: commented out, original broken?
-      // prg = *((PRG_HDR *)code[depth]); // Tom: this gives a better result but still doesn't look right?
-      prg = *(PRG_HDR *)(*(uint32_t *)code[depth]); // Tom: this is the original but unrolled (no macro)
+      prg = *(PRG_HDR *)RTR_addr(code[depth]);
 
       ++thdr.nprgs;
       tsize += sizeof(SD_entry);
@@ -173,9 +171,7 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
       exports[depth] = prg.exports;
 
-      // Tom: prg.imports should be a resource number here?
       impt[depth] = RTR_get_resource_handle(LNK, prg.imports, DA_TEMPORARY | DA_EVANESCENT);
-      printf("before RTR_lock\n");
       RTR_lock(LNK, impt[depth]);
 
       expt[depth] = RTR_get_resource_handle(LNK, prg.exports, DA_TEMPORARY | DA_EVANESCENT);
