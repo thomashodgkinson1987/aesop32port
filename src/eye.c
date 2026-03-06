@@ -33,8 +33,8 @@
 // #include <process.h> // Tom: commented out
 #include <stdint.h> // Tom: added
 
-#include "vfx.h"
-#include "gil2vfx.h"
+// #include "vfx.h" // Tom: commented out
+// #include "gil2vfx.h" // Tom: commented out
 
 #include "defs.h"
 #include "shared.h"
@@ -47,22 +47,22 @@
 #include "intrface.h"
 #include "rtres.h"
 #include "rt.h"
-#include "modsnd32.h"
+// #include "modsnd32.h" // Tom: commented out
 #include "sound.h"
 
 #define SAVETYPE (diag_flag ? SF_TXT : SF_BIN)
 
-#define SAVEDIR_FN "SAVEGAME\\SAVEGAME.DIR"
+#define SAVEDIR_FN "SAVEGAME/SAVEGAME.DIR" // Tom: changed `\\` to `/`
 
 int8_t savegame_dir[NUM_SAVEGAMES][SAVE_LEN + 1];
 
-static int8_t items_bin[] = "SAVEGAME\\ITEMS_yy.BIN";
-static int8_t items_txt[] = "SAVEGAME\\ITEMS_yy.TXT";
-static int8_t lvl_bin[] = "SAVEGAME\\LVLxx_yy.BIN";
-static int8_t lvl_txt[] = "SAVEGAME\\LVLxx_yy.TXT";
+static int8_t items_bin[] = "SAVEGAME/ITEMS_yy.BIN"; // Tom: changed `\\` to `/`
+static int8_t items_txt[] = "SAVEGAME/ITEMS_yy.TXT"; // Tom: changed `\\` to `/`
+static int8_t lvl_bin[] = "SAVEGAME/LVLxx_yy.BIN";   // Tom: changed `\\` to `/`
+static int8_t lvl_txt[] = "SAVEGAME/LVLxx_yy.TXT";   // Tom: changed `\\` to `/`
 
-static int8_t lvl_tmp[] = "SAVEGAME\\LVLxx.TMP";
-static int8_t itm_tmp[] = "SAVEGAME\\ITEMS.TMP";
+static int8_t lvl_tmp[] = "SAVEGAME/LVLxx.TMP"; // Tom: changed `\\` to `/`
+static int8_t itm_tmp[] = "SAVEGAME/ITEMS.TMP"; // Tom: changed `\\` to `/`
 
 int8_t DX_offset[6][4] = {{0, 0, 0, 0},
                           {0, 1, 0, -1},
@@ -383,7 +383,7 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
 {
    static uint8_t _x[] = {8, 80};
    static int8_t _y[] = {2, 54, 106};
-   int16_t red, yel, color;
+   int16_t red, yel /*, color //Tom: commented out, not currently used */;
    int16_t x, y, lp, save;
    (void)argcnt; // Tom: added
 
@@ -396,7 +396,7 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
       yel += sparkle;
    }
 
-   color = red;
+   // color = red; // Tom: commented out, not currently used
 
    x = _x[p & 1];
    y = _y[p >> 1];
@@ -405,11 +405,11 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
 
    if ((redfield) && (!yelfield))
    {
-      GIL2VFX_draw_rect(PAGE2, x, y, x + 63, y + 49, color);
+      // GIL2VFX_draw_rect(PAGE2, x, y, x + 63, y + 49, color); // Tom: commented out
    }
    else if ((yelfield) && (!redfield))
    {
-      GIL2VFX_draw_rect(PAGE2, x, y, x + 63, y + 49, yel);
+      // GIL2VFX_draw_rect(PAGE2, x, y, x + 63, y + 49, yel); // Tom: commented out
    }
    else
    {
@@ -419,14 +419,14 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
          x = save + lp;
          if (redfield)
          {
-            GIL2VFX_draw_line(PAGE2, x, y, x + 7, y, color);
-            GIL2VFX_draw_line(PAGE2, x + 8, y + 49, x + 15, y + 49, color);
+            // GIL2VFX_draw_line(PAGE2, x, y, x + 7, y, color); // Tom: commented out
+            // GIL2VFX_draw_line(PAGE2, x + 8, y + 49, x + 15, y + 49, color); // Tom: commented out
          }
 
          if (yelfield)
          {
-            GIL2VFX_draw_line(PAGE2, x + 8, y, x + 15, y, yel);
-            GIL2VFX_draw_line(PAGE2, x, y + 49, x + 7, y + 49, yel);
+            // GIL2VFX_draw_line(PAGE2, x + 8, y, x + 15, y, yel); // Tom: commented out
+            // GIL2VFX_draw_line(PAGE2, x, y + 49, x + 7, y + 49, yel); // Tom: commented out
          }
       }
 
@@ -438,14 +438,14 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
          y = save + lp - 1;
          if (yelfield)
          {
-            GIL2VFX_draw_line(PAGE2, x, y + 1, x, y + 6, yel);
-            GIL2VFX_draw_line(PAGE2, x + 63, y + 7, x + 63, y + 12, yel);
+            // GIL2VFX_draw_line(PAGE2, x, y + 1, x, y + 6, yel); // Tom: commented out
+            // GIL2VFX_draw_line(PAGE2, x + 63, y + 7, x + 63, y + 12, yel); // Tom: commented out
          }
 
          if (redfield)
          {
-            GIL2VFX_draw_line(PAGE2, x, y + 7, x, y + 12, color);
-            GIL2VFX_draw_line(PAGE2, x + 63, y + 1, x + 63, y + 6, color);
+            // GIL2VFX_draw_line(PAGE2, x, y + 7, x, y + 12, color); // Tom: commented out
+            // GIL2VFX_draw_line(PAGE2, x + 63, y + 1, x + 63, y + 6, color); // Tom: commented out
          }
       }
    }
@@ -490,6 +490,8 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
    int16_t lside, rside, top, bottom;
    int16_t roof, floor, lwall, rwall;
    (void)argcnt; // Tom: added
+   (void)view;   // Tom: not currently used
+   (void)scrn;   // Tom: not currently used
 
    hide_mouse();
 
@@ -502,10 +504,17 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
    lwall = -100;
    rwall = 276;
 
-   top = GIL2VFX_get_y1(view);
-   bottom = GIL2VFX_get_y2(view);
-   lside = GIL2VFX_get_x1(view);
-   rside = GIL2VFX_get_x2(view);
+   // Tom: added zeroed version
+   top = 0;
+   bottom = 0;
+   lside = 0;
+   rside = 0;
+
+   // Tom: commented out, zeroed version above
+   // top = GIL2VFX_get_y1(view);
+   // bottom = GIL2VFX_get_y2(view);
+   // lside = GIL2VFX_get_x1(view);
+   // rside = GIL2VFX_get_x2(view);
 
    xpos = dotbuffer;
    ypos = dotbuffer + MAXDOTS;
@@ -542,7 +551,9 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
                py = floor;
 
             if (Coord_In_Region(px, py, lside, top, rside, bottom))
-               GIL2VFX_draw_dot(scrn, px, py, color[i]);
+            {
+               // GIL2VFX_draw_dot(scrn, px, py, color[i]); // Tom: commented out
+            }
          }
 
       active = 0;
@@ -570,8 +581,13 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
          if (py > floor)
             py = floor;
 
-         mask = GIL2VFX_read_dot(view, px, py);
-         color[i] = GIL2VFX_read_dot(scrn, px, py);
+         // Tom: added zeroed version
+         mask = 0;
+         color[i] = 0;
+
+         // Tom: commented out, zeroed version above
+         // mask = GIL2VFX_read_dot(view, px, py);
+         // color[i] = GIL2VFX_read_dot(scrn, px, py);
 
          pixcol = colors[colidx[i] >> 8];
 
@@ -580,15 +596,17 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
             active = 1;
 
             if ((mask == XCOLOR) && Coord_In_Region(px, py, lside, top, rside, bottom))
-               GIL2VFX_draw_dot(scrn, px, py, pixcol);
+            {
+               // GIL2VFX_draw_dot(scrn, px, py, pixcol); // Tom: commented out
+            }
          }
          else
             colcnt[i] = 0;
       }
 
-      PollMod();
-      VFX_wait_vblank_leading();
-      VFX_wait_vblank_leading();
+      // PollMod(); // Tom: commented out
+      // VFX_wait_vblank_leading(); // Tom: commented out
+      // VFX_wait_vblank_leading(); // Tom: commented out
    }
 
    show_mouse();
@@ -611,6 +629,10 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
    int16_t *xpos, *ypos, *xvel, *yvel, *color, *colcnt, *colidx, *delay, *dotbuffer;
    int16_t m, v, grav78, t;
    (void)argcnt; // Tom: added
+   (void)px;     // Tom: not currently used
+   (void)py;     // Tom: not currently used
+   (void)view;   // Tom: not currently used
+   (void)scrn;   // Tom: not currently used
 
    hide_mouse();
 
@@ -696,7 +718,7 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
          {
             px = (xpos[i] >> ACCUR) + cx;
             py = (ypos[i] >> ACCUR) + cy;
-            GIL2VFX_draw_dot(scrn, px, py, color[i]);
+            // GIL2VFX_draw_dot(scrn, px, py, color[i]); // Tom: commented out
          }
 
       active = 0;
@@ -738,9 +760,11 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
          if (count < (life >> 2))
             mask = 0;
          else
-            mask = GIL2VFX_read_dot(view, px, py);
+            mask = 0; // Tom: added zeroed version
+         // mask = GIL2VFX_read_dot(view, px, py); // Tom: commented out
 
-         color[i] = GIL2VFX_read_dot(scrn, px, py);
+         color[i] = 0; // Tom: added zeroed version
+         // color[i] = GIL2VFX_read_dot(scrn, px, py); // Tom: commented out
          pixcol = colors[colidx[i] >> 8];
 
          if (pixcol)
@@ -748,14 +772,16 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
             active = 1;
 
             if (mask == XCOLOR && !delay[i])
-               GIL2VFX_draw_dot(scrn, px, py, pixcol);
+            {
+               // GIL2VFX_draw_dot(scrn, px, py, pixcol); // Tom: commented out
+            }
          }
          else
             colcnt[i] = 0;
       }
 
-      PollMod();
-      VFX_wait_vblank_leading();
+      // PollMod(); // Tom: commented out
+      // VFX_wait_vblank_leading(); // Tom: commented out
       count++;
    }
 
@@ -773,7 +799,7 @@ void read_save_directory(void)
    int32_t i;
    TF_class *TF;
 
-   TF = TF_construct(SAVEDIR_FN, TF_READ);
+   TF = TF_construct((int8_t *)SAVEDIR_FN, TF_READ);
 
    if (TF == NULL)
       abend(MSG_COSDR);
@@ -809,7 +835,7 @@ void set_savegame_title(int32_t argcnt, int8_t *string, uint32_t num)
 {
    (void)argcnt; // Tom: added
 
-   strcpy(savegame_dir[num], string);
+   strcpy((char *)savegame_dir[num], (char *)string);
 }
 
 /*********************************************************/
@@ -823,7 +849,7 @@ void write_save_directory(void)
    int32_t i;
    TF_class *TF;
 
-   TF = TF_construct(SAVEDIR_FN, TF_WRITE);
+   TF = TF_construct((int8_t *)SAVEDIR_FN, TF_WRITE);
 
    if (TF == NULL)
       abend(MSG_COSDW);
@@ -845,12 +871,12 @@ void set_save_slotnum(uint32_t slot)
 {
    int8_t num[3];
 
-   sprintf(num, "%02u", slot);
+   sprintf((char *)num, "%02u", slot);
 
-   strncpy(&items_bin[15], num, 2);
-   strncpy(&items_txt[15], num, 2);
-   strncpy(&lvl_bin[15], num, 2);
-   strncpy(&lvl_txt[15], num, 2);
+   strncpy((char *)&items_bin[15], (char *)num, 2);
+   strncpy((char *)&items_txt[15], (char *)num, 2);
+   strncpy((char *)&lvl_bin[15], (char *)num, 2);
+   strncpy((char *)&lvl_txt[15], (char *)num, 2);
 }
 
 /*********************************************************/
@@ -867,11 +893,11 @@ void set_save_lvlnum(uint32_t lvl)
 {
    int8_t num[3];
 
-   sprintf(num, "%02u", lvl);
+   sprintf((char *)num, "%02u", lvl);
 
-   strncpy(&lvl_bin[12], num, 2);
-   strncpy(&lvl_txt[12], num, 2);
-   strncpy(&lvl_tmp[12], num, 2);
+   strncpy((char *)&lvl_bin[12], (char *)num, 2);
+   strncpy((char *)&lvl_tmp[12], (char *)num, 2);
+   strncpy((char *)&lvl_txt[12], (char *)num, 2);
 }
 
 /*********************************************************/
@@ -1201,16 +1227,18 @@ void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int
 
    s = *(stag **)0x4fa;
 
-   strcpy(dir, dirname);
-   strcpy(s->prg, prgname);
+   printf("[TOM] launch: argcnt= dirname= prgname= argn1= argn2=\n"); // Tom: added
+
+   strcpy((char *)dir, (char *)dirname);
+   strcpy(s->prg, (char *)prgname);
 
    if (argn1 != NULL)
-      strcpy(s->arg1, argn1);
+      strcpy(s->arg1, (char *)argn1);
    else
       s->arg1[0] = 0;
 
    if (argn1 != NULL)
-      strcpy(s->arg2, argn2);
+      strcpy(s->arg2, (char *)argn2);
    else
       s->arg2[0] = 0;
 
@@ -1220,7 +1248,7 @@ void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int
    RTR_destroy(RTR, RTR_FREEBASE);
 
    locate(0, 51);
-   chdir(dir);
+   // chdir(dir); // Tom: commented out
 
    exit(127);
 }

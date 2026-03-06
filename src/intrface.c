@@ -31,13 +31,13 @@
 #include <string.h>
 #include <stdint.h> // Tom: added
 
-#include "vfx.h"
-#include "ail32.h"
-#include "gil2vfx.h"
-#include "gil2vfxa.h"
+// #include "vfx.h" // Tom: commented out
+// #include "ail32.h" // Tom: commented out
+// #include "gil2vfx.h" // Tom: commented out
+// #include "gil2vfxa.h" // Tom: commented out
 #include "mouse.h"
 
-extern VFX_DESC *VFX;
+// extern VFX_DESC *VFX; // Tom: commented out
 
 #include "defs.h"
 #include "shared.h"
@@ -53,7 +53,7 @@ extern VFX_DESC *VFX;
 
 int32_t interface_active = 0;
 
-HTIMER htimer;
+// HTIMER htimer; // Tom: commented out
 uint32_t volatile heartbeat;
 uint32_t volatile in_BIOS;
 
@@ -169,6 +169,7 @@ static void timer_callback(void) // Warning: called during IRQ 0
    static uint16_t *head = (uint16_t *)0x41aL;
    static uint16_t *tail = (uint16_t *)0x41cL;
    static uint16_t *buffer = (uint16_t *)0x41eL;
+   (void)scan; // Tom: added, not used?
 
    if (ENABLED <= 0)
       return;
@@ -313,7 +314,8 @@ void init_interface(void) // Tom: TODO
    wait_ptr_state = 0;
 
    // LUM the parameters have changed ("background" added)
-   MOUSE_init(VFX->scrn_width, VFX->scrn_height, 1);
+   // MOUSE_init(VFX->scrn_width, VFX->scrn_height, 1); // Tom: commented out, new version below
+   MOUSE_init(320, 200, 1); // Tom: added
 
    MOUSE_register_mouse_event_callback(mouse_event_handler);
    MOUSE_register_button_event_callback(mouse_button_event_handler);
@@ -323,9 +325,9 @@ void init_interface(void) // Tom: TODO
    btn_left = last_left = 0;
    btn_right = last_right = 0;
 
-   htimer = AIL_register_timer(timer_callback);
-   AIL_set_timer_frequency(htimer, 60);
-   AIL_start_timer(htimer);
+   // htimer = AIL_register_timer(timer_callback); // Tom: commented out
+   // AIL_set_timer_frequency(htimer, 60); // Tom: commented out
+   // AIL_start_timer(htimer); // Tom: commented out
 
    interface_active = 1;
 
@@ -383,7 +385,7 @@ void shutdown_interface(void) // Tom: TODO
       return;
    interface_active = 0;
 
-   AIL_release_timer_handle(htimer);
+   // AIL_release_timer_handle(htimer); // Tom: commented out
 
    hide_mouse();
 
@@ -476,7 +478,7 @@ void set_wait_pointer(int32_t argcnt, uint32_t number, int32_t hot_X, int32_t ho
 {
    (void)argcnt; // Tom: added
 
-   if (number == -1L)
+   if (number == UINT32_MAX)
    {
       wait_ptr_valid = 0;
       return;
@@ -588,11 +590,15 @@ uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd)
 {
    uint32_t stat;
    (void)argcnt; // Tom: added
+   (void)wnd;    // Tom: added
 
-   stat = ((point_X >= GIL2VFX_get_x1(wnd)) &&
-           (point_X <= GIL2VFX_get_x2(wnd)) &&
-           (point_Y >= GIL2VFX_get_y1(wnd)) &&
-           (point_Y <= GIL2VFX_get_y2(wnd)));
+   stat = 0; // Tom: added, stubbed version
+
+   // Tom: commented out, stubbed version above
+   // stat = ((point_X >= GIL2VFX_get_x1(wnd)) &&
+   //         (point_X <= GIL2VFX_get_x2(wnd)) &&
+   //         (point_Y >= GIL2VFX_get_y1(wnd)) &&
+   //         (point_Y <= GIL2VFX_get_y2(wnd)));
 
    return stat;
 }
@@ -608,8 +614,10 @@ uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd)
 void refresh_window(int32_t argcnt, uint32_t src, uint32_t target)
 {
    (void)argcnt; // Tom: added
+   (void)src;    // Tom: added
+   (void)target; // Tom: added
 
-   GIL2VFX_refresh_window(src, target);
+   // GIL2VFX_refresh_window(src, target); // Tom: commented out
 }
 
 void intrface_entry()

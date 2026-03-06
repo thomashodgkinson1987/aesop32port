@@ -156,14 +156,14 @@ int main(int argc, char *argv[]) // Tom: added
 
    HROED = RTR_get_resource_handle(RTR, ROED, DA_TEMPORARY | DA_EVANESCENT);
    RTR_lock(RTR, HROED);
-   // code = ascnum(RTD_lookup(HROED, code_name)); // Tom: commented out, new version below, might be broken
-   code = ascnum(RTD_lookup(HROED, (uint8_t *)code_name)); // Tom: added
+   code = ascnum(RTD_lookup(HROED, code_name)); // Tom: commented out, new version below, might be broken
+   // code = ascnum(RTD_lookup(HROED, (uint8_t *)code_name)); // Tom: added
    RTR_unlock(HROED);
 
-   if (code == (uint32_t)-1L)
+   if (code == UINT32_MAX)
       abend(MSG_SPNF);
 
-   rtn = create_program(1, bootstrap, (uint32_t)code);
+   rtn = create_program(1, bootstrap, code);
    rtn = destroy_object(1, rtn);
 
    for (i = 0; i < RTR->nentries; i++)

@@ -31,10 +31,10 @@
 #include <string.h>
 #include <stdint.h> // Tom: added
 
-#include "vfx.h"
+// #include "vfx.h" // Tom: commented out
 #include "mouse.h"
-#include "gil2vfx.h"
-#include "gil2vfxa.h"
+// #include "gil2vfx.h" // Tom: commented out
+// #include "gil2vfxa.h" // Tom: commented out
 
 #include "defs.h"
 #include "shared.h"
@@ -47,7 +47,7 @@
 #include "rtobject.h"
 #include "graphics.h"
 
-VFX_DESC *VFX;
+// VFX_DESC *VFX; // Tom: commented out
 
 int32_t window_owner[256];
 
@@ -55,7 +55,7 @@ uint32_t lastg_x;
 uint32_t lastg_y;
 uint32_t lastg_p;
 
-TEXTWINDOW tw[NTW];
+// TEXTWINDOW tw[NTW]; // Tom: commented out
 // WINDOW tw_refresh[NTW];
 int32_t tw_refresh[NTW];
 
@@ -155,40 +155,41 @@ void init_graphics(void)
 {
    uint32_t i, j;
 
-   GIL2VFX_init();
+   // GIL2VFX_init(); // Tom: commented out
 
    for (i = 0; i < 256; i++)
       window_owner[i] = -1;
 
-   GIL2VFX_wipe_window(PAGE2, 0);
+   // GIL2VFX_wipe_window(PAGE2, 0); // Tom: commented out
 
    txtbuf[sizeof(txtbuf) - 1] = 0x69; // constants for integrity checking
    txtbuf[sizeof(txtbuf) - 2] = 0x77;
 
-   for (i = 0; i < NTW; i++)
-   {
-      tw[i].font = NULL;
-      tw[i].window = 0;
-      tw[i].htab = tw[i].vtab = 0;
-      tw[i].delay = 0;
-      tw[i].continueFunction = NULL;
-      tw[i].txtbuf = txtbuf;
-      tw[i].txtpnt = txtbuf;
-      tw[i].justify = J_LEFT;
+   // Tom: commented out
+   // for (i = 0; i < NTW; i++)
+   // {
+   //    tw[i].font = NULL;
+   //    tw[i].window = 0;
+   //    tw[i].htab = tw[i].vtab = 0;
+   //    tw[i].delay = 0;
+   //    tw[i].continueFunction = NULL;
+   //    tw[i].txtbuf = txtbuf;
+   //    tw[i].txtpnt = txtbuf;
+   //    tw[i].justify = J_LEFT;
 
-      for (j = 0; j < 256; j++)
-         tw[i].lookaside[j] = j;
+   //    for (j = 0; j < 256; j++)
+   //       tw[i].lookaside[j] = j;
 
-      tw_refresh[i] = -1;
+   //    tw_refresh[i] = -1;
 
-      tw[i].font = (void *)-1U;
-   }
+   //    tw[i].font = (void *)-1U;
+   // }
 }
 
 /*********************************************************/
 void shutdown_graphics(void)
 {
-   GIL2VFX_shutdown_driver();
+   // GIL2VFX_shutdown_driver(); // Tom: commented out
 }
 
 /*********************************************************/
@@ -201,36 +202,38 @@ void shutdown_graphics(void)
 //
 /*********************************************************/
 
-void release_owned_windows(int32_t owner)
+// void release_owned_windows(int32_t owner) // Tom: original
+void release_owned_windows(uint32_t owner) // Tom: new
 {
    int32_t i;
 
-   if (owner == -1)
-   {
-      for (i = PAGE2 + 1; i < 256; i++)
-         if ((window_owner[i] != -1) &&
-             (window_owner[i] < NUM_ENTITIES))
-         {
-            window_owner[i] = -1;
-            GIL2VFX_release_window(i);
-         }
-   }
-   else
-   {
-      for (i = PAGE2 + 1; i < 256; i++)
-         if (window_owner[i] == owner)
-         {
-            window_owner[i] = -1;
-            GIL2VFX_release_window(i);
-         }
-   }
+   // Tom: commented out
+   // if (owner == -1)
+   // {
+   //    for (i = PAGE2 + 1; i < 256; i++)
+   //       if ((window_owner[i] != -1) &&
+   //           (window_owner[i] < NUM_ENTITIES))
+   //       {
+   //          window_owner[i] = -1;
+   //          GIL2VFX_release_window(i);
+   //       }
+   // }
+   // else
+   // {
+   //    for (i = PAGE2 + 1; i < 256; i++)
+   //       if (window_owner[i] == owner)
+   //       {
+   //          window_owner[i] = -1;
+   //          GIL2VFX_release_window(i);
+   //       }
+   // }
 }
 
 /*********************************************************/
 void draw_dot(int32_t argcnt, uint32_t page, uint32_t x, uint32_t y, uint32_t color)
 {
    (void)argcnt; // Tom: added
-   GIL2VFX_draw_dot(lastg_p = page, lastg_x = x, lastg_y = y, color);
+   // GIL2VFX_draw_dot(lastg_p = page, lastg_x = x, lastg_y = y, color); // Tom: commented out
 }
 
 /*********************************************************/
@@ -238,7 +241,7 @@ void draw_line(int32_t argcnt, uint32_t page, uint32_t x1, uint32_t y1, uint32_t
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_draw_line(lastg_p = page, x1, y1, lastg_x = x2, lastg_y = y2, color);
+   // GIL2VFX_draw_line(lastg_p = page, x1, y1, lastg_x = x2, lastg_y = y2, color); // Tom: commented out
 }
 
 /*********************************************************/
@@ -257,7 +260,7 @@ void line_to(int32_t argcnt, uint32_t x, uint32_t y, uint32_t color, ...) // Tom
       cy = va_arg(argptr, uint32_t);
       cc = va_arg(argptr, uint32_t);
 
-      GIL2VFX_draw_line(lastg_p, lastg_x, lastg_y, lx = cx, ly = cy, cc);
+      // GIL2VFX_draw_line(lastg_p, lastg_x, lastg_y, lx = cx, ly = cy, cc); // Tom: commented out
 
       lastg_x = lx;
       lastg_y = ly;
@@ -271,7 +274,7 @@ void draw_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_draw_rect(wndnum, x1, y1, x2, y2, color);
+   // GIL2VFX_draw_rect(wndnum, x1, y1, x2, y2, color); // Tom: commented out
 }
 
 /*********************************************************/
@@ -279,7 +282,7 @@ void fill_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_fill_rect(wndnum, x1, y1, x2, y2, color);
+   // GIL2VFX_fill_rect(wndnum, x1, y1, x2, y2, color); // Tom: commented out
 }
 
 /*********************************************************/
@@ -287,7 +290,7 @@ void hash_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_hash_rect(wndnum, x1, y1, x2, y2, color);
+   // GIL2VFX_hash_rect(wndnum, x1, y1, x2, y2, color); // Tom: commented out
 }
 
 /*********************************************************/
@@ -302,7 +305,8 @@ uint32_t get_bitmap_height(int32_t argcnt, uint32_t table, uint32_t number)
 
    RTR_lock(RTR, handle);
 
-   h = GIL2VFX_get_bitmap_height(RTR_addr(handle), number);
+   h = 0;
+   // h = GIL2VFX_get_bitmap_height(RTR_addr(handle), number); // Tom: commented out, zeroed version above
 
    RTR_unlock(handle);
 
@@ -334,7 +338,7 @@ void draw_bitmap(int32_t argcnt, uint32_t page, uint32_t table, uint32_t number,
 
    RTR_lock(RTR, handle);
 
-   GIL2VFX_draw_bitmap(page, x, y, flip, scale, lookaside, RTR_addr(handle), number);
+   // GIL2VFX_draw_bitmap(page, x, y, flip, scale, lookaside, RTR_addr(handle), number); // Tom: commented out
 
    RTR_unlock(handle);
 }
@@ -368,7 +372,8 @@ uint32_t visible_bitmap_rect(int32_t argcnt, int32_t x, int32_t y, uint32_t flip
 
    RTR_lock(RTR, handle);
 
-   result = GIL2VFX_visible_bitmap_rect(x, y, flip, RTR_addr(handle), number, bounds);
+   result = 0;
+   // result = GIL2VFX_visible_bitmap_rect(x, y, flip, RTR_addr(handle), number, bounds); // Tom: commented out
 
    new_array = add_ptr(RTR_addr(objlist[current_this]), array_offset);
 
@@ -392,7 +397,7 @@ void set_palette(int32_t argcnt, uint32_t region, uint32_t resource)
 {
    uint32_t handle;
    PAL_HDR *PHDR;
-   RGB *array;
+   // RGB *array; // Tom: commented out
    int32_t i, j, k, n, f, m, dm, d;
    uint8_t *fade;
    (void)argcnt; // Tom: added
@@ -416,36 +421,37 @@ void set_palette(int32_t argcnt, uint32_t region, uint32_t resource)
       }
    }
 
-   array = add_ptr(PHDR, PHDR->RGB);
+   // array = add_ptr(PHDR, PHDR->RGB); // Tom: commented out
 
    for (i = 0; i < PHDR->ncolors; i++)
    {
-      VFX_DAC_write(i + first_color[region], &array[i]);
+      // VFX_DAC_write(i + first_color[region], &array[i]); // Tom: commented out
 
-      if (!(i & 0x0f))
-         VFX_wait_vblank_leading();
+      // if (!(i & 0x0f)) // Tom: commented out
+      // VFX_wait_vblank_leading(); // Tom: commented out
    }
 
    switch (region)
    {
    case PAL_FIXED:
 
-      for (n = 0, i = BLU_BEG; n < BLU_NUM; n++, i++)
-         blu_inten[n] = array[i].r + array[i].g + array[i].b;
-      for (n = 0, i = RED_BEG; n < RED_NUM; n++, i++)
-         red_inten[n] = array[i].r + array[i].g + array[i].b;
-      for (n = 0, i = GRN_BEG; n < GRN_NUM; n++, i++)
-         grn_inten[n] = array[i].r + array[i].g + array[i].b;
-      for (n = 0, i = GRY_BEG; n < GRY_NUM; n++, i++)
-         gry_inten[n] = array[i].r + array[i].g + array[i].b;
-      for (n = 0, i = BRN_BEG; n < BRN_NUM; n++, i++)
-         brn_inten[n] = array[i].r + array[i].g + array[i].b;
+      // Tom: commented out
+      // for (n = 0, i = BLU_BEG; n < BLU_NUM; n++, i++)
+      //    blu_inten[n] = array[i].r + array[i].g + array[i].b;
+      // for (n = 0, i = RED_BEG; n < RED_NUM; n++, i++)
+      //    red_inten[n] = array[i].r + array[i].g + array[i].b;
+      // for (n = 0, i = GRN_BEG; n < GRN_NUM; n++, i++)
+      //    grn_inten[n] = array[i].r + array[i].g + array[i].b;
+      // for (n = 0, i = GRY_BEG; n < GRY_NUM; n++, i++)
+      //    gry_inten[n] = array[i].r + array[i].g + array[i].b;
+      // for (n = 0, i = BRN_BEG; n < BRN_NUM; n++, i++)
+      //    brn_inten[n] = array[i].r + array[i].g + array[i].b;
 
       f = first_color[region];
       n = num_colors[region];
       for (i = 0; i < n; i++)
       {
-         j = array[i].r + array[i].g + array[i].b;
+         // j = array[i].r + array[i].g + array[i].b; // Tom: commented out
 
          m = 0;
          dm = 32767;
@@ -512,7 +518,7 @@ void set_palette(int32_t argcnt, uint32_t region, uint32_t resource)
       n = num_colors[region];
       for (i = 0; i < n; i++)
       {
-         j = array[i].r + array[i].g + array[i].b;
+         // j = array[i].r + array[i].g + array[i].b; // Tom: commented out
 
          m = 0;
          dm = 32767;
@@ -596,18 +602,18 @@ void set_palette(int32_t argcnt, uint32_t region, uint32_t resource)
 /*********************************************************/
 void wait_vertical_retrace(void)
 {
-   VFX_wait_vblank_leading();
+   // VFX_wait_vblank_leading(); // Tom: commented out
 }
 
 /*********************************************************/
 uint32_t read_palette(int32_t argcnt, uint32_t regnum)
 {
-   RGB triplet;
+   // RGB triplet; // Tom: commented out
    uint32_t val;
    (void)argcnt; // Tom: added
 
-   VFX_DAC_read(regnum, &triplet);
-   val = ((uint32_t)triplet.r << 12) | ((uint32_t)triplet.g << 6) | ((uint32_t)triplet.b);
+   // VFX_DAC_read(regnum, &triplet); // Tom: commented out
+   // val = ((uint32_t)triplet.r << 12) | ((uint32_t)triplet.g << 6) | ((uint32_t)triplet.b); // Tom: commented out
 
    return val;
 }
@@ -615,14 +621,15 @@ uint32_t read_palette(int32_t argcnt, uint32_t regnum)
 /*********************************************************/
 void write_palette(int32_t argcnt, uint32_t regnum, uint32_t value)
 {
-   RGB triplet;
+   // RGB triplet; // Tom: commented out
    (void)argcnt; // Tom: added
 
-   triplet.r = value >> 12;
-   triplet.g = (value >> 6) & 63L;
-   triplet.b = value & 63L;
+   // Tom: commented out
+   // triplet.r = value >> 12;
+   // triplet.g = (value >> 6) & 63L;
+   // triplet.b = value & 63L;
 
-   VFX_DAC_write(regnum, &triplet);
+   // VFX_DAC_write(regnum, &triplet);
 }
 
 /*********************************************************/
@@ -630,7 +637,7 @@ void pixel_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd, uint32_t in
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_pixel_fade(src_wnd, dest_wnd, intervals);
+   // GIL2VFX_pixel_fade(src_wnd, dest_wnd, intervals); // Tom: commented out
 }
 
 /*********************************************************/
@@ -638,7 +645,7 @@ void color_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd)
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_color_fade(src_wnd, dest_wnd);
+   // GIL2VFX_color_fade(src_wnd, dest_wnd); // Tom: commented out
 }
 
 /*********************************************************/
@@ -646,7 +653,7 @@ void light_fade(int32_t argcnt, uint32_t src_wnd, uint32_t color)
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_light_fade(src_wnd, color);
+   // GIL2VFX_light_fade(src_wnd, color); // Tom: commented out
 }
 
 /*********************************************************/
@@ -655,7 +662,8 @@ uint32_t assign_window(int32_t argcnt, uint32_t owner, uint32_t x1, uint32_t y1,
    int32_t window;
    (void)argcnt; // Tom: added
 
-   window = GIL2VFX_assign_window(x1, y1, x2, y2);
+   window = 0;
+   // window = GIL2VFX_assign_window(x1, y1, x2, y2); // Tom: commented out
 
    window_owner[window] = owner;
 
@@ -668,7 +676,8 @@ uint32_t assign_subwindow(int32_t argcnt, uint32_t owner, uint32_t parent, uint3
    int32_t window;
    (void)argcnt; // Tom: added
 
-   window = GIL2VFX_assign_subwindow(parent, x1, y1, x2, y2);
+   window = 0;
+   // window = GIL2VFX_assign_subwindow(parent, x1, y1, x2, y2); // Tom: commented out
 
    window_owner[window] = owner;
 
@@ -680,7 +689,7 @@ void release_window(int32_t argcnt, uint32_t window)
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_release_window(window);
+   // GIL2VFX_release_window(window); // Tom: commented out
    window_owner[window] = -1;
 }
 
@@ -689,7 +698,8 @@ uint32_t get_x1(int32_t argcnt, uint32_t window)
 {
    (void)argcnt; // Tom: added
 
-   return GIL2VFX_get_x1(window);
+   // return GIL2VFX_get_x1(window); // Tom: commented out
+   return 0;
 }
 
 /*********************************************************/
@@ -697,7 +707,8 @@ uint32_t get_x2(int32_t argcnt, uint32_t window)
 {
    (void)argcnt; // Tom: added
 
-   return GIL2VFX_get_x2(window);
+   // return GIL2VFX_get_x2(window); // Tom: commented out
+   return 0;
 }
 
 /*********************************************************/
@@ -705,7 +716,8 @@ uint32_t get_y1(int32_t argcnt, uint32_t window)
 {
    (void)argcnt; // Tom: added
 
-   return GIL2VFX_get_y1(window);
+   // return GIL2VFX_get_y1(window); // Tom: commented out
+   return 0;
 }
 
 /*********************************************************/
@@ -713,7 +725,8 @@ uint32_t get_y2(int32_t argcnt, uint32_t window)
 {
    (void)argcnt; // Tom: added
 
-   return GIL2VFX_get_y2(window);
+   // return GIL2VFX_get_y2(window); // Tom: commented out
+   return 0;
 }
 
 /*********************************************************/
@@ -721,7 +734,7 @@ void set_x1(int32_t argcnt, uint32_t window, uint32_t x1)
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_set_x1(window, x1);
+   // GIL2VFX_set_x1(window, x1); // Tom: commented out
 }
 
 /*********************************************************/
@@ -729,7 +742,7 @@ void set_x2(int32_t argcnt, uint32_t window, uint32_t x2)
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_set_x2(window, x2);
+   // GIL2VFX_set_x2(window, x2); // Tom: commented out
 }
 
 /*********************************************************/
@@ -737,7 +750,7 @@ void set_y1(int32_t argcnt, uint32_t window, uint32_t y1)
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_set_y1(window, y1);
+   // GIL2VFX_set_y1(window, y1); // Tom: commented out
 }
 
 /*********************************************************/
@@ -745,7 +758,7 @@ void set_y2(int32_t argcnt, uint32_t window, uint32_t y2)
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_set_y2(window, y2);
+   // GIL2VFX_set_y2(window, y2); // Tom: commented out
 }
 
 /*********************************************************/
@@ -753,7 +766,7 @@ void wipe_window(int32_t argcnt, uint32_t window, uint32_t color)
 {
    (void)argcnt; // Tom: added
 
-   GIL2VFX_wipe_window(window, color);
+   // GIL2VFX_wipe_window(window, color); // Tom: commented out
 }
 
 /*********************************************************/
@@ -761,7 +774,7 @@ void text_window(int32_t argcnt, uint32_t wndnum, uint32_t wnd)
 {
    (void)argcnt; // Tom: added
 
-   tw[wndnum].window = wnd;
+   // tw[wndnum].window = wnd; // Tom: commented out
 }
 
 /*********************************************************/
@@ -776,25 +789,26 @@ void text_window(int32_t argcnt, uint32_t wndnum, uint32_t wnd)
 void text_style(int32_t argcnt, uint32_t wndnum, uint32_t font, uint32_t justify)
 {
    uint32_t hfont;
-   FONT *vfont;
+   // FONT *vfont; // Tom: commented out
    (void)argcnt; // Tom: added
 
-   tw[wndnum].justify = justify;
+   // tw[wndnum].justify = justify; // Tom: commented out
 
-   hfont = (uint32_t)tw[wndnum].font;
+   // hfont = (uint32_t)tw[wndnum].font; // Tom: commented out
 
-   if (hfont != -1U)
-   {
-      RTR_unlock(hfont);
-   }
+   // Tom: commented out
+   // if (hfont != UINT32_MAX)
+   // {
+   //    RTR_unlock(hfont);
+   // }
 
-   tw[wndnum].font = (void *)RTR_get_resource_handle(RTR, font, DA_DEFAULT);
+   // tw[wndnum].font = (void *)RTR_get_resource_handle(RTR, font, DA_DEFAULT); // Tom: commented out
 
-   RTR_lock(RTR, (uint32_t)tw[wndnum].font);
+   // RTR_lock(RTR, (uint32_t)tw[wndnum].font); // Tom: commented out
 
-   vfont = (FONT *)RTR_addr((uint32_t)tw[wndnum].font);
+   // vfont = (FONT *)RTR_addr((uint32_t)tw[wndnum].font); // Tom: commented out
 
-   tw[wndnum].lookaside[vfont->font_background] = 255;
+   // tw[wndnum].lookaside[vfont->font_background] = 255; // Tom: commented out
 }
 
 /*********************************************************/
@@ -802,8 +816,9 @@ void text_xy(int32_t argcnt, uint32_t wndnum, uint32_t htab, uint32_t vtab)
 {
    (void)argcnt; // Tom: added
 
-   tw[wndnum].htab = htab;
-   tw[wndnum].vtab = vtab;
+   // Tom: commented out
+   // tw[wndnum].htab = htab;
+   // tw[wndnum].vtab = vtab;
 }
 
 /*********************************************************/
@@ -811,7 +826,8 @@ int32_t get_text_x(int32_t argcnt, uint32_t wndnum)
 {
    (void)argcnt; // Tom: added
 
-   return tw[wndnum].htab;
+   // return tw[wndnum].htab; // Tom: commented out
+   return 0;
 }
 
 /*********************************************************/
@@ -819,7 +835,8 @@ int32_t get_text_y(int32_t argcnt, uint32_t wndnum)
 {
    (void)argcnt; // Tom: added
 
-   return tw[wndnum].vtab;
+   // return tw[wndnum].vtab; // Tom: commented out
+   return 0;
 }
 
 /*********************************************************/
@@ -828,13 +845,14 @@ void home(int32_t argcnt, uint32_t wndnum)
    uint32_t hfont;
    (void)argcnt; // Tom: added
 
-   hfont = (uint32_t)tw[wndnum].font;
-   tw[wndnum].font = RTR_addr(hfont);
+   // Tom: commented out
+   // hfont = (uint32_t)tw[wndnum].font;
+   // tw[wndnum].font = RTR_addr(hfont);
 
-   GIL2VFX_select_text_window(&tw[wndnum]);
-   GIL2VFX_home();
+   // GIL2VFX_select_text_window(&tw[wndnum]);
+   // GIL2VFX_home();
 
-   tw[wndnum].font = (void *)hfont;
+   // tw[wndnum].font = (void *)hfont;
 }
 
 /*********************************************************/
@@ -843,13 +861,14 @@ void text_color(int32_t argcnt, uint32_t wndnum, uint32_t current, uint32_t new)
    uint32_t hfont;
    (void)argcnt; // Tom: added
 
-   hfont = (uint32_t)tw[wndnum].font;
-   tw[wndnum].font = RTR_addr(hfont);
+   // Tom: commented out
+   // hfont = (uint32_t)tw[wndnum].font;
+   // tw[wndnum].font = RTR_addr(hfont);
 
-   GIL2VFX_select_text_window(&tw[wndnum]);
-   GIL2VFX_remap_font_color(current, new);
+   // GIL2VFX_select_text_window(&tw[wndnum]);
+   // GIL2VFX_remap_font_color(current, new);
 
-   tw[wndnum].font = (void *)hfont;
+   // tw[wndnum].font = (void *)hfont;
 }
 
 /*********************************************************/
@@ -857,7 +876,7 @@ void text_refresh_window(int32_t argcnt, uint32_t wndnum, int32_t wnd)
 {
    (void)argcnt; // Tom: added
 
-   tw_refresh[wndnum] = wnd;
+   // tw_refresh[wndnum] = wnd; // Tom: commented out
 }
 
 /*********************************************************/
@@ -876,94 +895,95 @@ void vsprint(int32_t argcnt, uint32_t wndnum, int8_t *format, va_list argptr)
    int8_t buff[32];
    (void)argcnt; // Tom: added
 
-   hfont = (uint32_t)tw[wndnum].font;
-   tw[wndnum].font = RTR_addr(hfont);
+   // Tom: commented out
+   // hfont = (uint32_t)tw[wndnum].font;
+   // tw[wndnum].font = RTR_addr(hfont);
 
-   GIL2VFX_select_text_window(&tw[wndnum]);
+   // GIL2VFX_select_text_window(&tw[wndnum]);
 
-   GIL2VFX_print(BUF, "");
-   txtbuf[0] = 0; // bug in GIL?  GIL_print("") above should do this!
+   // GIL2VFX_print(BUF, "");
+   // txtbuf[0] = 0; // bug in GIL?  GIL_print("") above should do this!
 
-   p = format;
+   // p = format;
 
-   while ((c = *p++) != 0)
-   {
-      if (c != '%')
-      {
-         GIL2VFX_print(APP, "%c", c);
-         continue;
-      }
+   // while ((c = *p++) != 0)
+   // {
+   //    if (c != '%')
+   //    {
+   //       GIL2VFX_print(APP, "%c", c);
+   //       continue;
+   //    }
 
-      switch (c = (*p++))
-      {
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-         GIL2VFX_remap_font_color(15, text_colors[c - '0']);
-         break;
+   //    switch (c = (*p++))
+   //    {
+   //    case '0':
+   //    case '1':
+   //    case '2':
+   //    case '3':
+   //    case '4':
+   //    case '5':
+   //    case '6':
+   //    case '7':
+   //    case '8':
+   //    case '9':
+   //       GIL2VFX_remap_font_color(15, text_colors[c - '0']);
+   //       break;
 
-      case 'd':
-         GIL2VFX_print(APP, "%s", ltoa(va_arg(argptr, int32_t), buff, 10));
-         break;
+   //    case 'd':
+   //       GIL2VFX_print(APP, "%s", ltoa(va_arg(argptr, int32_t), buff, 10));
+   //       break;
 
-      case 'u':
-         GIL2VFX_print(APP, "%s", ultoa(va_arg(argptr, uint32_t), buff, 10));
-         break;
+   //    case 'u':
+   //       GIL2VFX_print(APP, "%s", ultoa(va_arg(argptr, uint32_t), buff, 10));
+   //       break;
 
-      case 'x':
-      case 'X':
-         GIL2VFX_print(APP, "%s", ltoa(va_arg(argptr, int32_t), buff, 16));
-         break;
+   //    case 'x':
+   //    case 'X':
+   //       GIL2VFX_print(APP, "%s", ltoa(va_arg(argptr, int32_t), buff, 16));
+   //       break;
 
-      case 's':
-         str = RTR_get_resource_handle(RTR, va_arg(argptr, uint32_t), DA_DEFAULT);
+   //    case 's':
+   //       str = RTR_get_resource_handle(RTR, va_arg(argptr, uint32_t), DA_DEFAULT);
 
-         RTR_lock(RTR, str);
+   //       RTR_lock(RTR, str);
 
-         s = RTR_addr(str);
+   //       s = RTR_addr(str);
 
-         switch (*(uint16_t *)s)
-         {
-         case ':S':
-            GIL2VFX_print(APP, "%s", &s[2]);
-            break;
+   //       switch (*(uint16_t *)s)
+   //       {
+   //       case ':S':
+   //          GIL2VFX_print(APP, "%s", &s[2]);
+   //          break;
 
-         default:
-            abend(MSG_SRRV);
-         }
+   //       default:
+   //          abend(MSG_SRRV);
+   //       }
 
-         RTR_unlock(str);
+   //       RTR_unlock(str);
 
-         tw[wndnum].font = RTR_addr(hfont);
-         break;
+   //       tw[wndnum].font = RTR_addr(hfont);
+   //       break;
 
-      case 'a':
-         GIL2VFX_print(APP, va_arg(argptr, int8_t *));
-         break;
+   //    case 'a':
+   //       GIL2VFX_print(APP, va_arg(argptr, int8_t *));
+   //       break;
 
-      case 'c':
-         GIL2VFX_print(APP, "%c", (uint8_t)(va_arg(argptr, uint32_t) & 0xffL));
-         break;
-      }
-   }
+   //    case 'c':
+   //       GIL2VFX_print(APP, "%c", (uint8_t)(va_arg(argptr, uint32_t) & 0xffL));
+   //       break;
+   //    }
+   // }
 
-   if ((txtbuf[sizeof(txtbuf) - 1] != 0x69) ||
-       (txtbuf[sizeof(txtbuf) - 2] != 0x77))
-      abend(MSG_TBO);
+   // if ((txtbuf[sizeof(txtbuf) - 1] != 0x69) ||
+   //     (txtbuf[sizeof(txtbuf) - 2] != 0x77))
+   //    abend(MSG_TBO);
 
-   GIL2VFX_print_buffer(0);
+   // GIL2VFX_print_buffer(0);
 
-   tw[wndnum].font = (void *)hfont;
+   // tw[wndnum].font = (void *)hfont;
 
-   if (tw_refresh[wndnum] != -1)
-      refresh_window(0, tw[wndnum].window, tw_refresh[wndnum]);
+   // if (tw_refresh[wndnum] != -1)
+   //    refresh_window(0, tw[wndnum].window, tw_refresh[wndnum]);
 }
 
 /*********************************************************/
@@ -1086,15 +1106,17 @@ uint32_t char_width(int32_t argcnt, uint32_t wndnum, uint32_t ch)
    uint32_t w;
    (void)argcnt; // Tom: added
 
-   hfont = (uint32_t)tw[wndnum].font;
-   tw[wndnum].font = RTR_addr(hfont);
+   // Tom: commented out
+   // hfont = (uint32_t)tw[wndnum].font;
+   // tw[wndnum].font = RTR_addr(hfont);
 
-   GIL2VFX_select_text_window(&tw[wndnum]);
-   w = GIL2VFX_char_width(ch);
+   // GIL2VFX_select_text_window(&tw[wndnum]);
+   // w = GIL2VFX_char_width(ch);
 
-   tw[wndnum].font = (void *)hfont;
+   // tw[wndnum].font = (void *)hfont;
 
-   return w;
+   // return w;
+   return 0;
 }
 
 /*********************************************************/
@@ -1104,11 +1126,12 @@ uint32_t font_height(int32_t argcnt, uint32_t wndnum)
    uint32_t w;
    (void)argcnt; // Tom: added
 
-   hfont = (uint32_t)tw[wndnum].font;
+   // hfont = (uint32_t)tw[wndnum].font;
 
-   w = ((FONT *)(RTR_addr(hfont)))->char_height;
+   // w = ((FONT *)(RTR_addr(hfont)))->char_height;
 
-   return w;
+   // return w;
+   return 0;
 }
 
 /*********************************************************/
@@ -1119,42 +1142,43 @@ void solid_bar_graph(int32_t argcnt, int32_t x0, int32_t y0, int32_t x1, int32_t
    int32_t color;
    (void)argcnt; // Tom: added
 
-   GIL2VFX_draw_line(PAGE2, x0, y0, x0, y1, lb_border);
-   GIL2VFX_draw_line(PAGE2, x0, y1, x1, y1, lb_border);
-   GIL2VFX_draw_line(PAGE2, x1, y1 - 1, x1, y0, tr_border);
-   GIL2VFX_draw_line(PAGE2, x1, y0, x0 + 1, y0, tr_border);
+   // Tom: commented out
+   // GIL2VFX_draw_line(PAGE2, x0, y0, x0, y1, lb_border);
+   // GIL2VFX_draw_line(PAGE2, x0, y1, x1, y1, lb_border);
+   // GIL2VFX_draw_line(PAGE2, x1, y1 - 1, x1, y0, tr_border);
+   // GIL2VFX_draw_line(PAGE2, x1, y0, x0 + 1, y0, tr_border);
 
-   btop = y0 + 1;
-   bbtm = y1 - 1;
+   // btop = y0 + 1;
+   // bbtm = y1 - 1;
 
-   blft = x0 + 1;
-   brgt = x1 - 1;
+   // blft = x0 + 1;
+   // brgt = x1 - 1;
 
-   width = brgt - blft;
+   // width = brgt - blft;
 
-   if (val > max)
-      val = max;
-   else if (val < min)
-      val = min;
+   // if (val > max)
+   //    val = max;
+   // else if (val < min)
+   //    val = min;
 
-   range = max - min;
-   point = val - min;
+   // range = max - min;
+   // point = val - min;
 
-   grayx = blft + (point * width / range);
+   // grayx = blft + (point * width / range);
 
-   if (grayx != brgt)
-      GIL2VFX_fill_rect(PAGE2, grayx, btop, brgt, bbtm, bkgnd);
+   // if (grayx != brgt)
+   //    GIL2VFX_fill_rect(PAGE2, grayx, btop, brgt, bbtm, bkgnd);
 
-   if (val <= crit)
-      color = red;
-   else
-      color = (val * 3 >= max) ? grn : yel;
+   // if (val <= crit)
+   //    color = red;
+   // else
+   //    color = (val * 3 >= max) ? grn : yel;
 
-   if ((val != min) && (grayx == blft))
-      grayx = blft + 1;
+   // if ((val != min) && (grayx == blft))
+   //    grayx = blft + 1;
 
-   if (grayx != blft)
-      GIL2VFX_fill_rect(PAGE2, blft, btop, grayx, bbtm, color);
+   // if (grayx != blft)
+   //    GIL2VFX_fill_rect(PAGE2, blft, btop, grayx, bbtm, color);
 }
 
 void aprint(int32_t argcnt, int8_t *format, ...)

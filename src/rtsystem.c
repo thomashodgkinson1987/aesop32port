@@ -108,7 +108,7 @@ void mem_shutdown(void)
 
 uint32_t mem_avail(void)
 {
-   return 32 * 1024 * 1024; // Tom: hardcoded available memory
+   return 16 * 1024 * 1024; // Tom: hardcoded available memory
 
    // Tom: original code below
 

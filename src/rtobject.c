@@ -132,8 +132,8 @@ int32_t find_free_entry(int32_t min, int32_t end)
 void create_SOP_instance(uint32_t name, int32_t index)
 {
    objlist[index] = create_instance(RTR, name);
-
-   RT_execute(index, MSG_CREATE, -1U);
+printf("here\n");
+   RT_execute(index, MSG_CREATE, UINT32_MAX);
 }
 
 /***************************************************/
@@ -193,7 +193,7 @@ int32_t destroy_object(int32_t argcnt, int32_t index)
    int32_t rtn;
    (void)argcnt; // Tom: added
 
-   rtn = RT_execute(index, MSG_DESTROY, -1U);
+   rtn = RT_execute(index, MSG_DESTROY, UINT32_MAX);
 
    cancel_entity_requests(index);
    release_owned_windows(index);

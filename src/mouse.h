@@ -28,9 +28,10 @@
 
 #include <stdint.h>
 
-#ifndef VFX_H
-#include "vfx.h"
-#endif
+// Tom: commented out
+// #ifndef VFX_H
+// #include "vfx.h"
+// #endif
 
 //
 // MAX_MOUSE_BUFFER_SIZE should be set to the size of the visible area
@@ -50,22 +51,22 @@ extern void MOUSE_force_move(int32_t new_x, int32_t new_y);
 
 extern void MOUSE_register_mouse_event_callback(void (*fn)(int32_t x, int32_t y));
 extern void MOUSE_register_button_event_callback(void (*fn)(int32_t left, int32_t right, int32_t center));
-extern void MOUSE_register_watchdog_callback(int32_t (*fn)(RECT *area));
+// extern void MOUSE_register_watchdog_callback(int32_t (*fn)(RECT *area)); // Tom: commented out
 
 extern void MOUSE_lock(void);
 extern void MOUSE_unlock(void);
 extern void MOUSE_hold(void);
 extern void MOUSE_release(void);
 
-extern int32_t MOUSE_visible_area(RECT *area);
-extern int32_t MOUSE_shape_in_area(RECT *area);
+// extern int32_t MOUSE_visible_area(RECT *area); // Tom: commented out
+// extern int32_t MOUSE_shape_in_area(RECT *area); // Tom: commented out
 
 // extern void __cdecl MOUSE_serve(void); // Tom: commented out, new version below
 extern void MOUSE_serve(void);
 
-extern void MOUSE_window_refresh(WINDOW *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1);
-extern void MOUSE_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1);
+// extern void MOUSE_window_refresh(WINDOW *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1); // Tom: commented out
+// extern void MOUSE_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1); // Tom: commented out
 
-extern void MOUSE_pane_list_refresh(PANE_LIST *list);
+// extern void MOUSE_pane_list_refresh(PANE_LIST *list); // Tom: commented out
 
 #endif

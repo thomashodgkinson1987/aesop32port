@@ -24,99 +24,100 @@
 // ��                                                                        ��
 // ����������������������������������������������������������������������������
 
-#include <conio.h>
+// #include <conio.h> // Tom: commented out
 #include <stdio.h>
-#include <dos.h>
+// #include <dos.h> // Tom: commented out
 #include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <fcntl.h>
-#include <io.h>
+// #include <stdarg.h> // Tom: commented out
+// #include <string.h> // Tom: commented out
+// #include <fcntl.h> // Tom: commented out
+// #include <io.h> // Tom: commented out
+#include <stdint.h> // Tom: added
 
-#include "vfx.h"
-#include "dll.h"
-#include "mouse.h"
-#include "gil2vfx.h"
-#include "gil2vfxa.h"
+// #include "vfx.h" // Tom: commented out
+// #include "dll.h" // Tom: commented out
+// #include "mouse.h" // Tom: commented out
+// #include "gil2vfx.h" // Tom: commented out
+// #include "gil2vfxa.h" // Tom: commented out
 
-#include "defs.h"
-#include "rtsystem.h"
-#include "rtmsg.h"
-#include "rtres.h"
-#include "rtlink.h"
-#include "rt.h"
-#include "rtmsg.h"
-#include "ail32.h"
-#include "modsnd32.h"
+// #include "defs.h" // Tom: commented out
+// #include "rtsystem.h" // Tom: commented out
+// #include "rtmsg.h" // Tom: commented out
+// #include "rtres.h" // Tom: commented out
+// #include "rtlink.h" // Tom: commented out
+// #include "rt.h" // Tom: commented out
+// #include "rtmsg.h" // Tom: commented out
+// #include "ail32.h" // Tom: commented out
+// #include "modsnd32.h" // Tom: commented out
 #include "sound.h"
-#include "graphics.h"
+// #include "graphics.h" // Tom: commented out
 
-#define CFG_FN "SOUND.CFG"
-#define GTL_PFX "STDPATCH."
+// #define CFG_FN "SOUND.CFG" // Tom: commented out
+// #define GTL_PFX "STDPATCH." // Tom: commented out
 
-#define ROLAND_DRV_NAME "A32MT32.DLL"
-#define PCSPKR_DRV_NAME "A32SPKR.DLL"
-#define ADLIB_DRV_NAME "A32ADLIB.DLL"
-#define SBDIG_DRV_NAME "A32SBDG.DLL"
+// #define ROLAND_DRV_NAME "A32MT32.DLL" // Tom: commented out
+// #define PCSPKR_DRV_NAME "A32SPKR.DLL" // Tom: commented out
+// #define ADLIB_DRV_NAME "A32ADLIB.DLL" // Tom: commented out
+// #define SBDIG_DRV_NAME "A32SBDG.DLL" // Tom: commented out
 
-#define EMSHCNT 15       // 15 EMS handles for 64K sound blocks
-#define XMI_BUFSIZE 2048 // Size of reserved XMIDI sequence buffer
+// #define EMSHCNT 15       // 15 EMS handles for 64K sound blocks // Tom: commented out
+// #define XMI_BUFSIZE 2048 // Size of reserved XMIDI sequence buffer // Tom: commented out
 
-#define XMID_LA 0 // LAPC-1/MT-32 in use
-#define XMID_AD 1 // Ad Lib in use
-#define XMID_PC 2 // PC speaker in use
+// #define XMID_LA 0 // LAPC-1/MT-32 in use // Tom: commented out
+// #define XMID_AD 1 // Ad Lib in use // Tom: commented out
+// #define XMID_PC 2 // PC speaker in use // Tom: commented out
 
-UBYTE *PCM_storage; // "Simulated EMS" memory for flat-model SFX
+// uint8_t *PCM_storage; // "Simulated EMS" memory for flat-model SFX // Tom: commented out
 
-WORD XMI_device_type; // _LA, _AD, or _PC
+// int16_t XMI_device_type; // _LA, _AD, or _PC // Tom: commented out
 
-WORD PCM_active = 0;
-WORD XMI_active = 0;
+// int16_t PCM_active = 0; // Tom: commented out
+// int16_t XMI_active = 0; // Tom: commented out
 
-WORD sound_on;
-WORD music_resident;
+// int16_t sound_on; // Tom: commented out
+// int16_t music_resident; // Tom: commented out
 
-drvr_desc XMI_desc;
+// drvr_desc XMI_desc; // Tom: commented out
 
-WORD GTL = -1;
+// int16_t GTL = -1; // Tom: commented out
 
-HDRIVER hXMI, hPCM;
-HSEQUENCE hSEQ;
+// HDRIVER hXMI, hPCM; // Tom: commented out
+// HSEQUENCE hSEQ; // Tom: commented out
 
-BYTE XMI_fn[32];
+// int8_t XMI_fn[32]; // Tom: commented out
 
-void *XMI_driver;
-HRES hXMI_buffer;
-HRES hXMI_state;
-HRES hXMI_cache;
+// void *XMI_driver; // Tom: commented out
+// uint32_t hXMI_buffer; // Tom: commented out
+// uint32_t hXMI_state; // Tom: commented out
+// uint32_t hXMI_cache; // Tom: commented out
 
-UWORD EMS_offset[EMSHCNT]; // First free byte in each 64K block
+// uint16_t EMS_offset[EMSHCNT]; // First free byte in each 64K block // Tom: commented out
 
-WORD SND_blk[64];   // EMS block of sound effect at index #
-UWORD SND_off[64];  // EMS offset of sound effect at index #
-UWORD SND_size[64]; // Size of sound effect at index #
+// int16_t SND_blk[64];   // EMS block of sound effect at index # // Tom: commented out
+// uint16_t SND_off[64];  // EMS offset of sound effect at index # // Tom: commented out
+// uint16_t SND_size[64]; // Size of sound effect at index # // Tom: commented out
 
-struct // SSI MEL sound system config file
-{
-   WORD XMI_IO;
-   WORD XMI_IRQ;
-   WORD XMI_DMA;
-   WORD XMI_DRQ;
-   WORD XMI_CARDTYPE;
+// struct // SSI MEL sound system config file
+// {
+//    int16_t XMI_IO;
+//    int16_t XMI_IRQ;
+//    int16_t XMI_DMA;
+//    int16_t XMI_DRQ;
+//    int16_t XMI_CARDTYPE;
 
-   WORD PCM_IO;
-   WORD PCM_IRQ;
-   WORD PCM_DMA;
-   WORD PCM_DRQ;
-   WORD PCM_CARDTYPE;
+//    int16_t PCM_IO;
+//    int16_t PCM_IRQ;
+//    int16_t PCM_DMA;
+//    int16_t PCM_DRQ;
+//    int16_t PCM_CARDTYPE;
 
-   WORD PCM_ENABLED;
+//    int16_t PCM_ENABLED;
 
-   BYTE XMI_fn[14];
-   BYTE PCM_fn[14];
+//    int8_t XMI_fn[14];
+//    int8_t PCM_fn[14];
 
-   BYTE dummy[32];
-} MEL;
+//    int8_t dummy[32];
+// } MEL;  // Tom: commented out
 
 /****************************************************************************/
 //
@@ -124,23 +125,28 @@ struct // SSI MEL sound system config file
 //
 /****************************************************************************/
 
-static void *load_driver(BYTE *filename)
+static void *load_driver(int8_t *filename)
 {
-   void *DLL, *drvr;
+   // Tom: stubbed
+   (void)filename;
+   printf("[STUB] load_driver: filename=\n"); // Tom: TODO add filename to printout
+   return NULL;
 
-   DLL = FILE_read(filename, NULL);
+   // void *DLL, *drvr;
 
-   if (DLL == NULL)
-      return NULL;
+   // DLL = FILE_read(filename, NULL);
 
-   drvr = DLL_load(DLL, DLLMEM_ALLOC | DLLSRC_MEM, NULL);
+   // if (DLL == NULL)
+   //    return NULL;
 
-   free(DLL);
+   // drvr = DLL_load(DLL, DLLMEM_ALLOC | DLLSRC_MEM, NULL);
 
-   if (drvr == NULL)
-      return NULL;
+   // free(DLL);
 
-   return drvr;
+   // if (drvr == NULL)
+   //    return NULL;
+
+   // return drvr;
 }
 
 /****************************************************************************/
@@ -149,40 +155,47 @@ static void *load_driver(BYTE *filename)
 //
 /****************************************************************************/
 
-static void *load_global_timbre(ULONG bank, ULONG patch)
+static void *load_global_timbre(uint32_t bank, uint32_t patch)
 {
-   UWORD *timb_ptr;
-   static UWORD len;
+   // Tom: stubbed
+   (void)bank;
+   (void)patch;
 
-   static struct // GTL file header entry structure
-   {
-      BYTE patch;
-      BYTE bank;
-      ULONG offset;
-   } GTL_hdr;
+   printf("[STUB] load_global_timbre: bank= patch=\n"); // Tom: TODO add bank and patch
+   return NULL;
 
-   if (GTL == -1)
-      return NULL; // if no GTL, return failure
+   // uint16_t *timb_ptr;
+   // static uint16_t len;
 
-   lseek(GTL, 0, SEEK_SET); // else rewind to GTL header
+   // static struct // GTL file header entry structure
+   // {
+   //    int8_t patch;
+   //    int8_t bank;
+   //    uint32_t offset;
+   // } GTL_hdr;
 
-   do // search file for requested timbre
-   {
-      read(GTL, &GTL_hdr, sizeof(GTL_hdr));
-      if ((int)(GTL_hdr.bank) == -1)
-         return NULL; // timbre not found, return NULL
-   } while ((GTL_hdr.bank != bank) ||
-            (GTL_hdr.patch != patch));
+   // if (GTL == -1)
+   //    return NULL; // if no GTL, return failure
 
-   lseek(GTL, GTL_hdr.offset, SEEK_SET);
-   read(GTL, &len, 2); // timbre found, read its length
+   // lseek(GTL, 0, SEEK_SET); // else rewind to GTL header
 
-   timb_ptr = mem_alloc(len); // allocate memory for timbre ..
-   *timb_ptr = len;
-   // and load it
-   read(GTL, (timb_ptr + 1), len - 2);
+   // do // search file for requested timbre
+   // {
+   //    read(GTL, &GTL_hdr, sizeof(GTL_hdr));
+   //    if ((int)(GTL_hdr.bank) == -1)
+   //       return NULL; // timbre not found, return NULL
+   // } while ((GTL_hdr.bank != bank) ||
+   //          (GTL_hdr.patch != patch));
 
-   return timb_ptr; // else return pointer to timbre
+   // lseek(GTL, GTL_hdr.offset, SEEK_SET);
+   // read(GTL, &len, 2); // timbre found, read its length
+
+   // timb_ptr = mem_alloc(len); // allocate memory for timbre ..
+   // *timb_ptr = len;
+   // // and load it
+   // read(GTL, (timb_ptr + 1), len - 2);
+
+   // return timb_ptr; // else return pointer to timbre
 }
 
 /****************************************************************************/
@@ -203,53 +216,58 @@ static void *load_global_timbre(ULONG bank, ULONG patch)
 //
 /****************************************************************************/
 
-#pragma off(unreferenced)
-void cdecl load_sound_block(LONG argcnt, ULONG first_block, ULONG last_block, ULONG *array)
-#pragma on(unreferenced)
+void load_sound_block(int32_t argcnt, uint32_t first_block, uint32_t last_block, uint32_t *array)
 {
-   ULONG index;
-   ULONG i, cur;
-   ULONG size;
-   ULONG end;
-   ULONG res;
+   // Tom: stubbed
+   (void)argcnt;
+   (void)first_block;
+   (void)last_block;
+   (void)array;
 
-   if (!PCM_active)
-      return;
+   printf("[STUB] load_sound_block: argcnt= first_block= last_block= array=\n"); // Tom: TODO add parameters to print out
 
-   index = (first_block == BLK_COMMON) ? FIRST_COMMON : FIRST_LEVEL;
+   // uint32_t index;
+   // uint32_t i, cur;
+   // uint32_t size;
+   // uint32_t end;
+   // uint32_t res;
+   // (void)argcnt; // Tom: added
 
-   for (i = first_block; i <= last_block; i++)
-      EMS_offset[i] = 0;
+   // if (!PCM_active)
+   //    return;
 
-   for (i = 0; (res = array[i]) != 0L; i++)
-   {
-      size = RTR_seek(RTR, res);
-      if (size == 0L)
-         abend(MSG_SRNF);
+   // index = (first_block == BLK_COMMON) ? FIRST_COMMON : FIRST_LEVEL;
 
-      for (cur = first_block; cur <= last_block; cur++)
-      {
-         end = (ULONG)EMS_offset[cur] + size - 1L;
+   // for (i = first_block; i <= last_block; i++)
+   //    EMS_offset[i] = 0;
 
-         if (end < 65520L)
-            break;
-      }
+   // for (i = 0; (res = array[i]) != 0L; i++)
+   // {
+   //    size = RTR_seek(RTR, res);
+   //    if (size == 0L)
+   //       abend(MSG_SRNF);
 
-      if (cur > last_block)
-         abend(MSG_OOSSE);
+   //    for (cur = first_block; cur <= last_block; cur++)
+   //    {
+   //       end = (uint32_t)EMS_offset[cur] + size - 1L;
 
-      SND_blk[index] = cur; // EMS_handle[cur];
-      SND_off[index] = EMS_offset[cur];
-      SND_size[index] = (UWORD)size;
+   //       if (end < 65520L)
+   //          break;
+   //    }
 
-      RTR_read_resource(RTR,
-                        PCM_storage + EMS_offset[cur] + (cur * 65536),
-                        size);
+   //    if (cur > last_block)
+   //       abend(MSG_OOSSE);
 
-      EMS_offset[cur] += (UWORD)((size + 15L) & ~15L);
+   //    SND_blk[index] = cur; // EMS_handle[cur];
+   //    SND_off[index] = EMS_offset[cur];
+   //    SND_size[index] = (uint16_t)size;
 
-      index++;
-   }
+   //    RTR_read_resource(RTR, PCM_storage + EMS_offset[cur] + (cur * 65536), size);
+
+   //    EMS_offset[cur] += (uint16_t)((size + 15L) & ~15L);
+
+   //    index++;
+   // }
 }
 
 /****************************************************************************/
@@ -258,28 +276,33 @@ void cdecl load_sound_block(LONG argcnt, ULONG first_block, ULONG last_block, UL
 //
 /****************************************************************************/
 
-#pragma off(unreferenced)
-void cdecl sound_effect(LONG argcnt, ULONG index)
-#pragma on(unreferenced)
+void sound_effect(int32_t argcnt, uint32_t index)
 {
-   WORD ch;
+   // Tom: stubbed
+   (void)argcnt;
+   (void)index;
 
-   if (!PCM_active)
-      return;
-   if (!sound_on)
-      return;
+   printf("[STUB] sound_effect: argcnt= index=\n"); // Tom: TODO add prints
 
-   for (ch = 0; ch < PHYSICAL; ch++)
-      if (!PhysicalState(ch))
-         break;
+   // int16_t ch;
+   // (void)argcnt; // Tom: added
 
-   if (ch == PHYSICAL)
-      return;
+   // if (!PCM_active)
+   //    return;
+   // if (!sound_on)
+   //    return;
 
-   SetChannel(SND_blk[index], SND_off[index], SND_size[index], ch, 1);
+   // for (ch = 0; ch < PHYSICAL; ch++)
+   //    if (!PhysicalState(ch))
+   //       break;
 
-   SetActive(ch, ch);
-   ChannelOn(ch);
+   // if (ch == PHYSICAL)
+   //    return;
+
+   // SetChannel(SND_blk[index], SND_off[index], SND_size[index], ch, 1);
+
+   // SetActive(ch, ch);
+   // ChannelOn(ch);
 }
 
 /****************************************************************************/
@@ -288,65 +311,72 @@ void cdecl sound_effect(LONG argcnt, ULONG index)
 //
 /****************************************************************************/
 
-#pragma off(unreferenced)
-void cdecl play_sequence(LONG argcnt, ULONG LA_version, ULONG AD_version, ULONG PC_version)
-#pragma on(unreferenced)
+void play_sequence(int32_t argcnt, uint32_t LA_version, uint32_t AD_version, uint32_t PC_version)
 {
-   ULONG XMI_res;
-   ULONG size;
-   ULONG bank, patch, treq;
-   void *timb;
+   // Tom: stubbed
+   (void)argcnt;
+   (void)LA_version;
+   (void)AD_version;
+   (void)PC_version;
 
-   if (!XMI_active)
-      return;
-   if (!music_resident)
-      return;
-   if (!sound_on)
-      return;
+   printf("[STUB] play_sequence: argcnt= LA_version= AD_version= PC_version=\n"); // Tom: TODO add prints
 
-   switch (XMI_device_type)
-   {
-   case XMID_LA:
-      XMI_res = LA_version;
-      break;
-   case XMID_PC:
-      XMI_res = PC_version;
-      break;
-   default:
-      XMI_res = AD_version;
-      break;
-   }
+   // uint32_t XMI_res;
+   // uint32_t size;
+   // uint32_t bank, patch, treq;
+   // void *timb;
+   // (void)argcnt; // Tom: added
 
-   if (hSEQ != -1)
-   {
-      if (AIL_sequence_status(hXMI, hSEQ) != SEQ_DONE)
-         AIL_stop_sequence(hXMI, hSEQ);
+   // if (!XMI_active)
+   //    return;
+   // if (!music_resident)
+   //    return;
+   // if (!sound_on)
+   //    return;
 
-      AIL_release_sequence_handle(hXMI, hSEQ);
-   }
+   // switch (XMI_device_type)
+   // {
+   // case XMID_LA:
+   //    XMI_res = LA_version;
+   //    break;
+   // case XMID_PC:
+   //    XMI_res = PC_version;
+   //    break;
+   // default:
+   //    XMI_res = AD_version;
+   //    break;
+   // }
 
-   size = RTR_seek(RTR, XMI_res);
-   RTR_read_resource(RTR, RTR_addr(hXMI_buffer), size);
+   // if (hSEQ != -1)
+   // {
+   //    if (AIL_sequence_status(hXMI, hSEQ) != SEQ_DONE)
+   //       AIL_stop_sequence(hXMI, hSEQ);
 
-   hSEQ = AIL_register_sequence(hXMI, RTR_addr(hXMI_buffer), 0,
-                                RTR_addr(hXMI_state), NULL);
+   //    AIL_release_sequence_handle(hXMI, hSEQ);
+   // }
 
-   while ((treq = AIL_timbre_request(hXMI, hSEQ)) != -1U)
-   {
-      bank = treq / 256;
-      patch = treq % 256;
+   // size = RTR_seek(RTR, XMI_res);
+   // RTR_read_resource(RTR, RTR_addr(hXMI_buffer), size);
 
-      timb = load_global_timbre(bank, patch);
-      if (timb != NULL)
-      {
-         AIL_install_timbre(hXMI, bank, patch, timb);
-         mem_free(timb);
-      }
-      else
-         abend(MSG_TPNF, bank, patch);
-   }
+   // hSEQ = AIL_register_sequence(hXMI, RTR_addr(hXMI_buffer), 0,
+   //                              RTR_addr(hXMI_state), NULL);
 
-   AIL_start_sequence(hXMI, hSEQ);
+   // while ((treq = AIL_timbre_request(hXMI, hSEQ)) != -1U)
+   // {
+   //    bank = treq / 256;
+   //    patch = treq % 256;
+
+   //    timb = load_global_timbre(bank, patch);
+   //    if (timb != NULL)
+   //    {
+   //       AIL_install_timbre(hXMI, bank, patch, timb);
+   //       mem_free(timb);
+   //    }
+   //    else
+   //       abend(MSG_TPNF, bank, patch);
+   // }
+
+   // AIL_start_sequence(hXMI, hSEQ);
 }
 
 /****************************************************************************/
@@ -355,43 +385,44 @@ void cdecl play_sequence(LONG argcnt, ULONG LA_version, ULONG AD_version, ULONG 
 //
 /****************************************************************************/
 
-void cdecl load_music(void)
+void load_music(void)
 {
-   LONG tsize;
+   // Tom: stubbed
 
-   if ((!XMI_active) || (!sound_on) || (music_resident))
-      return;
+   printf("[STUB] load_music\n");
 
-   XMI_driver = load_driver(XMI_fn);
+   // int32_t tsize;
 
-   hXMI = AIL_register_driver(XMI_driver);
+   // if ((!XMI_active) || (!sound_on) || (music_resident))
+   //    return;
 
-   if (!AIL_detect_device(hXMI, XMI_desc.default_IO, XMI_desc.default_IRQ,
-                          XMI_desc.default_DMA, XMI_desc.default_DRQ))
-   {
-      mem_free(XMI_driver);
-      return;
-   }
+   // XMI_driver = load_driver(XMI_fn);
 
-   AIL_init_driver(hXMI, XMI_desc.default_IO, XMI_desc.default_IRQ,
-                   XMI_desc.default_DMA, XMI_desc.default_DRQ);
+   // hXMI = AIL_register_driver(XMI_driver);
 
-   hXMI_state = RTR_alloc(RTR, AIL_state_table_size(hXMI),
-                          DA_FIXED | DA_PRECIOUS);
+   // if (!AIL_detect_device(hXMI, XMI_desc.default_IO, XMI_desc.default_IRQ, XMI_desc.default_DMA, XMI_desc.default_DRQ))
+   // {
+   //    mem_free(XMI_driver);
+   //    return;
+   // }
 
-   hXMI_buffer = RTR_alloc(RTR, XMI_BUFSIZE, DA_FIXED | DA_PRECIOUS);
+   // AIL_init_driver(hXMI, XMI_desc.default_IO, XMI_desc.default_IRQ, XMI_desc.default_DMA, XMI_desc.default_DRQ);
 
-   hXMI_cache = -1;
-   tsize = AIL_default_timbre_cache_size(hXMI);
+   // hXMI_state = RTR_alloc(RTR, AIL_state_table_size(hXMI), DA_FIXED | DA_PRECIOUS);
 
-   if (tsize)
-   {
-      hXMI_cache = RTR_alloc(RTR, tsize, DA_FIXED | DA_PRECIOUS);
-      AIL_define_timbre_cache(hXMI, RTR_addr(hXMI_cache), (UWORD)tsize);
-   }
+   // hXMI_buffer = RTR_alloc(RTR, XMI_BUFSIZE, DA_FIXED | DA_PRECIOUS);
 
-   hSEQ = -1;
-   music_resident = 1;
+   // hXMI_cache = -1;
+   // tsize = AIL_default_timbre_cache_size(hXMI);
+
+   // if (tsize)
+   // {
+   //    hXMI_cache = RTR_alloc(RTR, tsize, DA_FIXED | DA_PRECIOUS);
+   //    AIL_define_timbre_cache(hXMI, RTR_addr(hXMI_cache), (uint16_t)tsize);
+   // }
+
+   // hSEQ = -1;
+   // music_resident = 1;
 }
 
 /****************************************************************************/
@@ -400,39 +431,43 @@ void cdecl load_music(void)
 //
 /****************************************************************************/
 
-void cdecl unload_music(void)
+void unload_music(void)
 {
-   LONG i;
+   // Tom: stubbed
 
-   if ((!XMI_active) || (!music_resident))
-      return;
+   printf("[STUB] unload_music\n");
 
-   if (hSEQ != -1)
-   {
-      if (AIL_sequence_status(hXMI, hSEQ) != SEQ_DONE)
-      {
-         AIL_stop_sequence(hXMI, hSEQ);
+   // int32_t i;
 
-         if (XMI_device_type == XMID_LA)
-            for (i = 0; i < 60; i++)
-               VFX_wait_vblank_leading();
-      }
+   // if ((!XMI_active) || (!music_resident))
+   //    return;
 
-      AIL_release_sequence_handle(hXMI, hSEQ);
-      hSEQ = -1;
-   }
+   // if (hSEQ != -1)
+   // {
+   //    if (AIL_sequence_status(hXMI, hSEQ) != SEQ_DONE)
+   //    {
+   //       AIL_stop_sequence(hXMI, hSEQ);
 
-   AIL_shutdown_driver(hXMI, MSG_AIL);
-   AIL_release_driver_handle(hXMI);
+   //       if (XMI_device_type == XMID_LA)
+   //          for (i = 0; i < 60; i++)
+   //             VFX_wait_vblank_leading();
+   //    }
 
-   if (hXMI_cache != -1U)
-      RTR_free(RTR, hXMI_cache);
+   //    AIL_release_sequence_handle(hXMI, hSEQ);
+   //    hSEQ = -1;
+   // }
 
-   RTR_free(RTR, hXMI_buffer);
-   RTR_free(RTR, hXMI_state);
-   mem_free(XMI_driver);
+   // AIL_shutdown_driver(hXMI, MSG_AIL);
+   // AIL_release_driver_handle(hXMI);
 
-   music_resident = 0;
+   // if (hXMI_cache != -1U)
+   //    RTR_free(RTR, hXMI_cache);
+
+   // RTR_free(RTR, hXMI_buffer);
+   // RTR_free(RTR, hXMI_state);
+   // mem_free(XMI_driver);
+
+   // music_resident = 0;
 }
 
 /****************************************************************************/
@@ -441,37 +476,43 @@ void cdecl unload_music(void)
 //
 /****************************************************************************/
 
-#pragma off(unreferenced)
-void cdecl set_sound_status(LONG argcnt, ULONG status)
-#pragma on(unreferenced)
+void set_sound_status(int32_t argcnt, uint32_t status)
 {
-   if (!(PCM_active || XMI_active))
-      return;
+   // Tom: stubbed
+   (void)argcnt;
+   (void)status;
 
-   if (status)
-      sound_on = 1;
-   else
-   {
-      if ((XMI_active) && (music_resident))
-         if (hSEQ != -1)
-         {
-            if (AIL_sequence_status(hXMI, hSEQ) != SEQ_DONE)
-               AIL_stop_sequence(hXMI, hSEQ);
+   printf("[STUB] set_sound_status: argcnt= status=\n"); // Tom: TODO add prints
 
-            AIL_release_sequence_handle(hXMI, hSEQ);
-            hSEQ = -1;
-         }
+   // (void)argcnt; // Tom: added
 
-      if (PCM_active)
-      {
-         InActive(0);
-         InActive(1);
-         InActive(2);
-         InActive(3);
-      }
+   // if (!(PCM_active || XMI_active))
+   //    return;
 
-      sound_on = 0;
-   }
+   // if (status)
+   //    sound_on = 1;
+   // else
+   // {
+   //    if ((XMI_active) && (music_resident))
+   //       if (hSEQ != -1)
+   //       {
+   //          if (AIL_sequence_status(hXMI, hSEQ) != SEQ_DONE)
+   //             AIL_stop_sequence(hXMI, hSEQ);
+
+   //          AIL_release_sequence_handle(hXMI, hSEQ);
+   //          hSEQ = -1;
+   //       }
+
+   //    if (PCM_active)
+   //    {
+   //       InActive(0);
+   //       InActive(1);
+   //       InActive(2);
+   //       InActive(3);
+   //    }
+
+   //    sound_on = 0;
+   // }
 }
 
 /****************************************************************************/
@@ -482,32 +523,36 @@ void cdecl set_sound_status(LONG argcnt, ULONG status)
 //
 /****************************************************************************/
 
-void cdecl shutdown_sound(void)
+void shutdown_sound(void)
 {
-   if (!(PCM_active || XMI_active))
-      return;
+   // Tom: stubbed
 
-   if (PCM_active)
-   {
-      StopMod();
+   printf("[STUB] shutdown_sound\n");
 
-      AIL_shutdown_driver(hPCM, MSG_AIL);
-      AIL_release_driver_handle(hPCM);
-   }
+   // if (!(PCM_active || XMI_active))
+   //    return;
 
-   if (XMI_active)
-   {
-      if (music_resident)
-      {
-         AIL_shutdown_driver(hXMI, MSG_AIL);
-         AIL_release_driver_handle(hXMI);
-      }
+   // if (PCM_active)
+   // {
+   //    StopMod();
 
-      if (GTL != -1)
-         close(GTL);
-   }
+   //    AIL_shutdown_driver(hPCM, MSG_AIL);
+   //    AIL_release_driver_handle(hPCM);
+   // }
 
-   PCM_active = XMI_active = music_resident = 0;
+   // if (XMI_active)
+   // {
+   //    if (music_resident)
+   //    {
+   //       AIL_shutdown_driver(hXMI, MSG_AIL);
+   //       AIL_release_driver_handle(hXMI);
+   //    }
+
+   //    if (GTL != -1)
+   //       close(GTL);
+   // }
+
+   // PCM_active = XMI_active = music_resident = 0;
 }
 
 /****************************************************************************/
@@ -523,155 +568,160 @@ void cdecl shutdown_sound(void)
 //
 /****************************************************************************/
 
-#pragma off(unreferenced)
-void cdecl init_sound(LONG argcnt, ULONG errprompt)
-#pragma on(unreferenced)
+void init_sound(int32_t argcnt, uint32_t errprompt)
 {
-   WORD PCM_requested, XMI_requested;
-   BYTE PCM_fn[32];
-   BYTE GTL_fn[32];
-   WORD PCM_IO;
-   WORD PCM_IRQ;
-   WORD XMI_IO;
-   BYTE *PCMdrvr;
-   drvr_desc *desc;
-   void *sndwrk;
+   // Tom: stubbed
+   (void)argcnt;
+   (void)errprompt;
 
-   if (PCM_active || XMI_active)
-      return;
+   printf("[STUB] init_sound: argcnt= errprompt=\n"); // Tom: TODO add prints
+   // sound_on = 1; // Tom: TODO see if this needs setting
 
-   PCM_requested = 0;
-   XMI_requested = 0;
-   music_resident = 0;
-   GTL = -1;
+   // int16_t PCM_requested, XMI_requested;
+   // int8_t PCM_fn[32];
+   // int8_t GTL_fn[32];
+   // int16_t PCM_IO;
+   // int16_t PCM_IRQ;
+   // int16_t XMI_IO;
+   // int8_t *PCMdrvr;
+   // drvr_desc *desc;
+   // void *sndwrk;
+   // (void)argcnt; // Tom: added
 
-   if (FILE_read(CFG_FN, &MEL) == NULL)
-   {
-      if (errprompt)
-      {
-         printf(MSG_NO_CFG);
-         printf(MSG_SND_F);
-         getch();
-      }
-      return;
-   }
+   // if (PCM_active || XMI_active)
+   //    return;
 
-   MEL.XMI_fn[13] = 0;
-   MEL.PCM_fn[13] = 0;
+   // PCM_requested = 0;
+   // XMI_requested = 0;
+   // music_resident = 0;
+   // GTL = -1;
 
-   if (!strnicmp(MEL.PCM_fn, "SB", 2))
-      strcpy(MEL.PCM_fn, SBDIG_DRV_NAME);
+   // if (FILE_read(CFG_FN, &MEL) == NULL)
+   // {
+   //    if (errprompt)
+   //    {
+   //       printf(MSG_NO_CFG);
+   //       printf(MSG_SND_F);
+   //       getch();
+   //    }
+   //    return;
+   // }
 
-   if (!stricmp(MEL.XMI_fn, "ADLIB.ADV"))
-      strcpy(MEL.XMI_fn, ADLIB_DRV_NAME);
-   else if (!stricmp(MEL.XMI_fn, "MT32MPU.ADV"))
-      strcpy(MEL.XMI_fn, ROLAND_DRV_NAME);
-   else
-      strcpy(MEL.XMI_fn, PCSPKR_DRV_NAME);
+   // MEL.XMI_fn[13] = 0;
+   // MEL.PCM_fn[13] = 0;
 
-   if (MEL.XMI_CARDTYPE != 113)
-   {
-      strcpy(XMI_fn, MEL.XMI_fn);
-      XMI_IO = MEL.XMI_IO;
-      XMI_requested = 1;
-   }
+   // if (!strnicmp(MEL.PCM_fn, "SB", 2))
+   //    strcpy(MEL.PCM_fn, SBDIG_DRV_NAME);
 
-   if ((MEL.PCM_CARDTYPE != 113) && (MEL.PCM_ENABLED))
-   {
-      strcpy(PCM_fn, MEL.PCM_fn);
-      PCM_IO = MEL.PCM_IO;
-      PCM_IRQ = MEL.PCM_IRQ;
-      PCM_requested = 1;
-   }
+   // if (!stricmp(MEL.XMI_fn, "ADLIB.ADV"))
+   //    strcpy(MEL.XMI_fn, ADLIB_DRV_NAME);
+   // else if (!stricmp(MEL.XMI_fn, "MT32MPU.ADV"))
+   //    strcpy(MEL.XMI_fn, ROLAND_DRV_NAME);
+   // else
+   //    strcpy(MEL.XMI_fn, PCSPKR_DRV_NAME);
 
-   if (PCM_requested)
-   {
-      if ((PCM_storage = malloc(15 * 65536)) == NULL) // memory avail?
-      {
-         if (errprompt)
-            printf(MSG_NO_EMS);
-      }
-      else
-      {
-         if ((PCMdrvr = load_driver(PCM_fn)) != NULL)
-         {
-            hPCM = AIL_register_driver(PCMdrvr);
-            desc = AIL_describe_driver(hPCM);
+   // if (MEL.XMI_CARDTYPE != 113)
+   // {
+   //    strcpy(XMI_fn, MEL.XMI_fn);
+   //    XMI_IO = MEL.XMI_IO;
+   //    XMI_requested = 1;
+   // }
 
-            desc->default_IO = PCM_IO;
-            desc->default_IRQ = PCM_IRQ;
+   // if ((MEL.PCM_CARDTYPE != 113) && (MEL.PCM_ENABLED))
+   // {
+   //    strcpy(PCM_fn, MEL.PCM_fn);
+   //    PCM_IO = MEL.PCM_IO;
+   //    PCM_IRQ = MEL.PCM_IRQ;
+   //    PCM_requested = 1;
+   // }
 
-            if (AIL_detect_device(hPCM, desc->default_IO, desc->default_IRQ,
-                                  desc->default_DMA, desc->default_DRQ))
-            {
-               AIL_init_driver(hPCM, desc->default_IO, desc->default_IRQ,
-                               desc->default_DMA, desc->default_DRQ);
+   // if (PCM_requested)
+   // {
+   //    if ((PCM_storage = malloc(15 * 65536)) == NULL) // memory avail?
+   //    {
+   //       if (errprompt)
+   //          printf(MSG_NO_EMS);
+   //    }
+   //    else
+   //    {
+   //       if ((PCMdrvr = load_driver(PCM_fn)) != NULL)
+   //       {
+   //          hPCM = AIL_register_driver(PCMdrvr);
+   //          desc = AIL_describe_driver(hPCM);
 
-               sndwrk = RTR_addr(RTR_alloc(RTR, ModSizeNeeded(),
-                                           DA_FIXED | DA_PRECIOUS));
+   //          desc->default_IO = PCM_IO;
+   //          desc->default_IRQ = PCM_IRQ;
 
-               if (StartMod(hPCM, sndwrk, (char *)PCM_storage) != -1)
-               {
-                  InActive(0);
-                  InActive(1);
-                  InActive(2);
-                  InActive(3);
+   //          if (AIL_detect_device(hPCM, desc->default_IO, desc->default_IRQ,
+   //                                desc->default_DMA, desc->default_DRQ))
+   //          {
+   //             AIL_init_driver(hPCM, desc->default_IO, desc->default_IRQ,
+   //                             desc->default_DMA, desc->default_DRQ);
 
-                  PCM_active = 1;
-               }
-            }
-         }
-      }
-   }
+   //             sndwrk = RTR_addr(RTR_alloc(RTR, ModSizeNeeded(),
+   //                                         DA_FIXED | DA_PRECIOUS));
 
-   if (XMI_requested)
-   {
-      if (!stricmp(XMI_fn, ROLAND_DRV_NAME))
-         XMI_device_type = XMID_LA;
-      else if (!stricmp(XMI_fn, PCSPKR_DRV_NAME))
-         XMI_device_type = XMID_PC;
-      else
-         XMI_device_type = XMID_AD;
+   //             if (StartMod(hPCM, sndwrk, (char *)PCM_storage) != -1)
+   //             {
+   //                InActive(0);
+   //                InActive(1);
+   //                InActive(2);
+   //                InActive(3);
 
-      if ((XMI_driver = load_driver(XMI_fn)) != NULL)
-      {
-         hXMI = AIL_register_driver(XMI_driver);
-         desc = AIL_describe_driver(hXMI);
+   //                PCM_active = 1;
+   //             }
+   //          }
+   //       }
+   //    }
+   // }
 
-         desc->default_IO = XMI_IO;
+   // if (XMI_requested)
+   // {
+   //    if (!stricmp(XMI_fn, ROLAND_DRV_NAME))
+   //       XMI_device_type = XMID_LA;
+   //    else if (!stricmp(XMI_fn, PCSPKR_DRV_NAME))
+   //       XMI_device_type = XMID_PC;
+   //    else
+   //       XMI_device_type = XMID_AD;
 
-         if (AIL_detect_device(hXMI, desc->default_IO, desc->default_IRQ,
-                               desc->default_DMA, desc->default_DRQ))
-         {
-            XMI_desc = *desc;
+   //    if ((XMI_driver = load_driver(XMI_fn)) != NULL)
+   //    {
+   //       hXMI = AIL_register_driver(XMI_driver);
+   //       desc = AIL_describe_driver(hXMI);
 
-            strcpy(GTL_fn, GTL_PFX);
-            strcat(GTL_fn, XMI_desc.data_suffix);
+   //       desc->default_IO = XMI_IO;
 
-            GTL = open(GTL_fn, O_RDONLY | O_BINARY);
+   //       if (AIL_detect_device(hXMI, desc->default_IO, desc->default_IRQ, desc->default_DMA, desc->default_DRQ))
+   //       {
+   //          XMI_desc = *desc;
 
-            XMI_active = 1;
-         }
+   //          strcpy(GTL_fn, GTL_PFX);
+   //          strcat(GTL_fn, XMI_desc.data_suffix);
 
-         AIL_release_driver_handle(hXMI);
-      }
+   //          GTL = open(GTL_fn, O_RDONLY | O_BINARY);
 
-      mem_free(XMI_driver);
-   }
+   //          XMI_active = 1;
+   //       }
 
-   sound_on = 1;
+   //       AIL_release_driver_handle(hXMI);
+   //    }
 
-   if (errprompt && XMI_requested && (!XMI_active))
-   {
-      printf(MSG_NO_XMI);
-      printf(MSG_SND_F);
-      getch();
-   }
+   //    mem_free(XMI_driver);
+   // }
 
-   if (errprompt && PCM_requested && (!PCM_active))
-   {
-      printf(MSG_NO_PCM);
-      printf(MSG_SND_F);
-      getch();
-   }
+   // sound_on = 1;
+
+   // if (errprompt && XMI_requested && (!XMI_active))
+   // {
+   //    printf(MSG_NO_XMI);
+   //    printf(MSG_SND_F);
+   //    getch();
+   // }
+
+   // if (errprompt && PCM_requested && (!PCM_active))
+   // {
+   //    printf(MSG_NO_PCM);
+   //    printf(MSG_SND_F);
+   //    getch();
+   // }
 }

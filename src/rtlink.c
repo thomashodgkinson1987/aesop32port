@@ -129,8 +129,7 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
    thdr.MV_list = sizeof(THDR);
    thdr.SD_list = sizeof(THDR);
-   // thdr.max_msg = -1U; // Tom: commented out, new version below
-   thdr.max_msg = UINT16_MAX; // Tom: added
+   thdr.max_msg = UINT16_MAX;
    thdr.nprgs = 0;
    thdr.isize = sizeof(IHDR);
    thdr.use_cnt = 0;
@@ -145,8 +144,7 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
    depth = 0;
    class = object;
 
-   // while (class != -1L) // Tom: commented out, new version below
-   while (class != UINT32_MAX) // Tom: added
+   while (class != UINT32_MAX)
    {
       code[depth] = RTR_get_resource_handle(RTR, class, DA_DEFAULT);
 

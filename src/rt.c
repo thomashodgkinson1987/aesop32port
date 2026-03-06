@@ -48,7 +48,8 @@ static uint32_t *objlist_ptr;
 /* Dictionary Functions */
 
 // uint8_t *RTD_lookup(uint32_t HRES, uint8_t *Key) // Tom: see header
-int8_t *RTD_lookup(uint32_t HRES, uint8_t *Key) // Tom: modified
+// int8_t *RTD_lookup(uint32_t HRES, uint8_t *Key) // Tom: modified
+int8_t *RTD_lookup(uint32_t HRES, void *Key) // Tom: modifiednew
 {
     uint8_t *dict = (uint8_t *)RTR_addr(HRES);
     uint32_t hash_size = *(uint16_t *)dict;
@@ -111,7 +112,8 @@ int8_t *RTD_lookup(uint32_t HRES, uint8_t *Key) // Tom: modified
 }
 
 // uint32_t RTD_first(void *dictionary) // Tom: original
-uint32_t *RTD_first(void *dictionary) // Tom: new
+// uint32_t *RTD_first(void *dictionary) // Tom: new
+void *RTD_first(void *dictionary) // Tom: newnew
 {
     uint8_t *esi = (uint8_t *)dictionary;
     uint32_t hash_size = *(uint16_t *)esi;
@@ -122,16 +124,19 @@ uint32_t *RTD_first(void *dictionary) // Tom: new
         return 0;
 
     // return (uint32_t)(esi - (uint8_t *)dictionary); // Tom: see below - header matching
-    return (uint32_t *)(esi - (uint8_t *)dictionary); // Tom: new
+    // return (uint32_t *)(esi - (uint8_t *)dictionary); // Tom: new
+    return (void *)(esi - (uint8_t *)dictionary); // Tom: newnew
 }
 
 // uint32_t RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def) // Tom: original
-uint32_t *RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def) // Tom: new
+// uint32_t *RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def) // Tom: new
+void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def) // Tom: newnew
 {
     if (cur == 0)
         return 0;
 
-    uint8_t *esi = (uint8_t *)base + cur;
+    // uint8_t *esi = (uint8_t *)base + cur;
+    uint8_t *esi = (uint8_t *)((uintptr_t)base + (uintptr_t)cur);
     uint32_t tag_len = *(uint16_t *)esi;
     esi += 2;
 
@@ -152,7 +157,8 @@ uint32_t *RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def) // T
     esi += def_len;
 
     // return (uint32_t)(esi - (uint8_t *)base); // Tom: original
-    return (uint32_t *)(esi - (uint8_t *)base); // Tom: new
+    // return (uint32_t *)(esi - (uint8_t *)base); // Tom: new
+    return (void *)(esi - (uint8_t *)base); // Tom: new
 }
 
 /* Subsystem Control Functions */
