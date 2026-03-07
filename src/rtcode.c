@@ -107,6 +107,7 @@ void load_string(int32_t argcnt, int8_t *array, uint32_t string)
    int8_t *new_array;
    uint32_t array_offset;
    (void)argcnt; // Tom: added
+   printf("[rtcode] load_string\n");
 
    // array_offset = (uint32_t)array - (uint32_t)RTR_addr(objlist[current_this]); // Tom: commented out, new version below
    array_offset = (uint32_t)((uintptr_t)array - (uintptr_t)RTR_addr(objlist[current_this]));
@@ -159,6 +160,8 @@ void load_resource(int32_t argcnt, int8_t *array, uint32_t resource)
    int8_t *new_array;
    (void)argcnt; // Tom: added
 
+   printf("[rtcode] load_resource\n");
+
    // array_offset = FP_OFF(array) - FP_OFF(RTR_addr(objlist[current_this])); // Tom: commented out, new version below
    // array_offset = (uint32_t)ptr_dif(array, RTR_addr(objlist[current_this])); // Tom: possible new version using existing ptr_dif macro
    array_offset = (uint32_t)((uintptr_t)array - (uintptr_t)RTR_addr(objlist[current_this])); // Tom: added, new version
@@ -177,24 +180,28 @@ void load_resource(int32_t argcnt, int8_t *array, uint32_t resource)
 void copy_string(int32_t argcnt, int8_t *src, int8_t *dest)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] copy_string\n");
    strcpy((char *)dest, (char *)src);
 }
 
 void string_force_lower(int32_t argcnt, int8_t *dest)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] string_force_lower\n");
    strlwr((char *)dest);
 }
 
 void string_force_upper(int32_t argcnt, int8_t *dest)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] string_force_upper\n");
    strupr((char *)dest);
 }
 
 uint32_t string_len(int32_t argcnt, int8_t *string)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] string_len\n");
    // return strlen((char *)string); // Tom: commented out, new version below
    return (uint32_t)strlen((char *)string);
 }
@@ -202,6 +209,7 @@ uint32_t string_len(int32_t argcnt, int8_t *string)
 uint32_t string_compare(int32_t argcnt, int8_t *str1, int8_t *str2)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] string_compare\n");
    // Tom: stricmp can return -1 on Windows
    return stricmp((char *)str1, (char *)str2);
 }
@@ -213,8 +221,9 @@ uint32_t string_compare(int32_t argcnt, int8_t *str1, int8_t *str2)
 int32_t strval(int32_t argcnt, int8_t *string)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] strval\n");
    if (string == NULL)
-      return -1L;
+      return -1;
 
    return ascnum(string);
 }
@@ -230,6 +239,7 @@ int32_t envval(int32_t argcnt, int8_t *name)
 {
    int8_t *env;
    (void)argcnt; // Tom: added
+   printf("[rtcode] envval\n");
 
    if ((env = (int8_t *)getenv((char *)name)) == NULL)
       return -1L;
@@ -243,6 +253,7 @@ int32_t envval(int32_t argcnt, int8_t *name)
 
 void beep(void)
 {
+   printf("[rtcode] beep\n");
    // Tom: commented out
 
    // uint16_t dx, ax;
@@ -263,12 +274,13 @@ void beep(void)
 void pokemem(int32_t argcnt, int32_t *addr, int32_t data)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] pokemem\n");
    if (addr == NULL)
    {
-      printf("[TOM] pokemem: attempt to write %d to NULL address, ignoring\n", data);
+      printf("[rtcode] pokemem: attempt to write %d to NULL address, ignoring\n", data);
       return;
    }
-   printf("[TOM] pokemem: addr=%p data=%d\n", (void *)addr, data);
+   printf("[rtcode] pokemem: addr=%p data=%d\n", (void *)addr, data);
    *addr = data;
 }
 
@@ -276,21 +288,22 @@ int32_t peekmem(int32_t argcnt, int32_t *addr)
 {
    static int first_call = 1;
    (void)argcnt; // Tom: added
+   printf("[rtcode] peekmem\n");
 
    if (first_call)
    {
       first_call = 0;
-      printf("[TOM] peekmem: first call (addr=%p), returning 'CINE' magic cookie\n", (void *)addr);
+      printf("[rtcode] peekmem: first call (addr=%p), returning 'CINE' magic cookie\n", (void *)addr);
       return 0x43494e45; // "CINE"
    }
 
    if (addr == NULL)
    {
-      printf("[TOM] peekmem: attempt to read from NULL address, returning 0\n");
+      printf("[rtcode] peekmem: attempt to read from NULL address, returning 0\n");
       return 0;
    }
 
-   printf("[TOM] peekmem: addr=%p\n", (void *)addr);
+   printf("[rtcode] peekmem: addr=%p\n", (void *)addr);
    return *addr;
 }
 
@@ -299,6 +312,7 @@ uint32_t rnd(int32_t argcnt, uint32_t low, uint32_t high)
    // LUM add type int
    static int init = 0;
    (void)argcnt; // Tom: added
+   printf("[rtcode] rnd\n");
 
    if (!init)
    {
@@ -314,6 +328,7 @@ uint32_t dice(int32_t argcnt, uint32_t ndice, uint32_t nsides, uint32_t bonus)
 {
    uint32_t n, total;
    (void)argcnt; // Tom: added
+   printf("[rtcode] dice\n");
 
    total = bonus;
 
@@ -325,6 +340,7 @@ uint32_t dice(int32_t argcnt, uint32_t ndice, uint32_t nsides, uint32_t bonus)
 
 uint32_t inkey(void)
 {
+   printf("[rtcode] inkey\n");
    // Tom: TODO: replace with SDL_PollEvent keyboard state checking later
    return 0; // Pretend no keys are ever pressed for now
 
@@ -334,24 +350,28 @@ uint32_t inkey(void)
 uint32_t absv(int32_t argcnt, int32_t val)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] absv\n");
    return (val < 0L) ? -val : val;
 }
 
 int32_t minv(int32_t argcnt, int32_t val1, int32_t val2)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] minv\n");
    return min(val1, val2);
 }
 
 int32_t maxv(int32_t argcnt, int32_t val1, int32_t val2)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] maxv\n");
    return max(val1, val2);
 }
 
 void diagnose(int32_t argcnt, uint32_t dtype, uint32_t parm)
 {
    (void)argcnt; // Tom: added
+   printf("[rtcode] diagnose\n");
    switch (dtype)
    {
    case 1:
@@ -366,5 +386,6 @@ void diagnose(int32_t argcnt, uint32_t dtype, uint32_t parm)
 
 uint32_t heapfree(void)
 {
+   printf("[rtcode] heapfree\n");
    return RTR->free;
 }

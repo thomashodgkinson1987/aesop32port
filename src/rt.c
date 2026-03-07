@@ -45,6 +45,96 @@ static uint8_t *stk_base;
 static VALUE *stk_off;
 static uint32_t *objlist_ptr;
 
+const char *case_list_strings[] = {
+    "do_BRT",
+    "do_BRF",
+    "do_BRA",
+    "do_CASE",
+    "do_PUSH",
+    "do_DUP",
+    "do_NOT",
+    "do_SETB",
+    "do_NEG",
+    "do_ADD",
+    "do_SUB",
+    "do_MUL",
+    "do_DIV",
+    "do_MOD",
+    "do_EXP",
+    "do_BAND",
+    "do_BOR",
+    "do_XOR",
+    "do_BNOT",
+    "do_SHL",
+    "do_SHR",
+    "do_LT",
+    "do_LE",
+    "do_EQ",
+    "do_NE",
+    "do_GE",
+    "do_GT",
+    "do_INC",
+    "do_DEC",
+    "do_SHTC",
+    "do_INTC",
+    "do_LNGC",
+    "do_RCRS",
+    "do_CALL",
+    "do_SEND",
+    "do_PASS",
+    "do_JSR",
+    "do_RTS",
+    "do_AIM",
+    "do_AIS",
+    "do_LTBA",
+    "do_LTWA",
+    "do_LTDA",
+    "do_LETA",
+    "do_LAB",
+    "do_LAW",
+    "do_LAD",
+    "do_SAB",
+    "do_SAW",
+    "do_SAD",
+    "do_LABA",
+    "do_LAWA",
+    "do_LADA",
+    "do_SABA",
+    "do_SAWA",
+    "do_SADA",
+    "do_LEAA",
+    "do_LSB",
+    "do_LSW",
+    "do_LSD",
+    "do_SSB",
+    "do_SSW",
+    "do_SSD",
+    "do_LSBA",
+    "do_LSWA",
+    "do_LSDA",
+    "do_SSBA",
+    "do_SSWA",
+    "do_SSDA",
+    "do_LESA",
+    "do_LXB",
+    "do_LXW",
+    "do_LXD",
+    "do_SXB",
+    "do_SXW",
+    "do_SXD",
+    "do_LXBA",
+    "do_LXWA",
+    "do_LXDA",
+    "do_SXBA",
+    "do_SXWA",
+    "do_SXDA",
+    "do_LEXA",
+    "do_SXAS",
+    "do_LECA",
+    "do_SOLE",
+    "do_END",
+    "do_BRK"};
+
 /* Dictionary Functions */
 
 // uint8_t *RTD_lookup(uint32_t HRES, uint8_t *Key) // Tom: see header
@@ -57,6 +147,8 @@ int8_t *RTD_lookup(uint32_t HRES, void *Key) // Tom: modifiednew
     uint8_t *esi = Key;
     uint32_t sum = 0;
     uint32_t tag_len = 1;
+
+    printf("[rt] RTD_lookup\n");
 
     /* Hash Function */
     while (1)
@@ -117,6 +209,9 @@ void *RTD_first(void *dictionary) // Tom: newnew
 {
     uint8_t *esi = (uint8_t *)dictionary;
     uint32_t hash_size = *(uint16_t *)esi;
+
+    printf("[rt] RTD_first\n");
+
     esi += 2;
     esi += hash_size * 4;
 
@@ -138,6 +233,9 @@ void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def) // Tom: new
     // uint8_t *esi = (uint8_t *)base + cur;
     uint8_t *esi = (uint8_t *)((uintptr_t)base + (uintptr_t)cur);
     uint32_t tag_len = *(uint16_t *)esi;
+
+    printf("[rt] RTD_iterate\n");
+
     esi += 2;
 
     if (tag_len == 0)
@@ -165,6 +263,8 @@ void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def) // Tom: new
 
 void RT_init(RTR_class *RTR, uint32_t StkSize, uint32_t *ObjectList)
 {
+    printf("[rt] RT_init\n");
+
     objlist_ptr = ObjectList;
     RTR_ptr = RTR;
     stk_base = (uint8_t *)mem_alloc(StkSize);
@@ -173,11 +273,13 @@ void RT_init(RTR_class *RTR, uint32_t StkSize, uint32_t *ObjectList)
 
 void RT_shutdown(void)
 {
+    printf("[rt] RT_shutdown\n");
     mem_free(stk_base);
 }
 
 void RT_arguments(void *Base, uint32_t Bytes)
 {
+    printf("[rt] RT_arguments\n");
     stk_off = (VALUE *)((uint8_t *)stk_off - Bytes);
     memcpy(stk_off, Base, Bytes);
 }
@@ -197,6 +299,8 @@ int32_t RT_execute(uint32_t Index, uint32_t Message, uint32_t Vector)
     uint8_t *ds32;
     uint8_t *esi;
     VALUE *edi;
+
+    printf("[rt] RT_execute\n");
 
     /* Call Stack Simulation */
     struct CallFrame
@@ -301,6 +405,9 @@ __handle_msg:
     while (1)
     {
         uint8_t opcode = *esi++;
+
+        printf("[RT_execute] opcode=%u %s\n", opcode, case_list_strings[opcode]);
+
         switch (opcode)
         {
         case 0: // do_BRT

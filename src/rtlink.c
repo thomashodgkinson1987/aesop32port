@@ -53,7 +53,7 @@ typedef struct
 //
 /***************************************************/
 
-int sort_by_msg(const void *a, const void *b)
+int sort_by_msg(const void *a, const void *b) // Tom: TODO change int to int32_t?
 {
    uint16_t na, nb;
 
@@ -68,7 +68,7 @@ int sort_by_msg(const void *a, const void *b)
       return -1;
 }
 
-int sort_by_class(const void *a, const void *b)
+int sort_by_class(const void *a, const void *b) // Tom: TODO change int to int32_t?
 {
    uint16_t na, nb;
 
