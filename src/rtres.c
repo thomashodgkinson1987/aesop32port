@@ -988,7 +988,7 @@ uint32_t RTR_get_resource_handle(RTR_class *RTR, uint32_t resource, uint32_t att
    ND_entry *dir;
    void *dest, *src;
    uint32_t nbytes;
-   printf("[TOM] RTR_get_resource_handle: resource=%u attrib=%u\n", resource, attrib);
+   // printf("[TOM] RTR_get_resource_handle: resource=%u attrib=%u\n", resource, attrib);
    dir = RTR_search_name_dir(RTR, resource);
 
    if (dir == NULL)
