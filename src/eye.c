@@ -1200,6 +1200,57 @@ void create_initial_binary_files(void)
    }
 }
 
+void mono_on(void)
+{
+   printf("[STUB] mono_on\n");
+}
+
+void mono_off(void)
+{
+   printf("[STUB] mono_off\n");
+}
+
+void *open_transfer_file(int32_t argcnt, int8_t *filename)
+{
+   (void)argcnt;
+   (void)filename;
+   printf("[STUB] open_transfer_file\n");
+   return NULL;
+}
+
+void close_transfer_file(void)
+{
+   printf("[STUB] close_transfer_file\n");
+}
+
+int32_t player_attrib(int32_t argcnt, uint32_t plrnum, uint32_t offset, uint32_t size)
+{
+   (void)argcnt;
+   (void)plrnum;
+   (void)offset;
+   (void)size;
+   printf("[STUB] player_attrib\n");
+   return 0;
+}
+
+int32_t item_attrib(int32_t argcnt, uint32_t plrnum, uint32_t invslot, uint32_t attrib)
+{
+   (void)argcnt;
+   (void)plrnum;
+   (void)invslot;
+   (void)attrib;
+   printf("[STUB] item_attrib\n");
+   return 0;
+}
+
+int32_t arrow_count(int32_t argcnt, uint32_t plrnum)
+{
+   (void)argcnt;
+   (void)plrnum;
+   printf("[STUB] arrow_count\n");
+   return 0;
+}
+
 /*********************************************************/
 //
 // Launch a secondary process

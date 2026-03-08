@@ -1,34 +1,33 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  RTRES.C                                                               ��
-// ��                                                                        ��
-// ��  AESOP runtime memory, resource, and data structure management         ��
-// ��                                                                        ��
-// ��  Version: 1.00 of 6-May-92 -- Initial version                          ��
-// ��                                                                        ��
-// ��  Project: Extensible State-Object Processor (AESOP/16)                 ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with Borland C++ v3.0                             ��
-// ��  Large memory model (16-bit DOS)                                       ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  10926 Jollyville #308                                                 ��
-// ��  Austin, TX 78759                                                      ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  RTRES.C                                                               ##
+// ##                                                                        ##
+// ##  AESOP runtime memory, resource, and data structure management         ##
+// ##                                                                        ##
+// ##  Version: 1.00 of 6-May-92 -- Initial version                          ##
+// ##                                                                        ##
+// ##  Project: Extensible State-Object Processor (AESOP/16)                 ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with Borland C++ v3.0                             ##
+// ##  Large memory model (16-bit DOS)                                       ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  10926 Jollyville #308                                                 ##
+// ##  Austin, TX 78759                                                      ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
 #include <stdio.h>
 #include <fcntl.h>
-// #include <io.h> // Tom: commented out
-// #include <dos.h> // Tom: commented out
 #include <string.h>
-#include <unistd.h> // Tom: added
+#include <unistd.h>
+#include <stdint.h>
 
 #include "defs.h"
 #include "rtsystem.h"
@@ -37,7 +36,6 @@
 #include "rt.h"
 #include "intrface.h"
 #include "graphics.h" // for dprint()
-// #include "modsnd32.h" // Tom: commented out
 
 #define FAST_LOCK 1 // user field = resource name if 0, file offset if 1
 
@@ -196,7 +194,7 @@ static uint32_t RTR_discard(RTR_class *RTR, uint32_t index, uint32_t do_move)
    uint32_t nbytes, size;
    HD_entry *sel;
 
-   printf("[rtres] RTR_discard\n");
+   printf("[rtres] RTR_discard(RTR_class *RTR, uint32_t index, uint32_t do_move) - RTR=%u index=%u do_move=%u\n", RTR, index, do_move);
 
    sel = &RTR->dir[index];
 
@@ -245,7 +243,7 @@ static uint32_t RTR_LRU(RTR_class *RTR)
    uint32_t i, oldest;
    uint32_t n, age;
 
-   printf("[rtres] RTR_LRU\n");
+   printf("[rtres] RTR_LRU(RTR_class *RTR) - RTR=%u\n", RTR);
 
    n = RTR->nentries;
    oldest = age = -1;
@@ -299,7 +297,7 @@ static uint32_t RTR_make_room(RTR_class *RTR, uint32_t goal)
    uint32_t next_seg, size_deleted, nbytes;
    void *dest, *src, *end;
 
-   printf("[rtres] RTR_make_room\n");
+   printf("[rtres] RTR_make_room(RTR_class *RTR, uint32_t goal) - RTR=%u goal=%u\n", RTR, goal);
 
    //
    // 1) If /goal/ bytes already free, return immediately
@@ -422,7 +420,7 @@ static uint32_t RTR_assign_space(RTR_class *RTR, uint32_t bytes, uint32_t attrib
 {
    HD_entry *sel;
 
-   printf("[rtres] RTR_assign_space\n");
+   printf("[rtres] RTR_assign_space(RTR_class *RTR, uint32_t bytes, uint32_t attrib, uint32_t entry) - RTR=%u bytes=%u attrib=%u entry=%u\n", RTR, bytes, attrib, entry);
 
    sel = (HD_entry *)entry;
 
@@ -460,7 +458,7 @@ static void RTR_init_dir(RTR_class *RTR, uint32_t first)
 {
    uint32_t i, j;
 
-   printf("[rtres] RTR_init_dir\n");
+   printf("[rtres] RTR_init_dir(RTR_class *RTR, uint32_t first) - RTR=%u first=%u\n", RTR, first);
 
    for (i = 0, j = first; i < DIR_BLK; i++, j++)
    {
@@ -486,7 +484,7 @@ static uint32_t RTR_new_entry(RTR_class *RTR)
    uint32_t nbytes;
    void *dest, *src;
 
-   printf("[rtres] RTR_new_entry\n");
+   printf("[rtres] RTR_new_entry(RTR_class *RTR) - RTR=%u\n", RTR);
 
    n = RTR->nentries;
 
@@ -547,7 +545,7 @@ uint32_t RTR_seek(RTR_class *RTR, uint32_t rnum)
    uint32_t dirblk, next;
    uint16_t dirent;
 
-   printf("[rtres] RTR_seek\n");
+   printf("[rtres] RTR_seek(RTR_class *RTR, uint32_t rnum) - RTR=%u rnum=%u\n", RTR, rnum);
 
    dirblk = (rnum / (uint32_t)OD_SIZE);
    dirent = (uint16_t)(rnum % (uint32_t)OD_SIZE);
@@ -591,7 +589,7 @@ static void RTR_read(RTR_class *RTR, uint32_t entry)
    HD_entry *sel;
    uint32_t len;
 
-   printf("[rtres] RTR_read\n");
+   printf("[rtres] RTR_read(RTR_class *RTR, uint32_t entry) - RTR=%u entry=%u\n", RTR, entry);
 
    sel = (HD_entry *)entry;
 
@@ -630,7 +628,7 @@ RTR_class *RTR_construct(void *base, uint32_t size, uint32_t nnames, int8_t *fil
    RTR_class *RTR;
    void *beg, *end;
 
-   printf("[rtres] RTR_construct\n");
+   printf("[rtres] RTR_construct(void *base, uint32_t size, uint32_t nnames, int8_t *filename) - base=%u size=%u nnames=%u filename=%s\n", base, size, nnames, filename);
 
    RTR = mem_alloc(sizeof(RTR_class));
 
@@ -676,7 +674,7 @@ RTR_class *RTR_construct(void *base, uint32_t size, uint32_t nnames, int8_t *fil
 
 void RTR_destroy(RTR_class *RTR, uint32_t flags)
 {
-   printf("[rtres] RTR_destroy\n");
+   printf("[rtres] RTR_destroy(RTR_class *RTR, uint32_t flags) - RTR=%u flags=%u\n", RTR, flags);
 
    close(RTR->file);
 
@@ -708,7 +706,7 @@ uint32_t RTR_alloc(RTR_class *RTR, uint32_t bytes, uint32_t attrib)
    uint32_t entry;
    HD_entry *sel;
 
-   printf("[rtres] RTR_alloc\n");
+   printf("[rtres] RTR_alloc(RTR_class *RTR, uint32_t bytes, uint32_t attrib) - RTR=%u bytes=%u attrib=%u\n", RTR, bytes, attrib);
 
    entry = RTR_new_entry(RTR);
    if (entry == UINT32_MAX)
@@ -742,7 +740,7 @@ void RTR_free(RTR_class *RTR, uint32_t entry)
    HD_entry *sel;
    ND_entry *dir;
 
-   printf("[rtres] RTR_free\n");
+   printf("[rtres] RTR_free(RTR_class *RTR, uint32_t entry) - RTR=%u entry=%u\n", RTR, entry);
 
    if (entry == UINT32_MAX)
       return;
@@ -809,7 +807,7 @@ void RTR_free(RTR_class *RTR, uint32_t entry)
 
 uint32_t RTR_force_discard(RTR_class *RTR, uint32_t goal)
 {
-   printf("[rtres] RTR_force_discard\n");
+   printf("[rtres] RTR_force_discard(RTR_class *RTR, uint32_t goal) - RTR=%u goal=%u\n", RTR, goal);
 
    return RTR_make_room(RTR, goal);
 }
@@ -832,7 +830,7 @@ void RTR_lock(RTR_class *RTR, uint32_t entry)
    uint32_t i, n;
    HD_entry *sel;
 
-   printf("[rtres] RTR_lock\n");
+   printf("[rtres] RTR_lock(RTR_class *RTR, uint32_t entry) - RTR=%u entry=%u\n", RTR, entry);
 
    // PollMod(); // Tom: commented out
 
@@ -884,7 +882,7 @@ void RTR_unlock(uint32_t entry)
 {
    HD_entry *sel;
 
-   printf("[rtres] RTR_unlock\n");
+   printf("[rtres] RTR_unlock(uint32_t entry) - entry=%u\n", entry);
 
    sel = (HD_entry *)entry;
 
@@ -903,7 +901,7 @@ uint32_t RTR_size(uint32_t entry)
 {
    HD_entry *sel;
 
-   printf("[rtres] RTR_size\n");
+   printf("[rtres] RTR_size(uint32_t entry) - entry=%u\n", entry);
 
    sel = (HD_entry *)entry;
 
@@ -950,7 +948,7 @@ void *RTR_addr(uint32_t entry)
 
 void RTR_read_resource(RTR_class *RTR, void *dest, uint32_t len)
 {
-   printf("[rtres] RTR_read_resource\n");
+   printf("[rtres] RTR_read_resource(RTR_class *RTR, void *dest, uint32_t len) - RTR=%u dest=%u len=%u\n", RTR, dest, len);
 
    while (len > (uint32_t)DOS_BUFFSIZE)
    {
@@ -981,7 +979,7 @@ uint32_t RTR_load_resource(RTR_class *RTR, uint32_t resource, uint32_t attrib)
    HD_entry *sel;
    uint32_t entry;
 
-   printf("[rtres] RTR_load_resource\n");
+   printf("[rtres] RTR_load_resource(RTR_class *RTR, uint32_t resource, uint32_t attrib) - RTR=%u resource=%u attrib=%u\n", RTR, resource, attrib);
 
    if (!RTR_seek(RTR, resource))
       return UINT32_MAX;
@@ -1025,7 +1023,7 @@ uint32_t RTR_get_resource_handle(RTR_class *RTR, uint32_t resource, uint32_t att
    void *dest, *src;
    uint32_t nbytes;
 
-   printf("[rtres] RTR_get_resource_handle\n");
+   printf("[rtres] RTR_get_resource_handle(RTR_class *RTR, uint32_t resource, uint32_t attrib) - RTR=%u resource=%u attrib=%u\n", RTR, resource, attrib);
 
    dir = RTR_search_name_dir(RTR, resource);
 
@@ -1088,7 +1086,7 @@ void RTR_free_resource(RTR_class *RTR, uint32_t resource)
 {
    ND_entry *dir;
 
-   printf("[rtres] RTR_free_resource\n");
+   printf("[rtres] RTR_free_resource(RTR_class *RTR, uint32_t resource) - RTR=%u resource=%u\n", RTR, resource);
 
    dir = RTR_search_name_dir(RTR, resource);
 
@@ -1113,7 +1111,7 @@ ND_entry *RTR_search_name_dir(RTR_class *RTR, uint32_t resource)
    ND_entry *dir, *try;
    uint32_t entry;
 
-   printf("[rtres] RTR_search_name_dir\n");
+   printf("[rtres] RTR_search_name_dir(RTR_class *RTR, uint32_t resource) - RTR=%u resource=%u\n", RTR, resource);
 
    dir = RTR_addr(RTR->name_dir);
 

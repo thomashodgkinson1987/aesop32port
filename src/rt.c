@@ -148,7 +148,7 @@ int8_t *RTD_lookup(uint32_t HRES, void *Key) // Tom: modifiednew
     uint32_t sum = 0;
     uint32_t tag_len = 1;
 
-    printf("[rt] RTD_lookup\n");
+    printf("[rt] RTD_lookup(uint32_t HRES, void *Key) - HRES=%u Key=%u\n", HRES, Key);
 
     /* Hash Function */
     while (1)
@@ -210,7 +210,7 @@ void *RTD_first(void *dictionary) // Tom: newnew
     uint8_t *esi = (uint8_t *)dictionary;
     uint32_t hash_size = *(uint16_t *)esi;
 
-    printf("[rt] RTD_first\n");
+    printf("[rt] RTD_first(void *dictionary) - dictionary=%u\n", dictionary);
 
     esi += 2;
     esi += hash_size * 4;
@@ -234,7 +234,7 @@ void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def) // Tom: new
     uint8_t *esi = (uint8_t *)((uintptr_t)base + (uintptr_t)cur);
     uint32_t tag_len = *(uint16_t *)esi;
 
-    printf("[rt] RTD_iterate\n");
+    printf("[rt] RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def) - base=%u cur=%u tag=%u def=%u\n", base, cur, tag, def);
 
     esi += 2;
 
@@ -263,7 +263,7 @@ void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def) // Tom: new
 
 void RT_init(RTR_class *RTR, uint32_t StkSize, uint32_t *ObjectList)
 {
-    printf("[rt] RT_init\n");
+    printf("[rt] RT_init(RTR_class *RTR, uint32_t StkSize, uint32_t *ObjectList) - RTR=%u StkSize=%u ObjectList=%u\n", RTR, StkSize, ObjectList);
 
     objlist_ptr = ObjectList;
     RTR_ptr = RTR;
@@ -273,13 +273,15 @@ void RT_init(RTR_class *RTR, uint32_t StkSize, uint32_t *ObjectList)
 
 void RT_shutdown(void)
 {
-    printf("[rt] RT_shutdown\n");
+    printf("[rt] RT_shutdown(void)\n");
+
     mem_free(stk_base);
 }
 
 void RT_arguments(void *Base, uint32_t Bytes)
 {
-    printf("[rt] RT_arguments\n");
+    printf("[rt] RT_arguments(void *Base, uint32_t Bytes) - Base=%u Bytes=%u\n", Base, Bytes);
+
     stk_off = (VALUE *)((uint8_t *)stk_off - Bytes);
     memcpy(stk_off, Base, Bytes);
 }
@@ -300,7 +302,7 @@ int32_t RT_execute(uint32_t Index, uint32_t Message, uint32_t Vector)
     uint8_t *esi;
     VALUE *edi;
 
-    printf("[rt] RT_execute\n");
+    printf("[rt] RT_execute(uint32_t Index, uint32_t Message, uint32_t Vector) - Index=%u Message=%u Vector=%u\n", Index, Message, Vector);
 
     /* Call Stack Simulation */
     struct CallFrame
@@ -390,7 +392,9 @@ __handle_msg:
     edi = stk_off;
     fptr = edi;
 
-    *(uint16_t *)((uint8_t *)edi - 2) = (uint16_t)Index;
+    // Use a full VALUE slot for Index to maintain 32-bit alignment
+    edi = (VALUE *)((uint8_t *)edi - sizeof(VALUE));
+    edi->val = (int32_t)Index;
 
     uint16_t auto_size = ((MHDR *)esi)->auto_size;
     edi = (VALUE *)((uint8_t *)edi - auto_size - sizeof(VALUE));
@@ -581,7 +585,7 @@ __handle_msg:
         }
         case 33: // do_CALL
         {
-            current_this = *(uint16_t *)((uint8_t *)fptr - 2);
+            current_this = (uint32_t)((VALUE *)((uint8_t *)fptr - sizeof(VALUE)))->val;
             uint8_t arg_count = *esi++;
             uint32_t args[256];
             for (int i = 0; i < arg_count; i++)
@@ -593,6 +597,7 @@ __handle_msg:
             int32_t ret_val = 0;
 
             /* Unrolled call dispatcher to emulate generic stack call */
+            stk_off = edi;
             switch (arg_count)
             {
             case 0:
@@ -653,9 +658,10 @@ __handle_msg:
                 ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15], args[16], args[17]);
                 break;
             }
+            stk_off = fptr;
 
-            edi += arg_count;
-            edi->val = ret_val;
+            edi += arg_count + 1; // Correct: edi was at func_ptr, pop it and all args
+            edi->val = ret_val;   // Current slot is now where return value goes
 
             /* Re-derive DS32 in case of resource move */
             uint8_t *new_ds32 = (uint8_t *)RTR_addr(h_prg);
@@ -680,6 +686,7 @@ __handle_msg:
             int32_t ret_val = RT_execute(instance_handle, msg_num, -1U);
 
             stk_off = fptr;
+            edi++; // Consume instance handle
             edi->val = ret_val;
             esi += 3;
 
@@ -740,7 +747,10 @@ __handle_msg:
 
             esi = ds32 + target;
             fptr = edi;
-            *(uint16_t *)((uint8_t *)edi - 2) = (uint16_t)Index;
+            // Use a full VALUE slot for Index to maintain alignment
+            edi = (VALUE *)((uint8_t *)edi - sizeof(VALUE));
+            edi->val = (int32_t)Index;
+
             uint16_t auto_sz = ((MHDR *)esi)->auto_size;
             edi = (VALUE *)((uint8_t *)edi - auto_sz - sizeof(VALUE));
             esi += sizeof(MHDR);

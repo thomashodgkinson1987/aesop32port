@@ -176,12 +176,13 @@ void write_initial_tempfiles(void);
 void create_initial_binary_files(void);
 void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int8_t *argn2);
 
-// Tom: commented out
-// void *open_transfer_file(int32_t argcnt, int8_t *filename);
-// void close_transfer_file(void);
-// int32_t player_attrib(int32_t argcnt, uint32_t plrnum, uint32_t offset, uint32_t size);
-// int32_t item_attrib(int32_t argcnt, uint32_t plrnum, uint32_t invslot, uint32_t attrib);
-// int32_t arrow_count(int32_t argcnt, uint32_t plrnum);
+void mono_on(void);
+void mono_off(void);
+void *open_transfer_file(int32_t argcnt, int8_t *filename);
+void close_transfer_file(void);
+int32_t player_attrib(int32_t argcnt, uint32_t plrnum, uint32_t offset, uint32_t size);
+int32_t item_attrib(int32_t argcnt, uint32_t plrnum, uint32_t invslot, uint32_t attrib);
+int32_t arrow_count(int32_t argcnt, uint32_t plrnum);
 
 // typedef void (cdecl *FARPROC)(); // Tom: TODO
 // Tom: `maybe typedef void (*FARPROC)(void);`
@@ -330,8 +331,8 @@ code_resources
 
    PROCDEF solid_bar_graph,
 
-//   PROCDEF mono_on,
-//   PROCDEF mono_off,
+   PROCDEF mono_on,
+   PROCDEF mono_off,
 
    //
    // Sound-related functions
@@ -397,10 +398,9 @@ code_resources
    // Eye II savegame file access
    //
 
-   // Tom: commented out
-   // PROCDEF open_transfer_file,
-   // PROCDEF close_transfer_file,
-   // PROCDEF player_attrib,
-   // PROCDEF item_attrib,
-   // PROCDEF arrow_count,
+   PROCDEF open_transfer_file,
+   PROCDEF close_transfer_file,
+   PROCDEF player_attrib,
+   PROCDEF item_attrib,
+   PROCDEF arrow_count,
 };
