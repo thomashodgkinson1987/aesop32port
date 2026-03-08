@@ -1,49 +1,42 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  RTSYSTEM.C                                                            ��
-// ��                                                                        ��
-// ��  AESOP runtime system-level services                                   ��
-// ��                                                                        ��
-// ��  Version: 1.00 of 6-May-92 -- Initial version                          ��
-// ��                                                                        ��
-// ��  Project: Extensible State-Object Processor (AESOP/16)                 ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with IBM PC ANSI C/C++ implementations            ��
-// ��  Large memory model (16-bit DOS)                                       ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  10926 Jollyville #308                                                 ��
-// ��  Austin, TX 78759                                                      ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  RTSYSTEM.C                                                            ##
+// ##                                                                        ##
+// ##  AESOP runtime system-level services                                   ##
+// ##                                                                        ##
+// ##  Version: 1.00 of 6-May-92 -- Initial version                          ##
+// ##                                                                        ##
+// ##  Project: Extensible State-Object Processor (AESOP/16)                 ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with IBM PC ANSI C/C++ implementations            ##
+// ##  Large memory model (16-bit DOS)                                       ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  10926 Jollyville #308                                                 ##
+// ##  Austin, TX 78759                                                      ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
-#include <stdint.h> // Tom: added
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
-// #include <dos.h> // Tom: commented out
 #include <ctype.h>
 #include <fcntl.h>
-// #include <io.h> // Tom: commented out
-// #include <conio.h> // Tom: commented out
 #include <errno.h>
-#include <sys/stat.h> // Tom: fixed (changed `\` to `/`)
-#include <unistd.h>   // Tom: added
-#include <time.h>     // Tom: added
-#include <termios.h>  // Tom: added
-#include <signal.h>   // Tom: added
-#include <fcntl.h>    // Tom: added
-
-// #include "vfx.h" // Tom: commented out
-// #include "ail32.h" // Tom: commented out
-// #include "gil2vfx.h" // Tom: commented out
+#include <sys/stat.h>
+#include <unistd.h>
+#include <time.h>
+#include <termios.h>
+#include <signal.h>
+#include <fcntl.h>
 
 #include "defs.h"
 #include "shared.h"
@@ -59,6 +52,8 @@
 
 void breakpoint(void)
 {
+   printf("[rtsystem] breakpoint(void)\n");
+
 #if defined(__linux__) || defined(__APPLE__)
    raise(SIGTRAP);
 #elif defined(_WIN32)
@@ -66,19 +61,22 @@ void breakpoint(void)
 #endif
 }
 
-// #pragma aux breakpoint = "int 3"; // Tom: commented out
-
-// Tom: replacement for the old DOS <io.h> filelength() function
 int32_t filelength(int16_t handle)
 {
    struct stat file_info;
+
+   printf("[rtsystem] filelength(int16_t handle) - handle=%i\n", handle);
 
    if (fstat(handle, &file_info) == -1)
    {
       return -1;
    }
 
-   return (int32_t)file_info.st_size;
+   int32_t filelength = (int32_t)file_info.st_size;
+
+   printf("[rtsystem] filelength: filelength=%i\n", filelength);
+
+   return filelength;
 }
 
 uint32_t headroom;
@@ -89,16 +87,24 @@ int16_t disk_err;
 
 void mem_init(void)
 {
+   printf("[rtsystem] mem_init(void)\n");
+
    headroom = init = mem_avail();
 
    checksum = 0;
+
+   printf("[rtsystem] mem_init: headroom=%u init=%u checksum=%u\n", headroom, init, checksum);
 }
 
 void mem_shutdown(void)
 {
    uint32_t end;
 
+   printf("[rtsystem] mem_shutdown(void)\n");
+
    end = mem_avail();
+
+   printf("[rtsystem] mem_shutdown: end=%u\n", end);
 
    if ((init != end) || (checksum != 0))
    {
@@ -108,7 +114,13 @@ void mem_shutdown(void)
 
 uint32_t mem_avail(void)
 {
-   return 16 * 1024 * 1024; // Tom: hardcoded available memory
+   printf("[rtsystem] mem_avail(void)\n");
+
+   uint32_t mem_avail = 16 * 1024 * 1024;
+
+   printf("[rtsystem] mem_avail: mem_avail=%u\n", mem_avail);
+
+   return mem_avail; // Tom: hardcoded available memory
 
    // Tom: original code below
 
@@ -124,6 +136,10 @@ uint32_t mem_avail(void)
 
 uint32_t mem_headroom(void)
 {
+   printf("[rtsystem] mem_headroom(void)\n");
+
+   printf("[rtsystem] mem_headroom: headroom=%u\n", headroom);
+
    return headroom;
 }
 
@@ -131,6 +147,8 @@ void *mem_alloc(uint32_t bytes)
 {
    uint32_t left;
    void *ptr;
+
+   printf("[rtsystem] mem_alloc(uint32_t bytes) - bytes=%u\n", bytes);
 
    ptr = (void *)malloc(bytes);
 
@@ -143,6 +161,8 @@ void *mem_alloc(uint32_t bytes)
 
    checksum ^= (uint32_t)ptr;
 
+   printf("[rtsystem] mem_alloc: left=%u ptr=%u headroom=%u checksum=%u\n", left, ptr, headroom, checksum);
+
    return ptr;
 }
 
@@ -150,15 +170,23 @@ int8_t *str_alloc(int8_t *str)
 {
    int8_t *ptr;
 
+   printf("[rtsystem] str_alloc(int8_t *str) - str=%s\n", str);
+
    ptr = mem_alloc(strlen((char *)str) + 1);
    strcpy((char *)ptr, (char *)str);
+
+   printf("[rtsystem] str_alloc: ptr=%u\n", ptr);
 
    return ptr;
 }
 
 void mem_free(void *ptr)
 {
+   printf("[rtsystem] mem_free(void *ptr) - ptr=%u\n", ptr);
+
    checksum ^= (uint32_t)ptr;
+
+   printf("[rtsystem] mem_free: checksum=%u\n", checksum);
 
    free(ptr);
 }
@@ -183,6 +211,8 @@ int32_t ascnum(int8_t *string)
    int32_t i, j, len, base, neg, chr;
    int32_t total;
 
+   printf("[rtsystem] ascnum(int8_t *string) - string=%s\n", string);
+
    while (isspace(*string))
       string++;
 
@@ -201,8 +231,6 @@ int32_t ascnum(int8_t *string)
    if (*string == '\'')
       return (int32_t)(*(string + 1));
 
-   // Tom: added new version, see below commented out block for old version
-
    if (string[0] == '0' && string[1] == 'x')
    {
       base = 16;
@@ -217,22 +245,6 @@ int32_t ascnum(int8_t *string)
    {
       base = 10;
    }
-
-   // Tom: commented out, see new version above
-   // switch (*(uint16_t *)string)
-   // {
-   // case 'x0':
-   //    base = 16;
-   //    string += 2;
-   //    break;
-   // case 'b0':
-   //    base = 2;
-   //    string += 2;
-   //    break;
-   // default:
-   //    base = 10;
-   //    break;
-   // }
 
    if (base == 10 && isdigit(*string))
       return neg ? -atol((char *)string) : atol((char *)string);
@@ -257,6 +269,8 @@ int32_t ascnum(int8_t *string)
          return -1;
    }
 
+   printf("[rtsystem] ascnum: total=%i\n", total);
+
    return total;
 }
 
@@ -268,6 +282,8 @@ int32_t ascnum(int8_t *string)
 
 void opcode_fault(void *PC, void *stk)
 {
+   printf("[rtsystem] opcode_fault(void *PC, void *stk) - PC=%u stk=%u\n", PC, stk);
+
    abend(MSG_IAO, *(unsigned char *)PC, PC, stk);
 }
 
@@ -287,6 +303,8 @@ void abend(char *msg, ...)
    int16_t recover;
    int16_t x, y;
    char loErrorBuffer[1000 + 1]; // max length + 1
+
+   printf("[rtsystem] abend(char *msg, ...) - msg=%s\n", msg);
 
    curpos(&x, &y);
    if (y > 25)
@@ -350,6 +368,8 @@ TF_class *TF_construct(int8_t *filename, int16_t oflag)
    int16_t file;
    uint32_t hbuf;
 
+   printf("[rtsystem] TF_construct(int8_t *filename, int16_t oflag) - filename=%s oflag=%i\n", filename, oflag);
+
    if (oflag == TF_WRITE)
       oflag = O_CREAT | O_TRUNC | O_WRONLY;
    else
@@ -376,6 +396,8 @@ TF_class *TF_construct(int8_t *filename, int16_t oflag)
    if (!(oflag & O_WRONLY))
       read(TF->file, TF->buffer, TF_BUFSIZE);
 
+   printf("[rtsystem] TF_construct: TF=%u\n", TF);
+
    return TF;
 }
 
@@ -391,6 +413,8 @@ int16_t TF_destroy(TF_class *TF)
 {
    int16_t e, f;
 
+   printf("[rtsystem] TF_destroy(TF_class *TF) - TF=%u\n", TF);
+
    e = f = TF->p;
 
    if ((TF->mode & O_WRONLY) && (TF->p != 0))
@@ -400,6 +424,8 @@ int16_t TF_destroy(TF_class *TF)
 
    RTR_free(RTR, TF->hbuf);
    mem_free(TF);
+
+   printf("[rtsystem] TF_destroy: return %i\n", (e == f));
 
    return (e == f);
 }
@@ -414,14 +440,21 @@ int16_t TF_destroy(TF_class *TF)
 
 int16_t TF_wchar(TF_class *TF, int8_t ch)
 {
+   printf("[rtsystem] TF_wchar(TF_class *TF, int8_t ch) - TF=%u ch=%i\n", TF, ch);
+
    TF->buffer[TF->p++] = ch;
 
    if (TF->p == TF_BUFSIZE)
    {
       TF->p = 0;
       if (write(TF->file, TF->buffer, TF_BUFSIZE) != TF_BUFSIZE)
+      {
+         printf("[rtsystem] TF_wchar: return 0\n");
          return 0;
+      }
    }
+
+   printf("[rtsystem] TF_wchar: return 1\n");
 
    return 1;
 }
@@ -436,17 +469,28 @@ int16_t TF_wchar(TF_class *TF, int8_t ch)
 
 int8_t TF_rchar(TF_class *TF)
 {
+   printf("[rtsystem] TF_rchar(TF_class *TF) - TF=%u\n", TF);
+
    if (TF->pos >= TF->len)
+   {
+      printf("[rtsystem] TF_rchar: return 0\n");
       return 0;
+   }
 
    ++TF->pos;
 
    if (TF->p != TF_BUFSIZE)
+   {
+      printf("[rtsystem] TF_rchar: return %i\n", TF->buffer[TF->p++]);
       return TF->buffer[TF->p++];
+   }
 
    read(TF->file, TF->buffer, TF_BUFSIZE);
 
    TF->p = 1;
+
+   printf("[rtsystem] TF_rchar: return %i\n", TF->buffer[0]);
+
    return TF->buffer[0];
 }
 
@@ -467,6 +511,8 @@ int16_t TF_readln(TF_class *TF, int8_t *buffer, int16_t maxlen)
 {
    int16_t b, c;
 
+   printf("[rtsystem] TF_readln(TF_class *TF, int8_t *buffer, int16_t maxlen) - TF=%u buffer=%u maxlen=%i\n", TF, buffer, maxlen);
+
    do
    {
       b = 0;
@@ -483,16 +529,24 @@ int16_t TF_readln(TF_class *TF, int8_t *buffer, int16_t maxlen)
          buffer[b++] = c;
 
          if (!c)
+         {
+            printf("[rtsystem] TF_readln: return 0\n");
             return 0;
+         }
       }
 
       if (b == maxlen - 1)
          while ((c = TF_rchar(TF)) != '\n')
             if (!c)
+            {
+               printf("[rtsystem] TF_readln: return 0\n");
                return 0;
+            }
 
       buffer[b] = 0;
    } while (!strlen((char *)buffer));
+
+   printf("[rtsystem] TF_readln: return 1\n");
 
    return 1;
 }
@@ -510,14 +564,24 @@ int16_t TF_writeln(TF_class *TF, int8_t *buffer)
 {
    int16_t b, c;
 
+   printf("[rtsystem] TF_writeln(TF_class *TF, int8_t *buffer) - TF=%u buffer=%u\n", TF, buffer);
+
    b = 0;
 
    while ((c = buffer[b++]) != 0)
       if (!TF_wchar(TF, c))
+      {
+         printf("[rtsystem] TF_writeln: return 0\n");
          return 0;
+      }
 
    TF_wchar(TF, '\r');
-   return TF_wchar(TF, '\n');
+
+   int16_t r = TF_wchar(TF, '\n');
+
+   printf("[rtsystem] TF_writeln: return %i\n", r);
+
+   return r;
 }
 
 /***************************************************/
@@ -531,11 +595,21 @@ int16_t TF_writeln(TF_class *TF, int8_t *buffer)
 
 int16_t delete_file(int8_t *filename)
 {
+   printf("[rtsystem] delete_file(int8_t *filename) - filename=%s\n", filename);
+
    if (!unlink((char *)filename))
+   {
+      printf("[rtsystem] delete_file: return 1\n");
       return 1;
+   }
 
    if (errno == ENOENT)
+   {
+      printf("[rtsystem] delete_file: return 0\n");
       return 0;
+   }
+
+   printf("[rtsystem] delete_file: return -1\n");
 
    return -1;
 }
@@ -555,6 +629,8 @@ int16_t copy_file(int8_t *src_filename, int8_t *dest_filename)
    int8_t *buffer;
    int16_t status;
    int16_t s, d, n;
+
+   printf("[rtsystem] copy_file(int8_t *src_filename, int8_t *dest_filename) - src_filename=%s dest_filename=%s\n", src_filename, dest_filename);
 
    s = open((char *)src_filename, O_RDONLY | O_BINARY);
 
@@ -613,8 +689,9 @@ int16_t copy_file(int8_t *src_filename, int8_t *dest_filename)
 int32_t file_size(int8_t *filename)
 {
    int16_t handle;
-   // uint32_t len; // Tom: commented out, `filelength` takes `int32_t`
-   int32_t len; // Tom: added
+   int32_t len;
+
+   printf("[rtsystem] file_size(int8_t *filename) - filename=%s\n", filename);
 
    disk_err = 0;
 
@@ -630,6 +707,9 @@ int32_t file_size(int8_t *filename)
       disk_err = CANT_READ_FILE;
 
    close(handle);
+
+   printf("[rtsystem] file_size: return %i\n", len);
+
    return len;
 }
 
@@ -644,6 +724,8 @@ int8_t *read_file(int8_t *filename, void *dest)
    int16_t i, handle;
    uint32_t len;
    int8_t *buf, *mem;
+
+   printf("[rtsystem] read_file(int8_t *filename, void *dest) - filename=%s dest=%u\n", filename, dest);
 
    disk_err = 0;
 
@@ -714,6 +796,8 @@ int16_t write_file(int8_t *filename, void *buf, uint32_t len)
 {
    int16_t i, handle;
 
+   printf("[rtsystem] write_file(int8_t *filename, void *buf, uint32_t len) - filename=%s buf=%u len=%u\n", filename, buf, len);
+
    disk_err = 0;
 
    handle = open((char *)filename, O_CREAT | O_RDWR | O_TRUNC | O_BINARY, S_IREAD | S_IWRITE);
@@ -766,6 +850,8 @@ int16_t write_file(int8_t *filename, void *buf, uint32_t len)
 int16_t append_file(int8_t *filename, void *buf, uint32_t len)
 {
    int16_t i, handle;
+
+   printf("[rtsystem] append_file(int8_t *filename, void *buff, uint32_t len) - filename=%s buff=%u len=%u\n", filename, buf, len);
 
    disk_err = 0;
 
@@ -822,6 +908,8 @@ uint32_t file_time(int8_t *filename)
 {
    // Tom: added new version
 
+   printf("[rtsystem] file_tile(int8_t *filename) - filename=%s\n", filename);
+
    struct stat file_info;
 
    if (stat((char *)filename, &file_info) == -1)
@@ -845,6 +933,8 @@ uint32_t file_time(int8_t *filename)
    // DOS Time Format (16 bits):
    // Hour (0-23) = 5 bits, Minute (0-59) = 6 bits, Seconds/2 (0-29) = 5 bits
    uint16_t dos_time = (t->tm_hour << 11) | (t->tm_min << 5) | (t->tm_sec / 2);
+
+   printf("[rtsystem] file_time: return %u\n", ((uint32_t)dos_date << 16) | dos_time);
 
    // Original code returned DX (date) shifted left by 16, plus CX (time)
    return ((uint32_t)dos_date << 16) | dos_time;
@@ -876,11 +966,10 @@ uint32_t file_time(int8_t *filename)
 
 void locate(int16_t x, int16_t y)
 {
-   // Tom: new version
-
-   // Stub: do nothing
    (void)x;
    (void)y;
+
+   printf("[STUB] [rtsystem] locate(int16_t x, int16_t y) - x=%i y=%i\n", x, y);
 
    // Tom: original code below
 
@@ -901,11 +990,10 @@ void locate(int16_t x, int16_t y)
 
 void curpos(int16_t *x, int16_t *y)
 {
-   // Tom: new version
-
    // Stub: pretend the cursor is always at 0,0
    *x = 0;
    *y = 0;
+   printf("[STUB] [rtsystem] curpos(int16_t *x, int16_t *y) - x=%u y=%u\n", x, y);
 
    // Tom: original code below
 

@@ -23,15 +23,11 @@
 // ��                                                                        ��
 // ����������������������������������������������������������������������������
 
-#include <stdint.h> // Tom: added
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-// #include <conio.h> // Tom: commented out
 #include <ctype.h>
 #include <string.h>
-// #include <dos.h> // Tom: commented out
-
-// #include "ail32.h" // Tom: commented out
 
 #include "defs.h"
 #include "shared.h"
@@ -101,6 +97,8 @@ int main(int argc, char *argv[]) // Tom: added
    uint32_t i;
    uint32_t code;
    int32_t rtn;
+
+   printf("[interp.c:main]\n");
 
    pathname = (int8_t *)argv[0];
 
