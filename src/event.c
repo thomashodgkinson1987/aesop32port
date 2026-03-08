@@ -197,11 +197,11 @@ void add_notify_request(int32_t client, int32_t message, int32_t event, int32_t 
    NR->parameter = parameter;
    NR->status = (0 & ~NSX_TYPE) | event;
 
-   nxt = NR_first[event];
+   nxt = NR_first[event & NSX_TYPE];
 
    if (nxt == -1)
    {
-      NR_first[event] = i;
+      NR_first[event & NSX_TYPE] = i;
       NR->prev = -1;
    }
    else
@@ -243,7 +243,7 @@ void delete_notify_request(int32_t client, int32_t message, int32_t event, int32
 
    do
    {
-      nxt = NR_first[event]; // start at chain beginning
+      nxt = NR_first[event & NSX_TYPE]; // start at chain beginning
 
       while (nxt != -1) // while not at end of chain
       {
@@ -271,7 +271,7 @@ void delete_notify_request(int32_t client, int32_t message, int32_t event, int32
          if (prev != -1)
             NR_list[prev].next = nxt;
          else
-            NR_first[event] = nxt;
+            NR_first[event & NSX_TYPE] = nxt;
 
          NR->next = -1;             // append NREQ to FREE
          fnxt = NR_first[SYS_FREE]; // chain...
@@ -642,13 +642,13 @@ void dispatch_event(void)
 
    current_event_type = typ;
 
-   nxt = NR_first[typ];
+   nxt = NR_first[typ & NSX_TYPE];
    while (nxt != -1)
    {
       NR = &NR_list[nxt];
       nxt = NR->next;
 
-      if ((NR->status & NSX_TYPE) != typ)
+      if ((NR->status & NSX_TYPE) != (typ & NSX_TYPE))
          break;
       if (NR->client == -1)
          break;
