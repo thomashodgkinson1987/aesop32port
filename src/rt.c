@@ -392,12 +392,13 @@ __handle_msg:
     edi = stk_off;
     fptr = edi;
 
-    // Use a full VALUE slot for Index to maintain 32-bit alignment
-    edi = (VALUE *)((uint8_t *)edi - sizeof(VALUE));
-    edi->val = (int32_t)Index;
+    // Use a full VALUE slot for Index at fptr - 4 to maintain 32-bit alignment
+    ((VALUE *)fptr - 1)->val = (int32_t)Index;
 
     uint16_t auto_size = ((MHDR *)esi)->auto_size;
-    edi = (VALUE *)((uint8_t *)edi - auto_size - sizeof(VALUE));
+    // Align auto_size to 4 bytes to keep edi aligned
+    uint32_t aligned_auto = (auto_size + 3) & ~3;
+    edi = (VALUE *)((uint8_t *)edi - aligned_auto - sizeof(VALUE));
     esi += sizeof(MHDR);
 
 #define GET_WORD()                     \
@@ -585,7 +586,7 @@ __handle_msg:
         }
         case 33: // do_CALL
         {
-            current_this = (uint32_t)((VALUE *)((uint8_t *)fptr - sizeof(VALUE)))->val;
+            current_this = (uint32_t)((VALUE *)fptr - 1)->val;
             uint8_t arg_count = *esi++;
             uint32_t args[256];
             for (int i = 0; i < arg_count; i++)
@@ -686,8 +687,7 @@ __handle_msg:
             int32_t ret_val = RT_execute(instance_handle, msg_num, -1U);
 
             stk_off = fptr;
-            edi++; // Consume instance handle
-            edi->val = ret_val;
+            edi->val = ret_val; // Overwrite instance handle with return value
             esi += 3;
 
             uint8_t *new_ds32 = (uint8_t *)RTR_addr(h_prg);
@@ -747,12 +747,11 @@ __handle_msg:
 
             esi = ds32 + target;
             fptr = edi;
-            // Use a full VALUE slot for Index to maintain alignment
-            edi = (VALUE *)((uint8_t *)edi - sizeof(VALUE));
-            edi->val = (int32_t)Index;
+            ((VALUE *)fptr - 1)->val = (int32_t)Index;
 
             uint16_t auto_sz = ((MHDR *)esi)->auto_size;
-            edi = (VALUE *)((uint8_t *)edi - auto_sz - sizeof(VALUE));
+            uint32_t aligned_auto = (auto_sz + 3) & ~3;
+            edi = (VALUE *)((uint8_t *)edi - aligned_auto - sizeof(VALUE));
             esi += sizeof(MHDR);
             break;
         }

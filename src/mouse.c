@@ -1,62 +1,115 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  MOUSE.C   (modified by LUM for AESOP/32, 070105)                      ��
-// ��                                                                        ��
-// ��  Interrupt-based mouse interface for 386FX VFX drivers                 ��
-// ��                                                                        ��
-// ��  Version 1.00 of 09-Jul-93: Initial release for Rational DOS/4GW       ��
-// ��          1.01 of 04-Sep-93: MOUSE_force_move() added                   ��
-// ��                             MOUSE_status() added                       ��
-// ��                             Callback function declarations fixed       ��
-// ��                             May now be compiled as linkable module or  ��
-// ��                              standalone demo program                   ��
-// ��          1.02 of 18-Nov-93: MetaWare/Phar Lap support added            ��
-// ��          1.10 of  3-Dec-93: Updated to use new WINDOW structure        ��
-// ��                             MOUSE_pane_refresh() added                 ��
-// ��          1.11 of 15-Feb-94: Upper-case MOUSE_ function names           ��
-// ��                             Pane offsets fixed in MOUSE_pane_refresh() ��
-// ��          1.12 of 11-Aug-95: Include MSS.H for AIL V3.0 compatibility   ��
-// ��                                                                        ��
-// ��  Project: 386FX Sound & Light(TM)                                      ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  80386 C source compatible with WATCOM C v9.0 or later                 ��
-// ��                                 MetaWare High C++ 3.1 or later         ��
-// ��                                                                        ��
-// ��  Compile with DEMO #defined to assemble mouse demo program             ��
-// ��                                                                        ��
-// ��  Example program requires Miles Sound System for timer services        ��
-// ��  Must be compiled with stack-checking disabled!                        ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992-1994 Non-Linear Arts, Inc.                         ��
-// ��                                                                        ��
-// ��  Non-Linear Arts, Inc.                                                 ��
-// ��  3415 Greystone #200                                                   ��
-// ��  Austin, TX 78731                                                      ��
-// ��                                                                        ��
-// ��  (512) 346-9595 / FAX (512) 346-9596 / BBS (512) 454-9990              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  MOUSE.C   (modified by LUM for AESOP/32, 070105)                      ##
+// ##                                                                        ##
+// ##  Interrupt-based mouse interface for 386FX VFX drivers                 ##
+// ##                                                                        ##
+// ##  Version 1.00 of 09-Jul-93: Initial release for Rational DOS/4GW       ##
+// ##          1.01 of 04-Sep-93: MOUSE_force_move() added                   ##
+// ##                             MOUSE_status() added                       ##
+// ##                             Callback function declarations fixed       ##
+// ##                             May now be compiled as linkable module or  ##
+// ##                              standalone demo program                   ##
+// ##          1.02 of 18-Nov-93: MetaWare/Phar Lap support added            ##
+// ##          1.10 of  3-Dec-93: Updated to use new WINDOW structure        ##
+// ##                             MOUSE_pane_refresh() added                 ##
+// ##          1.11 of 15-Feb-94: Upper-case MOUSE_ function names           ##
+// ##                             Pane offsets fixed in MOUSE_pane_refresh() ##
+// ##          1.12 of 11-Aug-95: Include MSS.H for AIL V3.0 compatibility   ##
+// ##                                                                        ##
+// ##  Project: 386FX Sound & Light(TM)                                      ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  80386 C source compatible with WATCOM C v9.0 or later                 ##
+// ##                                 MetaWare High C++ 3.1 or later         ##
+// ##                                                                        ##
+// ##  Compile with DEMO #defined to assemble mouse demo program             ##
+// ##                                                                        ##
+// ##  Example program requires Miles Sound System for timer services        ##
+// ##  Must be compiled with stack-checking disabled!                        ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992-1994 Non-Linear Arts, Inc.                         ##
+// ##                                                                        ##
+// ##  Non-Linear Arts, Inc.                                                 ##
+// ##  3415 Greystone #200                                                   ##
+// ##  Austin, TX 78731                                                      ##
+// ##                                                                        ##
+// ##  (512) 346-9595 / FAX (512) 346-9596 / BBS (512) 454-9990              ##
+// ##                                                                        ##
+// ############################################################################
 
 // LUM - this is needed for Watcom
 #define DPMI
 
 #include <stdio.h>
 #include <stdlib.h>
-// #include <dos.h> // Tom: commented out
-// #include <conio.h> // Tom: commented out
 #include <string.h>
-
-// #include "vfx.h" // Tom: commented out
-// #include "dll.h" // Tom: commented out
 
 #define NO_OLD_SYS_FUNCTIONS
 // LUM include ail32.h instead of mss.h
 // #include "ail32.h" // Tom: commented out
 
 #include "mouse.h"
+
+//
+//
+//
+//
+//
+
+typedef unsigned char UBYTE;
+typedef unsigned short UWORD;
+typedef unsigned long ULONG;
+typedef char BYTE;
+typedef signed short WORD;
+typedef signed long LONG;
+typedef float FLOAT;
+typedef signed long FIXED16; // 16:16 fixed-point type [-32K,+32K]
+typedef signed long FIXED30; // 2:30 fixed-point type [-1.999,+1.999]
+
+typedef unsigned char STENCIL;
+
+typedef struct _window
+{
+   UBYTE *buffer;
+   LONG x_max;
+   LONG y_max;
+
+   STENCIL *stencil;
+   UBYTE *shadow;
+} WINDOW;
+
+typedef struct _pane
+{
+   WINDOW *window;
+   LONG x0;
+   LONG y0;
+   LONG x1;
+   LONG y1;
+} PANE;
+
+typedef struct _pane_list
+{
+   PANE *array;
+   ULONG *flags;
+   LONG size;
+} PANE_LIST;
+
+typedef struct
+{
+   LONG x0;
+   LONG y0;
+   LONG x1;
+   LONG y1;
+} RECT;
+
+//
+//
+//
+//
+//
 
 //
 // Mouse system variables
@@ -149,44 +202,47 @@ typedef struct // INT21 (Phar Lap) real-mode interrupt structure
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Save area underneath visible portion of mouse cursor, and draw cursor  ��
-// �� shape on screen                                                        ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Save area underneath visible portion of mouse cursor, and draw cursor  ##
+// ## shape on screen                                                        ##
+// ##                                                                        ##
+// ############################################################################
 
 static void MOUSE_draw(void)
 {
-   printf("[STUB] MOUSE_draw\n");
+   printf("[mouse] MOUSE_draw(void)\n");
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Restore area underneath mouse cursor                                   ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Restore area underneath mouse cursor                                   ##
+// ##                                                                        ##
+// ############################################################################
 
 static void MOUSE_restore_area(void)
 {
-   printf("[STUB] MOUSE_restore_area\n");
+   printf("[mouse] MOUSE_restore_area(void)\n");
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Declare an area of the screen to be off limits to any visible part of  ��
-// �� the mouse cursor; the cursor will not be drawn if any portion falls    ��
-// �� within this area                                                       ��
-// ��                                                                        ��
-// �� If x0 < 0, the previously registered exclusion area will be cancelled  ��
-// ��                                                                        ��
-// �� This exclusion area is internal to the mouse system; for general mouse ��
-// �� area exclusion, use the MOUSE_register_watchdog_callback() function    ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Declare an area of the screen to be off limits to any visible part of  ##
+// ## the mouse cursor; the cursor will not be drawn if any portion falls    ##
+// ## within this area                                                       ##
+// ##                                                                        ##
+// ## If x0 < 0, the previously registered exclusion area will be cancelled  ##
+// ##                                                                        ##
+// ## This exclusion area is internal to the mouse system; for general mouse ##
+// ## area exclusion, use the MOUSE_register_watchdog_callback() function    ##
+// ##                                                                        ##
+// ############################################################################
 
 static void MOUSE_exclude_area(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 {
+   printf("[mouse] MOUSE_exclude_area(int32_t x0, int32_t y0, int32_t x1, int32_t y1) - x0=%i y0=%i x1=%i y1=%i\n", x0, y0, x1, y1);
+   printf("[mouse] \n");
+
    // Tom: commented out
    // exclude_region.x0 = x0;
    // exclude_region.y0 = y0;
@@ -194,25 +250,27 @@ static void MOUSE_exclude_area(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
    // exclude_region.y1 = y1;
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Install a real-mode mouse event handler in lower 1MB of RAM            ��
-// ��                                                                        ��
-// �� To avoid the overhead of switching between real and protected mode, we ��
-// �� don't take advantage of the DOS extender's built-in support for mouse  ��
-// �� event handlers.  Instead, we make a real-mode interrupt call to the    ��
-// �� Microsoft INT 33H interface to install a very short real-mode event    ��
-// �� handler in the lower 1MB of memory.  Each time the mouse state changes,��
-// �� the event handler records the new state in variables accessible to     ��
-// �� MOUSE.C.  These variables are then monitored at regular intervals by   ��
-// �� the protected-mode timer event handler MOUSE_serve(), which can then   ��
-// �� simulate the action of a true protected-mode mouse event handler       ��
-// �� with minimal overhead.                                                 ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Install a real-mode mouse event handler in lower 1MB of RAM            ##
+// ##                                                                        ##
+// ## To avoid the overhead of switching between real and protected mode, we ##
+// ## don't take advantage of the DOS extender's built-in support for mouse  ##
+// ## event handlers.  Instead, we make a real-mode interrupt call to the    ##
+// ## Microsoft INT 33H interface to install a very short real-mode event    ##
+// ## handler in the lower 1MB of memory.  Each time the mouse state changes,##
+// ## the event handler records the new state in variables accessible to     ##
+// ## MOUSE.C.  These variables are then monitored at regular intervals by   ##
+// ## the protected-mode timer event handler MOUSE_serve(), which can then   ##
+// ## simulate the action of a true protected-mode mouse event handler       ##
+// ## with minimal overhead.                                                 ##
+// ##                                                                        ##
+// ############################################################################
 
 static int32_t MOUSE_install_handler(void)
 {
+   printf("[mouse] MOUSE_install_handler(void)\n");
+
    static unsigned char real_stub[] =
        {
            0xbe, 0x00, 0x00, // mov si,0
@@ -310,14 +368,16 @@ static int32_t MOUSE_install_handler(void)
    }
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Disable real-mode event handler                                        ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Disable real-mode event handler                                        ##
+// ##                                                                        ##
+// ############################################################################
 
 static void MOUSE_remove_handler(void)
 {
+   printf("[mouse] MOUSE_remove_handler(void)\n");
+
    //
    // Rational Systems DOS/4GW version
    //
@@ -360,110 +420,122 @@ static void MOUSE_remove_handler(void)
 #endif
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Inhibit mouse service; stop tracking movement and button activity      ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Inhibit mouse service; stop tracking movement and button activity      ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_lock(void)
 {
+   printf("[mouse] MOUSE_lock(void)\n");
+
    ++locked;
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Enable mouse service; resume movement and button tracking              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Enable mouse service; resume movement and button tracking              ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_unlock(void)
 {
+   printf("[mouse] MOUSE_unlock(void)\n");
+
    --locked;
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Inhibit mouse movement tracking (buttons still monitored)              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Inhibit mouse movement tracking (buttons still monitored)              ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_hold(void)
 {
+   printf("[mouse] MOUSE_hold(void)\n");
+
    ++held;
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Enable mouse movement tracking                                         ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Enable mouse movement tracking                                         ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_release(void)
 {
+   printf("[mouse] MOUSE_release(void)\n");
+
    --held;
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Return physical area of screen currently occupied by visible portion   ��
-// �� of mouse cursor                                                        ��
-// ��                                                                        ��
-// �� Validates *area RECT structure; returns 0 if mouse pointer hidden,     ��
-// �� excluded, or visible portion offscreen                                 ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Return physical area of screen currently occupied by visible portion   ##
+// ## of mouse cursor                                                        ##
+// ##                                                                        ##
+// ## Validates *area RECT structure; returns 0 if mouse pointer hidden,     ##
+// ## excluded, or visible portion offscreen                                 ##
+// ##                                                                        ##
+// ############################################################################
 
-// Tom: commented out
-// int32_t MOUSE_visible_area(RECT *area)
-// {
-//    MOUSE_lock();
+int32_t MOUSE_visible_area(RECT *area)
+{
+   printf("[mouse] MOUSE_visible_area(RECT *area)\n");
 
-//    if ((excluded) || (hidecnt < 0))
-//    {
-//       MOUSE_unlock();
-//       return 0;
-//    }
+   MOUSE_lock();
 
-//    *area = saved;
+   if ((excluded) || (hidecnt < 0))
+   {
+      MOUSE_unlock();
+      return 0;
+   }
 
-//    MOUSE_unlock();
+   // *area = saved; // Tom: commented out
 
-//    return 1;
-// }
+   MOUSE_unlock();
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Return 1 if any visible portion of mouse cursor lies within given      ��
-// �� rectangular area; 0 otherwise                                          ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+   return 1;
+}
 
-// Tom: commented out
-// int32_t MOUSE_shape_in_area(RECT *area)
-// {
-//    RECT cur;
+// ############################################################################
+// ##                                                                        ##
+// ## Return 1 if any visible portion of mouse cursor lies within given      ##
+// ## rectangular area; 0 otherwise                                          ##
+// ##                                                                        ##
+// ############################################################################
 
-//    if (!MOUSE_visible_area(&cur))
-//       return 0;
+int32_t MOUSE_shape_in_area(RECT *area)
+{
+   RECT cur;
 
-//    if ((cur.x0 > area->x1) ||
-//        (cur.x1 < area->x0) ||
-//        (cur.y1 < area->y0) ||
-//        (cur.y0 > area->y1))
-//       return 0;
+   printf("[mouse] MOUSE_shape_in_area(RECT *area)\n");
 
-//    return 1;
-// }
+   if (!MOUSE_visible_area(&cur))
+      return 0;
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Show mouse cursor                                                      ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+   // if ((cur.x0 > area->x1) ||
+   //     (cur.x1 < area->x0) ||
+   //     (cur.y1 < area->y0) ||
+   //     (cur.y0 > area->y1))
+   //    return 0;
+
+   return 1;
+}
+
+// ############################################################################
+// ##                                                                        ##
+// ## Show mouse cursor                                                      ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_show(void)
 {
+   printf("[mouse] MOUSE_show(void)\n");
+
    MOUSE_lock();
 
    if (hidecnt)
@@ -477,14 +549,16 @@ void MOUSE_show(void)
    MOUSE_unlock();
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Hide mouse cursor                                                      ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Hide mouse cursor                                                      ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_hide(void)
 {
+   printf("[mouse] MOUSE_hide(void)\n");
+
    MOUSE_lock();
 
    if (!hidecnt)
@@ -495,19 +569,21 @@ void MOUSE_hide(void)
    MOUSE_unlock();
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Set mouse pointer shape                                                ��
-// ��                                                                        ��
-// �� Note: This routine may be called from a background interrupt handler   ��
-// ��       or mouse event callback function                                 ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Set mouse pointer shape                                                ##
+// ##                                                                        ##
+// ## Note: This routine may be called from a background interrupt handler   ##
+// ##       or mouse event callback function                                 ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_set_pointer(void *table, int32_t shape)
 {
    int32_t hot, res;
    int32_t w, h;
+
+   printf("[mouse] MOUSE_set_pointer(void *table, int32_t shape) - table=%u shape=%i\n", table, shape);
 
    if ((pointer_table == table) &&
        (pointer == shape))
@@ -539,19 +615,21 @@ void MOUSE_set_pointer(void *table, int32_t shape)
    MOUSE_unlock();
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Return current mouse coordinates and button status                     ��
-// ��                                                                        ��
-// �� *mx,*my,*ml,*mr,*mc = locations to store mouse status variables for    ��
-// �� X,Y,left button, right button, center button respectively              ��
-// ��                                                                        ��
-// �� Pass NULL pointers for unwanted variables                              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Return current mouse coordinates and button status                     ##
+// ##                                                                        ##
+// ## *mx,*my,*ml,*mr,*mc = locations to store mouse status variables for    ##
+// ## X,Y,left button, right button, center button respectively              ##
+// ##                                                                        ##
+// ## Pass NULL pointers for unwanted variables                              ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_status(int32_t *mx, int32_t *my, int32_t *ml, int32_t *mr, int32_t *mc)
 {
+   printf("[mouse] MOUSE_status(int32_t *mx, int32_t *my, int32_t *ml, int32_t *mr, int32_t *mc) - mx=%u my=%u ml=%u mr=%u mc=%u\n", mx, my, ml, mr, mc);
+
    MOUSE_lock();
 
    if (mx != NULL)
@@ -568,111 +646,121 @@ void MOUSE_status(int32_t *mx, int32_t *my, int32_t *ml, int32_t *mr, int32_t *m
    MOUSE_unlock();
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Manually alter the mouse's coordinates                                 ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Manually alter the mouse's coordinates                                 ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_force_move(int32_t new_x, int32_t new_y)
 {
+   printf("[mouse] MOUSE_force_move(int32_t new_x, int32_t new_y) - new_x=%i new_y=%i\n", new_x, new_y);
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Install an application event handler for mouse movement events         ��
-// ��                                                                        ��
-// �� This function should be passed the address of a function with the      ��
-// �� following prototype:                                                   ��
-// ��                                                                        ��
-// ��   void MOUSE_event_callback(int32_t x, int32_t y)                      ��
-// ��                                                                        ��
-// �� This function will be called whenever the mouse's location changes,    ��
-// �� regardless of whether the cursor is hidden or excluded.                ��
-// ��                                                                        ��
-// �� Passing NULL to this function will cancel further event callbacks      ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Install an application event handler for mouse movement events         ##
+// ##                                                                        ##
+// ## This function should be passed the address of a function with the      ##
+// ## following prototype:                                                   ##
+// ##                                                                        ##
+// ##   void MOUSE_event_callback(int32_t x, int32_t y)                      ##
+// ##                                                                        ##
+// ## This function will be called whenever the mouse's location changes,    ##
+// ## regardless of whether the cursor is hidden or excluded.                ##
+// ##                                                                        ##
+// ## Passing NULL to this function will cancel further event callbacks      ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_register_mouse_event_callback(void (*fn)(int32_t x, int32_t y))
 {
+   printf("[mouse] MOUSE_register_mouse_event_callback(void (*fn)(int32_t x, int32_t y))\n");
+
    MOUSE_event_callback = fn;
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Install an application event handler for mouse button events           ��
-// ��                                                                        ��
-// �� This function should be passed the address of a function with the      ��
-// �� following prototype:                                                   ��
-// ��                                                                        ��
-// ��   void button_event_callback(int32_t left, int32_t right, int32_t center) ��
-// ��                                                                        ��
-// �� This function will be called whenever the mouse's button status        ��
-// �� changes, regardless of whether the cursor is hidden, excluded, or held.��
-// ��                                                                        ��
-// �� Passing NULL to this function will cancel further event callbacks      ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Install an application event handler for mouse button events           ##
+// ##                                                                        ##
+// ## This function should be passed the address of a function with the      ##
+// ## following prototype:                                                   ##
+// ##                                                                        ##
+// ##   void button_event_callback(int32_t left, int32_t right, int32_t center) ##
+// ##                                                                        ##
+// ## This function will be called whenever the mouse's button status        ##
+// ## changes, regardless of whether the cursor is hidden, excluded, or held.##
+// ##                                                                        ##
+// ## Passing NULL to this function will cancel further event callbacks      ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_register_button_event_callback(void (*fn)(int32_t left, int32_t right, int32_t center))
 {
+   printf("[mouse] MOUSE_register_button_event_callback(void (*fn)(int32_t left, int32_t right, int32_t center))\n");
+
    button_event_callback = fn;
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Install an application "watchdog" handler for mouse pointer exclusion  ��
-// ��                                                                        ��
-// �� This function should be passed the address of a function with the      ��
-// �� following prototype:                                                   ��
-// ��                                                                        ��
-// ��   int32_t watchdog_callback(RECT *area)                             ��
-// ��                                                                        ��
-// �� This function will be called whenever the mouse cursor is about to be  ��
-// �� drawn to the screen overlaying *area. If it returns a nonzero value,   ��
-// �� the cursor will be drawn normally.  Otherwise, the cursor will not be  ��
-// �� drawn.                                                                 ��
-// ��                                                                        ��
-// �� Passing NULL to this function will cancel further watchdog callbacks   ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Install an application "watchdog" handler for mouse pointer exclusion  ##
+// ##                                                                        ##
+// ## This function should be passed the address of a function with the      ##
+// ## following prototype:                                                   ##
+// ##                                                                        ##
+// ##   int32_t watchdog_callback(RECT *area)                             ##
+// ##                                                                        ##
+// ## This function will be called whenever the mouse cursor is about to be  ##
+// ## drawn to the screen overlaying *area. If it returns a nonzero value,   ##
+// ## the cursor will be drawn normally.  Otherwise, the cursor will not be  ##
+// ## drawn.                                                                 ##
+// ##                                                                        ##
+// ## Passing NULL to this function will cancel further watchdog callbacks   ##
+// ##                                                                        ##
+// ############################################################################
 
-// Tom: commented out
-// void MOUSE_register_watchdog_callback(int32_t (*fn)(RECT *area))
-// {
-//    watchdog_callback = fn;
-// }
+void MOUSE_register_watchdog_callback(int32_t (*fn)(RECT *area))
+{
+   printf("[mouse] void MOUSE_register_watchdog_callback(int32_t (*fn)(RECT *area))\n");
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Timer callback routine simulates protected-mode mouse event handler    ��
-// �� by periodically inspecting variables maintained by real-mode handler   ��
-// ��                                                                        ��
-// �� The real-mode event handler shares data with this timer handler via    ��
-// �� three variables defined at 0:4F0-0:4F5, an area of low memory          ��
-// �� designated for interprocess communication                              ��
-// ��                                                                        ��
-// �� To eliminate all mouse flicker during movement, add a call to          ��
-// �� VFX_wait_vblank_leading() just before the MOUSE_restore_area() call    ��
-// �� below.  However, this can cause a substantial performance loss during  ��
-// �� periods of rapid mouse movement, especially in EVGA.                   ��
-// ��                                                                        ��
-// �� Notes: This routine is called from an asynchronous interrupt handler!  ��
-// ��        May also be called manually to force status update              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+   // watchdog_callback = fn; // Tom: commented out
+}
+
+// ############################################################################
+// ##                                                                        ##
+// ## Timer callback routine simulates protected-mode mouse event handler    ##
+// ## by periodically inspecting variables maintained by real-mode handler   ##
+// ##                                                                        ##
+// ## The real-mode event handler shares data with this timer handler via    ##
+// ## three variables defined at 0:4F0-0:4F5, an area of low memory          ##
+// ## designated for interprocess communication                              ##
+// ##                                                                        ##
+// ## To eliminate all mouse flicker during movement, add a call to          ##
+// ## VFX_wait_vblank_leading() just before the MOUSE_restore_area() call    ##
+// ## below.  However, this can cause a substantial performance loss during  ##
+// ## periods of rapid mouse movement, especially in EVGA.                   ##
+// ##                                                                        ##
+// ## Notes: This routine is called from an asynchronous interrupt handler!  ##
+// ##        May also be called manually to force status update              ##
+// ##                                                                        ##
+// ############################################################################
 
 // LUM this function had to be changed for AIL 2 (__cdecl not __pascal and parameter user was removed)!
 // it is needed, otherwise it crashes when the function is called!
 
 void MOUSE_timer_serve()
 {
+   printf("[mouse] MOUSE_timer_serve()\n");
+
    MOUSE_serve();
 }
 
 void MOUSE_serve()
 {
+   printf("[mouse] MOUSE_serve()\n");
+
 #ifdef __HIGHC__
    FARPTR loc;
 #endif
@@ -744,436 +832,444 @@ void MOUSE_serve()
    --locked;
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Wrapper for VFX_window_refresh() which automatically handles mouse     ��
-// �� cursor maintenance if the mouse cursor falls within the target screen  ��
-// �� coordinates                                                            ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-
-// void MOUSE_window_refresh(WINDOW *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1)
-// {
-//    int32_t shp_x, shp_y;
-//    int32_t bw, bh;
-//    PANE bkgnd, client;
-//    int32_t mx, my, ml, mr, mt, mb, xr;
-//    uint8_t *in;
-
-//    //
-//    // If mouse hidden, just call the driver and return
-//    //
-
-//    if (hidecnt < 0)
-//    {
-//       VFX_window_refresh(target, x0, y0, x1, y1);
-//       return;
-//    }
-
-//    //
-//    // Freeze the mouse to ensure valid coordinates
-//    //
-
-//    MOUSE_hold();
-
-//    //
-//    // If mouse is currently outside the region to be refreshed, register the
-//    // region as an exclusion area, release the mouse, do the refresh,
-//    // cancel the exclusion area, and force an update
-//    //
-
-//    if ((saved.x0 > x1) ||
-//        (saved.x1 < x0) ||
-//        (saved.y1 < y0) ||
-//        (saved.y0 > y1))
-//    {
-//       MOUSE_exclude_area(x0, y0, x1, y1);
-
-//       MOUSE_release();
-
-//       VFX_window_refresh(target, x0, y0, x1, y1);
-
-//       MOUSE_exclude_area(-1, -1, -1, -1);
-
-//       MOUSE_serve();
-//       return;
-//    }
-
-//    //
-//    // If this is a scaled window refresh, do a hide/refresh/show cycle and
-//    // return
-//    //
-
-//    if (((x1 - x0) != target->x_max) ||
-//        ((y1 - y0) != target->y_max))
-//    {
-//       VFX_wait_vblank_leading();
-//       MOUSE_hide();
-//       VFX_window_refresh(target, x0, y0, x1, y1);
-//       MOUSE_show();
-
-//       MOUSE_release();
-//       MOUSE_serve();
-//       return;
-//    }
-
-//    //
-//    // If client window has a stencil, do a hide/refresh/show cycle if
-//    // the mouse cursor overlaps a non-transparent area of the stencil
-//    //
-
-//    if (target->stencil != NULL)
-//    {
-//       //
-//       // Find edges of visible mouse cursor relative to
-//       // window being refreshed
-//       //
-
-//       ml = max(x0, saved.x0) - x0;
-//       mr = min(x1, saved.x1) - x0;
-//       mt = max(y0, saved.y0) - y0;
-//       mb = min(y1, saved.y1) - y0;
-
-//       //
-//       // See if a non-transparent stencil packet overlaps mouse cursor
-//       //
-
-//       for (my = mt; my <= mb; my++)
-//       {
-//          mx = 0;
-
-//          in = (uint8_t *)target->stencil +
-//               (((uint32_t *)target->stencil)[my]);
-
-//          while (mx <= mr)
-//          {
-//             xr = mx + (*in & 0x7f) - 1;
-
-//             if (*in < 128)
-//             {
-//                if (!((mx > mr) || (xr < ml)))
-//                {
-//                   VFX_wait_vblank_leading();
-//                   MOUSE_hide();
-//                   VFX_window_refresh(target, x0, y0, x1, y1);
-//                   MOUSE_show();
-
-//                   MOUSE_release();
-//                   MOUSE_serve();
-//                   return;
-//                }
-//             }
-
-//             in++;
-//             mx = xr + 1;
-//          }
-//       }
-//    }
-
-//    //
-//    // If mouse is inside the region to be refreshed, temporarily merge the
-//    // pointer shape with the client's window so that it will not be erased
-//    // during the refresh, do the refresh, and restore the client's window
-//    // contents
-//    //
-
-//    //
-//    // Define pane to describe part of client window which will be overlaid
-//    // by cursor
-//    //
-
-//    client.window = target;
-//    client.x0 = max(x0, saved.x0) - x0;
-//    client.x1 = min(x1, saved.x1) - x0;
-//    client.y0 = max(y0, saved.y0) - y0;
-//    client.y1 = min(y1, saved.y1) - y0;
-
-//    //
-//    // Define pane to describe part of saved background window which
-//    // lies within client screen area
-//    //
-
-//    bw = saved.x1 - saved.x0;
-//    bh = saved.y1 - saved.y0;
-
-//    bkgnd.window = &save;
-//    bkgnd.x0 = (saved.x0 < x0) ? x0 - saved.x0 : 0;
-//    bkgnd.x1 = (saved.x1 > x1) ? bw - (saved.x1 - x1) : bw;
-//    bkgnd.y0 = (saved.y0 < y0) ? y0 - saved.y0 : 0;
-//    bkgnd.y1 = (saved.y1 > y1) ? bh - (saved.y1 - y1) : bh;
-
-//    //
-//    // Update background preservation window by copying client source
-//    // pane to background pane
-//    //
-
-//    VFX_pane_copy(&client, 0, 0, &bkgnd, 0, 0, NO_COLOR);
-
-//    //
-//    // Draw the mouse pointer into the client's source window, so it will
-//    // appear onscreen at the correct place when the window is refreshed
-//    //
-
-//    shp_x = (x + hot_x < x0) ? x - x0 : -hot_x;
-//    shp_y = (y + hot_y < y0) ? y - y0 : -hot_y;
-
-//    VFX_shape_draw(&client, pointer_table, pointer, shp_x, shp_y);
-
-//    //
-//    // Copy client's window to screen, including the overlaid mouse pointer
-//    //
-
-//    VFX_window_refresh(target, x0, y0, x1, y1);
-
-//    //
-//    // Finally, restore the part of the client's window which we overwrote
-//    // with the mouse pointer (not necessary if client doesn't intend to
-//    // re-use contents of window)
-//    //
-
-//    VFX_pane_copy(&bkgnd, 0, 0, &client, 0, 0, NO_COLOR);
-
-//    //
-//    // Release the mouse and force service in case coordinates
-//    // need updating
-//    //
-
-//    MOUSE_release();
-//    MOUSE_serve();
-// }
-
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Wrapper for VFX_pane_refresh() which automatically handles mouse       ��
-// �� cursor maintenance if the mouse cursor falls within the target screen  ��
-// �� coordinates                                                            ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-
-// void MOUSE_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1)
-// {
-//    int32_t shp_x, shp_y;
-//    int32_t bw, bh;
-//    PANE bkgnd, client;
-//    int32_t mx, my, ml, mr, mt, mb, xr;
-//    uint8_t *in;
-
-//    //
-//    // If mouse hidden, just call the driver and return
-//    //
-
-//    if (hidecnt < 0)
-//    {
-//       VFX_pane_refresh(target, x0, y0, x1, y1);
-//       return;
-//    }
-
-//    //
-//    // Freeze the mouse to ensure valid coordinates
-//    //
-
-//    MOUSE_hold();
-
-//    //
-//    // If mouse is currently outside the region to be refreshed, register the
-//    // region as an exclusion area, release the mouse, do the refresh,
-//    // cancel the exclusion area, and force an update
-//    //
-
-//    if ((saved.x0 > x1) ||
-//        (saved.x1 < x0) ||
-//        (saved.y1 < y0) ||
-//        (saved.y0 > y1))
-//    {
-//       MOUSE_exclude_area(x0, y0, x1, y1);
-
-//       MOUSE_release();
-
-//       VFX_pane_refresh(target, x0, y0, x1, y1);
-
-//       MOUSE_exclude_area(-1, -1, -1, -1);
-
-//       MOUSE_serve();
-//       return;
-//    }
-
-//    //
-//    // If this is a scaled pane refresh, do a hide/refresh/show cycle and
-//    // return
-//    //
-
-//    if (((x1 - x0) !=
-//         (min(target->x1, target->window->x_max) - max(target->x0, 0))) ||
-//        ((y1 - y0) !=
-//         (min(target->y1, target->window->y_max) - max(target->y0, 0))))
-//    {
-//       VFX_wait_vblank_leading();
-//       MOUSE_hide();
-//       VFX_pane_refresh(target, x0, y0, x1, y1);
-//       MOUSE_show();
-
-//       MOUSE_release();
-//       MOUSE_serve();
-//       return;
-//    }
-
-//    //
-//    // If client window has a stencil, do a hide/refresh/show cycle if
-//    // the mouse cursor overlaps a non-transparent area of the stencil
-//    //
-
-//    if (target->window->stencil != NULL)
-//    {
-//       //
-//       // Find edges of visible mouse cursor relative to
-//       // window being refreshed
-//       //
-
-//       ml = max(x0, saved.x0) - x0 + target->x0;
-//       mr = min(x1, saved.x1) - x0 + target->x0;
-//       mt = max(y0, saved.y0) - y0 + target->y0;
-//       mb = min(y1, saved.y1) - y0 + target->y0;
-
-//       //
-//       // See if a non-transparent stencil packet overlaps mouse cursor
-//       //
-
-//       for (my = mt; my <= mb; my++)
-//       {
-//          mx = 0;
-
-//          in = (uint8_t *)target->window->stencil +
-//               (((uint32_t *)target->window->stencil)[my]);
-
-//          while (mx <= mr)
-//          {
-//             xr = mx + (*in & 0x7f) - 1;
-
-//             if (*in < 128)
-//             {
-//                if (!((mx > mr) || (xr < ml)))
-//                {
-//                   VFX_wait_vblank_leading();
-//                   MOUSE_hide();
-//                   VFX_pane_refresh(target, x0, y0, x1, y1);
-//                   MOUSE_show();
-
-//                   MOUSE_release();
-//                   MOUSE_serve();
-//                   return;
-//                }
-//             }
-
-//             in++;
-//             mx = xr + 1;
-//          }
-//       }
-//    }
-
-//    //
-//    // If mouse is inside the region to be refreshed, temporarily merge the
-//    // pointer shape with the client's pane so that it will not be erased
-//    // during the refresh, do the refresh, and restore the client's pane
-//    // contents
-//    //
-
-//    //
-//    // Define pane to describe part of client window which will be overlaid
-//    // by cursor
-//    //
-//    // Set client pane coordinates relative to target pane
-//    //
-
-//    client.window = target->window;
-//    client.x0 = max(x0, saved.x0) - x0 + target->x0;
-//    client.x1 = min(x1, saved.x1) - x0 + target->x0;
-//    client.y0 = max(y0, saved.y0) - y0 + target->y0;
-//    client.y1 = min(y1, saved.y1) - y0 + target->y0;
-
-//    //
-//    // Define pane to describe part of saved background window which
-//    // lies within client screen area
-//    //
-
-//    bw = saved.x1 - saved.x0;
-//    bh = saved.y1 - saved.y0;
-
-//    bkgnd.window = &save;
-//    bkgnd.x0 = (saved.x0 < x0) ? x0 - saved.x0 : 0;
-//    bkgnd.x1 = (saved.x1 > x1) ? bw - (saved.x1 - x1) : bw;
-//    bkgnd.y0 = (saved.y0 < y0) ? y0 - saved.y0 : 0;
-//    bkgnd.y1 = (saved.y1 > y1) ? bh - (saved.y1 - y1) : bh;
-
-//    //
-//    // Update background preservation window by copying client source
-//    // pane to background pane
-//    //
-
-//    VFX_pane_copy(&client, 0, 0, &bkgnd, 0, 0, NO_COLOR);
-
-//    //
-//    // Draw the mouse pointer into the client's source window, so it will
-//    // appear onscreen at the correct place when the window is refreshed
-//    //
-
-//    shp_x = (x + hot_x < x0) ? x - x0 : -hot_x;
-//    shp_y = (y + hot_y < y0) ? y - y0 : -hot_y;
-
-//    VFX_shape_draw(&client, pointer_table, pointer, shp_x, shp_y);
-
-//    //
-//    // Copy client's pane to screen, including the overlaid mouse pointer
-//    //
-
-//    VFX_pane_refresh(target, x0, y0, x1, y1);
-
-//    //
-//    // Finally, restore the part of the client's window which we overwrote
-//    // with the mouse pointer (not necessary if client doesn't intend to
-//    // re-use contents of window)
-//    //
-
-//    VFX_pane_copy(&bkgnd, 0, 0, &client, 0, 0, NO_COLOR);
-
-//    //
-//    // Release the mouse and force service in case coordinates
-//    // need updating
-//    //
-
-//    MOUSE_release();
-//    MOUSE_serve();
-// }
-
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Perform MOUSE_pane_refresh() calls for all entries in a PANE_LIST      ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-
-// void MOUSE_pane_list_refresh(PANE_LIST *list)
-// {
-//    uint32_t i;
-//    PANE *a;
-
-//    for (i = 0; i < list->size; i++)
-//    {
-//       if (list->flags[i] == PL_VALID)
-//       {
-//          a = &list->array[i];
-
-//          MOUSE_pane_refresh(a, a->x0, a->y0, a->x1, a->y1);
-//       }
-//    }
-// }
-
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Initialize mouse system                                                ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Wrapper for VFX_window_refresh() which automatically handles mouse     ##
+// ## cursor maintenance if the mouse cursor falls within the target screen  ##
+// ## coordinates                                                            ##
+// ##                                                                        ##
+// ############################################################################
+
+void MOUSE_window_refresh(WINDOW *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1)
+{
+   printf("[mouse] MOUSE_window_refresh(WINDOW *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1)\n");
+
+   // int32_t shp_x, shp_y;
+   // int32_t bw, bh;
+   // PANE bkgnd, client;
+   // int32_t mx, my, ml, mr, mt, mb, xr;
+   // uint8_t *in;
+
+   // //
+   // // If mouse hidden, just call the driver and return
+   // //
+
+   // if (hidecnt < 0)
+   // {
+   //    VFX_window_refresh(target, x0, y0, x1, y1);
+   //    return;
+   // }
+
+   // //
+   // // Freeze the mouse to ensure valid coordinates
+   // //
+
+   // MOUSE_hold();
+
+   // //
+   // // If mouse is currently outside the region to be refreshed, register the
+   // // region as an exclusion area, release the mouse, do the refresh,
+   // // cancel the exclusion area, and force an update
+   // //
+
+   // if ((saved.x0 > x1) ||
+   //     (saved.x1 < x0) ||
+   //     (saved.y1 < y0) ||
+   //     (saved.y0 > y1))
+   // {
+   //    MOUSE_exclude_area(x0, y0, x1, y1);
+
+   //    MOUSE_release();
+
+   //    VFX_window_refresh(target, x0, y0, x1, y1);
+
+   //    MOUSE_exclude_area(-1, -1, -1, -1);
+
+   //    MOUSE_serve();
+   //    return;
+   // }
+
+   // //
+   // // If this is a scaled window refresh, do a hide/refresh/show cycle and
+   // // return
+   // //
+
+   // if (((x1 - x0) != target->x_max) ||
+   //     ((y1 - y0) != target->y_max))
+   // {
+   //    VFX_wait_vblank_leading();
+   //    MOUSE_hide();
+   //    VFX_window_refresh(target, x0, y0, x1, y1);
+   //    MOUSE_show();
+
+   //    MOUSE_release();
+   //    MOUSE_serve();
+   //    return;
+   // }
+
+   // //
+   // // If client window has a stencil, do a hide/refresh/show cycle if
+   // // the mouse cursor overlaps a non-transparent area of the stencil
+   // //
+
+   // if (target->stencil != NULL)
+   // {
+   //    //
+   //    // Find edges of visible mouse cursor relative to
+   //    // window being refreshed
+   //    //
+
+   //    ml = max(x0, saved.x0) - x0;
+   //    mr = min(x1, saved.x1) - x0;
+   //    mt = max(y0, saved.y0) - y0;
+   //    mb = min(y1, saved.y1) - y0;
+
+   //    //
+   //    // See if a non-transparent stencil packet overlaps mouse cursor
+   //    //
+
+   //    for (my = mt; my <= mb; my++)
+   //    {
+   //       mx = 0;
+
+   //       in = (uint8_t *)target->stencil +
+   //            (((uint32_t *)target->stencil)[my]);
+
+   //       while (mx <= mr)
+   //       {
+   //          xr = mx + (*in & 0x7f) - 1;
+
+   //          if (*in < 128)
+   //          {
+   //             if (!((mx > mr) || (xr < ml)))
+   //             {
+   //                VFX_wait_vblank_leading();
+   //                MOUSE_hide();
+   //                VFX_window_refresh(target, x0, y0, x1, y1);
+   //                MOUSE_show();
+
+   //                MOUSE_release();
+   //                MOUSE_serve();
+   //                return;
+   //             }
+   //          }
+
+   //          in++;
+   //          mx = xr + 1;
+   //       }
+   //    }
+   // }
+
+   // //
+   // // If mouse is inside the region to be refreshed, temporarily merge the
+   // // pointer shape with the client's window so that it will not be erased
+   // // during the refresh, do the refresh, and restore the client's window
+   // // contents
+   // //
+
+   // //
+   // // Define pane to describe part of client window which will be overlaid
+   // // by cursor
+   // //
+
+   // client.window = target;
+   // client.x0 = max(x0, saved.x0) - x0;
+   // client.x1 = min(x1, saved.x1) - x0;
+   // client.y0 = max(y0, saved.y0) - y0;
+   // client.y1 = min(y1, saved.y1) - y0;
+
+   // //
+   // // Define pane to describe part of saved background window which
+   // // lies within client screen area
+   // //
+
+   // bw = saved.x1 - saved.x0;
+   // bh = saved.y1 - saved.y0;
+
+   // bkgnd.window = &save;
+   // bkgnd.x0 = (saved.x0 < x0) ? x0 - saved.x0 : 0;
+   // bkgnd.x1 = (saved.x1 > x1) ? bw - (saved.x1 - x1) : bw;
+   // bkgnd.y0 = (saved.y0 < y0) ? y0 - saved.y0 : 0;
+   // bkgnd.y1 = (saved.y1 > y1) ? bh - (saved.y1 - y1) : bh;
+
+   // //
+   // // Update background preservation window by copying client source
+   // // pane to background pane
+   // //
+
+   // VFX_pane_copy(&client, 0, 0, &bkgnd, 0, 0, NO_COLOR);
+
+   // //
+   // // Draw the mouse pointer into the client's source window, so it will
+   // // appear onscreen at the correct place when the window is refreshed
+   // //
+
+   // shp_x = (x + hot_x < x0) ? x - x0 : -hot_x;
+   // shp_y = (y + hot_y < y0) ? y - y0 : -hot_y;
+
+   // VFX_shape_draw(&client, pointer_table, pointer, shp_x, shp_y);
+
+   // //
+   // // Copy client's window to screen, including the overlaid mouse pointer
+   // //
+
+   // VFX_window_refresh(target, x0, y0, x1, y1);
+
+   // //
+   // // Finally, restore the part of the client's window which we overwrote
+   // // with the mouse pointer (not necessary if client doesn't intend to
+   // // re-use contents of window)
+   // //
+
+   // VFX_pane_copy(&bkgnd, 0, 0, &client, 0, 0, NO_COLOR);
+
+   // //
+   // // Release the mouse and force service in case coordinates
+   // // need updating
+   // //
+
+   // MOUSE_release();
+   // MOUSE_serve();
+}
+
+// ############################################################################
+// ##                                                                        ##
+// ## Wrapper for VFX_pane_refresh() which automatically handles mouse       ##
+// ## cursor maintenance if the mouse cursor falls within the target screen  ##
+// ## coordinates                                                            ##
+// ##                                                                        ##
+// ############################################################################
+
+void MOUSE_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1)
+{
+   printf("[mouse] MOUSE_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1)\n");
+
+   // int32_t shp_x, shp_y;
+   // int32_t bw, bh;
+   // PANE bkgnd, client;
+   // int32_t mx, my, ml, mr, mt, mb, xr;
+   // uint8_t *in;
+
+   // //
+   // // If mouse hidden, just call the driver and return
+   // //
+
+   // if (hidecnt < 0)
+   // {
+   //    VFX_pane_refresh(target, x0, y0, x1, y1);
+   //    return;
+   // }
+
+   // //
+   // // Freeze the mouse to ensure valid coordinates
+   // //
+
+   // MOUSE_hold();
+
+   // //
+   // // If mouse is currently outside the region to be refreshed, register the
+   // // region as an exclusion area, release the mouse, do the refresh,
+   // // cancel the exclusion area, and force an update
+   // //
+
+   // if ((saved.x0 > x1) ||
+   //     (saved.x1 < x0) ||
+   //     (saved.y1 < y0) ||
+   //     (saved.y0 > y1))
+   // {
+   //    MOUSE_exclude_area(x0, y0, x1, y1);
+
+   //    MOUSE_release();
+
+   //    VFX_pane_refresh(target, x0, y0, x1, y1);
+
+   //    MOUSE_exclude_area(-1, -1, -1, -1);
+
+   //    MOUSE_serve();
+   //    return;
+   // }
+
+   // //
+   // // If this is a scaled pane refresh, do a hide/refresh/show cycle and
+   // // return
+   // //
+
+   // if (((x1 - x0) !=
+   //      (min(target->x1, target->window->x_max) - max(target->x0, 0))) ||
+   //     ((y1 - y0) !=
+   //      (min(target->y1, target->window->y_max) - max(target->y0, 0))))
+   // {
+   //    VFX_wait_vblank_leading();
+   //    MOUSE_hide();
+   //    VFX_pane_refresh(target, x0, y0, x1, y1);
+   //    MOUSE_show();
+
+   //    MOUSE_release();
+   //    MOUSE_serve();
+   //    return;
+   // }
+
+   // //
+   // // If client window has a stencil, do a hide/refresh/show cycle if
+   // // the mouse cursor overlaps a non-transparent area of the stencil
+   // //
+
+   // if (target->window->stencil != NULL)
+   // {
+   //    //
+   //    // Find edges of visible mouse cursor relative to
+   //    // window being refreshed
+   //    //
+
+   //    ml = max(x0, saved.x0) - x0 + target->x0;
+   //    mr = min(x1, saved.x1) - x0 + target->x0;
+   //    mt = max(y0, saved.y0) - y0 + target->y0;
+   //    mb = min(y1, saved.y1) - y0 + target->y0;
+
+   //    //
+   //    // See if a non-transparent stencil packet overlaps mouse cursor
+   //    //
+
+   //    for (my = mt; my <= mb; my++)
+   //    {
+   //       mx = 0;
+
+   //       in = (uint8_t *)target->window->stencil +
+   //            (((uint32_t *)target->window->stencil)[my]);
+
+   //       while (mx <= mr)
+   //       {
+   //          xr = mx + (*in & 0x7f) - 1;
+
+   //          if (*in < 128)
+   //          {
+   //             if (!((mx > mr) || (xr < ml)))
+   //             {
+   //                VFX_wait_vblank_leading();
+   //                MOUSE_hide();
+   //                VFX_pane_refresh(target, x0, y0, x1, y1);
+   //                MOUSE_show();
+
+   //                MOUSE_release();
+   //                MOUSE_serve();
+   //                return;
+   //             }
+   //          }
+
+   //          in++;
+   //          mx = xr + 1;
+   //       }
+   //    }
+   // }
+
+   // //
+   // // If mouse is inside the region to be refreshed, temporarily merge the
+   // // pointer shape with the client's pane so that it will not be erased
+   // // during the refresh, do the refresh, and restore the client's pane
+   // // contents
+   // //
+
+   // //
+   // // Define pane to describe part of client window which will be overlaid
+   // // by cursor
+   // //
+   // // Set client pane coordinates relative to target pane
+   // //
+
+   // client.window = target->window;
+   // client.x0 = max(x0, saved.x0) - x0 + target->x0;
+   // client.x1 = min(x1, saved.x1) - x0 + target->x0;
+   // client.y0 = max(y0, saved.y0) - y0 + target->y0;
+   // client.y1 = min(y1, saved.y1) - y0 + target->y0;
+
+   // //
+   // // Define pane to describe part of saved background window which
+   // // lies within client screen area
+   // //
+
+   // bw = saved.x1 - saved.x0;
+   // bh = saved.y1 - saved.y0;
+
+   // bkgnd.window = &save;
+   // bkgnd.x0 = (saved.x0 < x0) ? x0 - saved.x0 : 0;
+   // bkgnd.x1 = (saved.x1 > x1) ? bw - (saved.x1 - x1) : bw;
+   // bkgnd.y0 = (saved.y0 < y0) ? y0 - saved.y0 : 0;
+   // bkgnd.y1 = (saved.y1 > y1) ? bh - (saved.y1 - y1) : bh;
+
+   // //
+   // // Update background preservation window by copying client source
+   // // pane to background pane
+   // //
+
+   // VFX_pane_copy(&client, 0, 0, &bkgnd, 0, 0, NO_COLOR);
+
+   // //
+   // // Draw the mouse pointer into the client's source window, so it will
+   // // appear onscreen at the correct place when the window is refreshed
+   // //
+
+   // shp_x = (x + hot_x < x0) ? x - x0 : -hot_x;
+   // shp_y = (y + hot_y < y0) ? y - y0 : -hot_y;
+
+   // VFX_shape_draw(&client, pointer_table, pointer, shp_x, shp_y);
+
+   // //
+   // // Copy client's pane to screen, including the overlaid mouse pointer
+   // //
+
+   // VFX_pane_refresh(target, x0, y0, x1, y1);
+
+   // //
+   // // Finally, restore the part of the client's window which we overwrote
+   // // with the mouse pointer (not necessary if client doesn't intend to
+   // // re-use contents of window)
+   // //
+
+   // VFX_pane_copy(&bkgnd, 0, 0, &client, 0, 0, NO_COLOR);
+
+   // //
+   // // Release the mouse and force service in case coordinates
+   // // need updating
+   // //
+
+   // MOUSE_release();
+   // MOUSE_serve();
+}
+
+// ############################################################################
+// ##                                                                        ##
+// ## Perform MOUSE_pane_refresh() calls for all entries in a PANE_LIST      ##
+// ##                                                                        ##
+// ############################################################################
+
+void MOUSE_pane_list_refresh(PANE_LIST *list)
+{
+   printf("[mouse] MOUSE_pane_list_refresh(PANE_LIST *list)\n");
+
+   // uint32_t i;
+   // PANE *a;
+
+   // for (i = 0; i < list->size; i++)
+   // {
+   //    if (list->flags[i] == PL_VALID)
+   //    {
+   //       a = &list->array[i];
+
+   //       MOUSE_pane_refresh(a, a->x0, a->y0, a->x1, a->y1);
+   //    }
+   // }
+}
+
+// ############################################################################
+// ##                                                                        ##
+// ## Initialize mouse system                                                ##
+// ##                                                                        ##
+// ############################################################################
 
 int32_t MOUSE_init(int32_t xsize, int32_t ysize, int32_t background)
 {
+   printf("[mouse] MOUSE_init(int32_t xsize, int32_t ysize, int32_t background) - xsize=%i ysize=%i background=%i\n", xsize, ysize, background);
+
    //    union REGS inregs, outregs;
 
    //    //
@@ -1336,14 +1432,16 @@ int32_t MOUSE_init(int32_t xsize, int32_t ysize, int32_t background)
    return 1;
 }
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Shut down mouse system                                                 ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Shut down mouse system                                                 ##
+// ##                                                                        ##
+// ############################################################################
 
 void MOUSE_shutdown(void)
 {
+   printf("[mouse] MOUSE_shutdown(void)\n");
+
    //    union REGS inregs, outregs;
 
    //    // LUM added
@@ -1388,11 +1486,11 @@ void MOUSE_shutdown(void)
 
 #ifdef DEMO
 
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// �� Exercise mouse system (compiled only if DEMO defined)                  ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ## Exercise mouse system (compiled only if DEMO defined)                  ##
+// ##                                                                        ##
+// ############################################################################
 
 int32_t volatile local_X;
 int32_t volatile local_Y;

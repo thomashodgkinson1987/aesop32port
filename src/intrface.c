@@ -1,43 +1,35 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  INTRFACE.C                                                            ��
-// ��                                                                        ��
-// ��  AESOP user interface code resource handlers for Eye III engine        ��
-// ��                                                                        ��
-// ��  Version: 1.00 of 6-May-92 -- Initial version                          ��
-// ��                                                                        ��
-// ��  Project: Eye III                                                      ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with Borland C++ v3.0 or later                    ��
-// ��  Large memory model (16-bit DOS)                                       ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  10926 Jollyville #308                                                 ��
-// ��  Austin, TX 78759                                                      ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  INTRFACE.C                                                            ##
+// ##                                                                        ##
+// ##  AESOP user interface code resource handlers for Eye III engine        ##
+// ##                                                                        ##
+// ##  Version: 1.00 of 6-May-92 -- Initial version                          ##
+// ##                                                                        ##
+// ##  Project: Eye III                                                      ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with Borland C++ v3.0 or later                    ##
+// ##  Large memory model (16-bit DOS)                                       ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  10926 Jollyville #308                                                 ##
+// ##  Austin, TX 78759                                                      ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
-// #include <conio.h> // Tom: commented out
 #include <stdio.h>
-// #include <dos.h> // Tom: commented out
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <stdint.h> // Tom: added
+#include <stdint.h>
 
-// #include "vfx.h" // Tom: commented out
-// #include "ail32.h" // Tom: commented out
-// #include "gil2vfx.h" // Tom: commented out
-// #include "gil2vfxa.h" // Tom: commented out
 #include "mouse.h"
-
-// extern VFX_DESC *VFX; // Tom: commented out
 
 #include "defs.h"
 #include "shared.h"
@@ -110,6 +102,8 @@ typedef struct // DPMI real-mode interrupt structure
 /*********************************************************/
 void getkey(void)
 {
+   printf("[intrface] getkey(void)\n");
+
    while (!find_event(SYS_KEYDOWN, -1L))
       ;
 
@@ -122,6 +116,8 @@ void add_region_event(int32_t type, int32_t owner)
    int16_t nxt;
    uint32_t r;
    NREQ *NR;
+
+   printf("[intrface] add_region_event(int32_t type, int32_t owner) - type=%i owner=%i\n", type, owner);
 
    DISABLE();
 
@@ -171,6 +167,8 @@ static void timer_callback(void) // Warning: called during IRQ 0
    static uint16_t *buffer = (uint16_t *)0x41eL;
    (void)scan; // Tom: added, not used?
 
+   printf("[intrface] timer_callback(void)\n");
+
    if (ENABLED <= 0)
       return;
 
@@ -208,6 +206,8 @@ static void mouse_event_handler(int32_t px, int32_t py)
    int32_t r;
    NREQ *NR;
    EVENT *EV;
+
+   printf("[intrface] mouse_event_handler(int32_t px, int32_t py) - px=%i py=%i\n", px, py);
 
    if (entry)
       return;
@@ -269,6 +269,8 @@ static void mouse_button_event_handler(int32_t left, int32_t right, int32_t cent
    static int32_t entry = 0;
    (void)center; // Tom: added
 
+   printf("[intrface] mouse_button_event_handler(int32_t left, int32_t right, int32_t center) - left=%i right=%i center=%i\n", left, right, center);
+
    if (entry)
       return;
    entry = 1;
@@ -303,6 +305,8 @@ static void mouse_button_event_handler(int32_t left, int32_t right, int32_t cent
 void init_interface(void) // Tom: TODO
 {
    // Tom: added new version
+
+   printf("[intrface] init_interface(void)\n");
 
    in_BIOS = 0;
    heartbeat = 0L;
@@ -379,6 +383,8 @@ void init_interface(void) // Tom: TODO
 /*********************************************************/
 void shutdown_interface(void) // Tom: TODO
 {
+   printf("[intrface] shutdown_interface(void)\n");
+
    // Tom: added new version
 
    if (!interface_active)
@@ -423,6 +429,8 @@ void shutdown_interface(void) // Tom: TODO
 void set_mouse_pointer(int32_t argcnt, uint32_t table, uint32_t number, int32_t hot_X, int32_t hot_Y, uint32_t scale, uint32_t fade_table, uint32_t fade_level)
 {
    ND_entry *entry;
+
+   printf("[intrface] set_mouse_pointer(int32_t argcnt, uint32_t table, uint32_t number, int32_t hot_X, int32_t hot_Y, uint32_t scale, uint32_t fade_table, uint32_t fade_level) - argcnt=%i table=%u number=%u hot_X=%i hot_Y=%i scale=%u fade_table=%u fade_level=%u\n", argcnt, table, number, hot_X, hot_Y, scale, fade_table, fade_level);
 
    if ((wait_ptr_state != 0) && (argcnt != 0))
    {
@@ -478,6 +486,8 @@ void set_wait_pointer(int32_t argcnt, uint32_t number, int32_t hot_X, int32_t ho
 {
    (void)argcnt; // Tom: added
 
+   printf("[intrface] set_wait_pointer(int32_t argcnt, uint32_t number, int32_t hot_X, int32_t hot_Y) - argcnt=%i number=%u hot_X=%i hot_Y=%i\n", argcnt, number, hot_X, hot_Y);
+
    if (number == UINT32_MAX)
    {
       wait_ptr_valid = 0;
@@ -494,6 +504,8 @@ void set_wait_pointer(int32_t argcnt, uint32_t number, int32_t hot_X, int32_t ho
 /*********************************************************/
 void standby_cursor(void)
 {
+   printf("[intrface] standby_cursor(void)\n");
+
    if (!wait_ptr_valid)
       return;
    if (!ptr_valid)
@@ -519,6 +531,8 @@ void standby_cursor(void)
 
 void resume_cursor(void)
 {
+   printf("[intrface] resume_cursor(void)\n");
+
    if (!wait_ptr_valid)
       return;
    if (!ptr_valid)
@@ -538,6 +552,8 @@ void resume_cursor(void)
 
 void lock_mouse(void)
 {
+   printf("[intrface] lock_mouse(void)\n");
+
    MOUSE_lock();
 }
 
@@ -551,18 +567,24 @@ void lock_mouse(void)
 
 void unlock_mouse(void)
 {
+   printf("[intrface] unlock_mouse(void)\n");
+
    MOUSE_unlock();
 }
 
 /*********************************************************/
 void show_mouse(void)
 {
+   printf("[intrface] show_mouse(void)\n");
+
    MOUSE_show();
 }
 
 /*********************************************************/
 void hide_mouse(void)
 {
+   printf("[intrface] hide_mouse(void)\n");
+
    MOUSE_hide();
 }
 
@@ -570,6 +592,8 @@ void hide_mouse(void)
 uint32_t mouse_XY(void)
 {
    uint32_t xy;
+
+   printf("[intrface] mouse_XY(void)\n");
 
    DISABLE();
 
@@ -591,6 +615,8 @@ uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd)
    uint32_t stat;
    (void)argcnt; // Tom: added
    (void)wnd;    // Tom: added
+
+   printf("[intrface] mouse_in_window(int32_t argcnt, uint32_t wnd) - argcnt=%i wnd=%u\n", argcnt, wnd);
 
    stat = 0; // Tom: added, stubbed version
 
@@ -617,10 +643,14 @@ void refresh_window(int32_t argcnt, uint32_t src, uint32_t target)
    (void)src;    // Tom: added
    (void)target; // Tom: added
 
+   printf("[intrface] refresh_window(int32_t argcnt, uint32_t src, uint32_t target) - argcnt=%i src=%u target=%u\n", argcnt, src, target);
+
    // GIL2VFX_refresh_window(src, target); // Tom: commented out
 }
 
 void intrface_entry()
 {
+   printf("[intrface] intrface_entry()\n");
+
    // wvideo
 }

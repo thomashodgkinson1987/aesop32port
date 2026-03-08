@@ -37,12 +37,13 @@ ifeq (run,$(firstword $(MAKECMDGOALS)))
 endif
 
 run: build
+	cp $(TARGET) eobiii/
 	@if [ -z "$(RUN_ARGS)" ]; then \
-		./$(TARGET) $(RES_FILE) $(START_OBJ); \
+		cd eobiii && ./$(TARGET) $(RES_FILE) $(START_OBJ); \
 	else \
 		SEC=$(word 1,$(RUN_ARGS)); \
 		OUT=$(word 2,$(RUN_ARGS)); \
-		echo "Running $(TARGET) for $$SEC seconds, saving output to $$OUT..."; \
-		timeout --foreground $${SEC}s ./$(TARGET) $(RES_FILE) $(START_OBJ) > $$OUT 2>&1 || true; \
+		echo "Running $(TARGET) in eobiii for $$SEC seconds, saving output to $$OUT..."; \
+		cd eobiii && timeout --foreground $${SEC}s ./$(TARGET) $(RES_FILE) $(START_OBJ) > ../$$OUT 2>&1 || true; \
 		echo "Done. Output saved to $$OUT."; \
 	fi
