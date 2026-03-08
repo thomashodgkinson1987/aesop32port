@@ -660,8 +660,8 @@ __handle_msg:
             }
             stk_off = fptr;
 
-            edi += arg_count + 1; // Correct: edi was at func_ptr, pop it and all args
-            edi->val = ret_val;   // Current slot is now where return value goes
+            edi += arg_count; // edi now points to func_ptr slot
+            edi->val = ret_val;   // return value overwrites func_ptr slot
 
             /* Re-derive DS32 in case of resource move */
             uint8_t *new_ds32 = (uint8_t *)RTR_addr(h_prg);
