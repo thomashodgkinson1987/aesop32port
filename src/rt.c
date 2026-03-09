@@ -609,55 +609,55 @@ __handle_msg:
                 ret_val = ((int32_t (*)(int32_t, int32_t))func_ptr)(arg_count, args[0]);
                 break;
             case 2:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t))func_ptr)(arg_count, args[1], args[0]);
                 break;
             case 3:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[2], args[1], args[0]);
                 break;
             case 4:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[3], args[2], args[1], args[0]);
                 break;
             case 5:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 6:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 7:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 8:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 9:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 10:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 11:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[10], args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 12:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[11], args[10], args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 13:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[12], args[11], args[10], args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 14:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[13], args[12], args[11], args[10], args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 15:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[14], args[13], args[12], args[11], args[10], args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 16:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[15], args[14], args[13], args[12], args[11], args[10], args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 17:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15], args[16]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[16], args[15], args[14], args[13], args[12], args[11], args[10], args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             case 18:
-                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15], args[16], args[17]);
+                ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[17], args[16], args[15], args[14], args[13], args[12], args[11], args[10], args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             }
             stk_off = fptr;

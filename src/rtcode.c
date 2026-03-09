@@ -62,6 +62,8 @@
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
+static int32_t dos_bda_04f0 = 0; // Virtualise the BIOS Data Area address 0x04f0
+
 uint32_t diag_flag = 0;
 
 // Tom: added
@@ -261,42 +263,60 @@ void beep(void)
 
 void pokemem(int32_t argcnt, int32_t *addr, int32_t data)
 {
-   (void)argcnt;
+   uint32_t linear_addr = (uint32_t)addr; // Cast so we can safely check the integer value
 
-   printf("[rtcode] pokemem: argcnt=%i addr=%p data=%i\n", argcnt, (void *)addr, data);
+   printf("[rtcode] pokemem: argcnt=%i addr=0x%x data=%i\n", argcnt, linear_addr, data);
 
-   if (addr == NULL)
+   if (linear_addr == 0)
    {
       printf("[rtcode] pokemem: attempt to write %d to NULL address, ignoring\n", data);
       return;
    }
 
+   // Intercept writes to the DOS BIOS Data Area
+   if (linear_addr == 0x04F0)
+   {
+      dos_bda_04f0 = data;
+      return;
+   }
+
+   // Catch any other hardcoded low-memory DOS addresses to prevent segfaults
+   if (linear_addr < 0x10000)
+   {
+      printf("[rtcode] pokemem: Blocked write to low DOS memory 0x%x\n", linear_addr);
+      return;
+   }
+
+   // If the script actually passes a valid dynamic memory pointer from the engine, write to it
    *addr = data;
 }
 
 int32_t peekmem(int32_t argcnt, int32_t *addr)
 {
-   static int first_call = 1;
    (void)argcnt;
+   uint32_t linear_addr = (uint32_t)addr;
 
-   printf("[rtcode] peekmem: argcnt=%i addr=%p\n", argcnt, (void *)addr);
-
-   if (first_call)
-   {
-      first_call = 0;
-      printf("[rtcode] peekmem: first call (addr=%p), returning 'CINE' magic cookie\n", (void *)addr);
-      return 0;
-      // return 0x43494e45; // "CINE"
-   }
-
-   if (addr == NULL)
+   if (linear_addr == 0)
    {
       printf("[rtcode] peekmem: attempt to read from NULL address, returning 0\n");
       return 0;
    }
 
-   printf("[rtcode] peekmem: argcnt=%i addr=%p return=%i\n", argcnt, (void *)addr, *addr);
+   // Intercept reads from the DOS BIOS Data Area
+   if (linear_addr == 0x04F0)
+   {
+      printf("[rtcode] peekmem: argcnt=%i addr=%p return=%i\n", argcnt, (void *)addr, dos_bda_04f0);
+      return dos_bda_04f0;
+   }
 
+   // Catch any other hardcoded low-memory DOS addresses to prevent segfaults
+   if (linear_addr < 0x10000)
+   {
+      printf("[rtcode] peekmem: Blocked read from low DOS memory 0x%x\n", linear_addr);
+      return 0;
+   }
+
+   printf("[rtcode] peekmem: argcnt=%i addr=%p return=%i\n", argcnt, (void *)addr, *addr);
    return *addr;
 }
 
