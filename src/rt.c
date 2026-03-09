@@ -137,9 +137,7 @@ const char *case_list_strings[] = {
 
 /* Dictionary Functions */
 
-// uint8_t *RTD_lookup(uint32_t HRES, uint8_t *Key) // Tom: see header
-// int8_t *RTD_lookup(uint32_t HRES, uint8_t *Key) // Tom: modified
-int8_t *RTD_lookup(uint32_t HRES, void *Key) // Tom: modifiednew
+int8_t *RTD_lookup(uint32_t HRES, void *Key)
 {
     uint8_t *dict = (uint8_t *)RTR_addr(HRES);
     uint32_t hash_size = *(uint16_t *)dict;
@@ -147,8 +145,6 @@ int8_t *RTD_lookup(uint32_t HRES, void *Key) // Tom: modifiednew
     uint8_t *esi = Key;
     uint32_t sum = 0;
     uint32_t tag_len = 1;
-
-    printf("[rt] RTD_lookup(uint32_t HRES, void *Key) - HRES=%u Key=%u\n", HRES, Key);
 
     /* Hash Function */
     while (1)
@@ -176,7 +172,10 @@ int8_t *RTD_lookup(uint32_t HRES, void *Key) // Tom: modifiednew
     uint32_t chain_offset = *(uint32_t *)(dict + 2 + edx * 4);
 
     if (chain_offset == 0)
+    {
+        printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL\n", HRES, Key);
         return NULL;
+    }
 
     uint8_t *edi = dict + chain_offset;
 
@@ -185,14 +184,17 @@ int8_t *RTD_lookup(uint32_t HRES, void *Key) // Tom: modifiednew
         uint32_t ecx = *(uint16_t *)edi;
         edi += 2;
         if (ecx == 0)
+        {
+            printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL\n", HRES, Key);
             return NULL;
+        }
 
         if (ecx == tag_len)
         {
             if (memcmp(edi, Key, tag_len) == 0)
             {
-                // return edi + tag_len + 2; /* Return Definition string */ // Tom: old version
-                return (int8_t *)(edi + tag_len + 2); /* Return Definition string */ // Tom: new version
+                printf("[rt] RTD_lookup: HRES=%u Key=%p return=%u\n", HRES, Key, (int8_t *)(edi + tag_len + 2));
+                return (int8_t *)(edi + tag_len + 2);
             }
         }
 
@@ -203,38 +205,34 @@ int8_t *RTD_lookup(uint32_t HRES, void *Key) // Tom: modifiednew
     }
 }
 
-// uint32_t RTD_first(void *dictionary) // Tom: original
-// uint32_t *RTD_first(void *dictionary) // Tom: new
-void *RTD_first(void *dictionary) // Tom: newnew
+void *RTD_first(void *dictionary)
 {
     uint8_t *esi = (uint8_t *)dictionary;
     uint32_t hash_size = *(uint16_t *)esi;
-
-    printf("[rt] RTD_first(void *dictionary) - dictionary=%u\n", dictionary);
 
     esi += 2;
     esi += hash_size * 4;
 
     if (*(uint16_t *)esi == 0)
+    {
+        printf("[rt] RTD_first: dictionary=%p return=0\n", dictionary);
         return 0;
+    }
 
-    // return (uint32_t)(esi - (uint8_t *)dictionary); // Tom: see below - header matching
-    // return (uint32_t *)(esi - (uint8_t *)dictionary); // Tom: new
-    return (void *)(esi - (uint8_t *)dictionary); // Tom: newnew
+    printf("[rt] RTD_first: dictionary=%p return=%p\n", dictionary, (void *)(esi - (uint8_t *)dictionary));
+    return (void *)(esi - (uint8_t *)dictionary);
 }
 
-// uint32_t RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def) // Tom: original
-// uint32_t *RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def) // Tom: new
-void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def) // Tom: newnew
+void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def)
 {
     if (cur == 0)
+    {
+        printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=0\n", base, cur, (void *)tag, (void *)def);
         return 0;
+    }
 
-    // uint8_t *esi = (uint8_t *)base + cur;
     uint8_t *esi = (uint8_t *)((uintptr_t)base + (uintptr_t)cur);
     uint32_t tag_len = *(uint16_t *)esi;
-
-    printf("[rt] RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def) - base=%u cur=%u tag=%u def=%u\n", base, cur, tag, def);
 
     esi += 2;
 
@@ -243,7 +241,10 @@ void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def) // Tom: new
         tag_len = *(uint16_t *)esi;
         esi += 2;
         if (tag_len == 0)
+        {
+            printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=0\n", base, cur, (void *)tag, (void *)def);
             return 0;
+        }
     }
 
     *tag = (int8_t *)esi;
@@ -254,16 +255,15 @@ void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def) // Tom: new
     *def = (int8_t *)esi;
     esi += def_len;
 
-    // return (uint32_t)(esi - (uint8_t *)base); // Tom: original
-    // return (uint32_t *)(esi - (uint8_t *)base); // Tom: new
-    return (void *)(esi - (uint8_t *)base); // Tom: new
+    printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=%p\n", base, cur, (void *)tag, (void *)def, (void *)(esi - (uint8_t *)base));
+    return (void *)(esi - (uint8_t *)base);
 }
 
 /* Subsystem Control Functions */
 
 void RT_init(RTR_class *RTR, uint32_t StkSize, uint32_t *ObjectList)
 {
-    printf("[rt] RT_init(RTR_class *RTR, uint32_t StkSize, uint32_t *ObjectList) - RTR=%u StkSize=%u ObjectList=%u\n", RTR, StkSize, ObjectList);
+    printf("[rt] RT_init: RTR=%p StkSize=%u ObjectList=%p\n", (void *)RTR, StkSize, (void *)ObjectList);
 
     objlist_ptr = ObjectList;
     RTR_ptr = RTR;
@@ -273,14 +273,14 @@ void RT_init(RTR_class *RTR, uint32_t StkSize, uint32_t *ObjectList)
 
 void RT_shutdown(void)
 {
-    printf("[rt] RT_shutdown(void)\n");
+    printf("[rt] RT_shutdown\n");
 
     mem_free(stk_base);
 }
 
 void RT_arguments(void *Base, uint32_t Bytes)
 {
-    printf("[rt] RT_arguments(void *Base, uint32_t Bytes) - Base=%u Bytes=%u\n", Base, Bytes);
+    printf("[rt] RT_arguments: Base=%p Bytes=%u\n", Base, Bytes);
 
     stk_off = (VALUE *)((uint8_t *)stk_off - Bytes);
     memcpy(stk_off, Base, Bytes);
@@ -302,7 +302,7 @@ int32_t RT_execute(uint32_t Index, uint32_t Message, uint32_t Vector)
     uint8_t *esi;
     VALUE *edi;
 
-    printf("[rt] RT_execute(uint32_t Index, uint32_t Message, uint32_t Vector) - Index=%u Message=%u Vector=%u\n", Index, Message, Vector);
+    printf("[rt] RT_execute: Index=%u Message=%u Vector=%u\n", Index, Message, Vector);
 
     /* Call Stack Simulation */
     struct CallFrame
@@ -329,7 +329,7 @@ int32_t RT_execute(uint32_t Index, uint32_t Message, uint32_t Vector)
     THDR *thdr = (THDR *)ptr_thunk;
     MV_entry *mv_list;
 
-    if (Vector != -1U && Vector != 0xFFFF)
+    if (Vector != UINT32_MAX && Vector != 0xFFFF)
     {
         esi = ptr_thunk + Vector;
         goto __handle_msg;
@@ -684,7 +684,7 @@ __handle_msg:
             uint32_t instance_handle = edi->val;
             uint16_t msg_num = *(uint16_t *)(esi + 1);
 
-            int32_t ret_val = RT_execute(instance_handle, msg_num, -1U);
+            int32_t ret_val = RT_execute(instance_handle, msg_num, UINT32_MAX);
 
             stk_off = fptr;
             edi->val = ret_val; // Overwrite instance handle with return value

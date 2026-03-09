@@ -1,40 +1,38 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  RTOBJECT.C                                                            ��
-// ��                                                                        ��
-// ��  AESOP runtime code resource handlers for Eye III engine               ��
-// ��                                                                        ��
-// ��  Universal object management                                           ��
-// ��                                                                        ��
-// ��  Version: 1.00 of 23-Aug-92 -- Initial version                         ��
-// ��                                                                        ��
-// ��  Project: Eye III                                                      ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with Borland C++ v3.0 or later                    ��
-// ��  Large memory model (16-bit DOS)                                       ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  10926 Jollyville #308                                                 ��
-// ��  Austin, TX 78759                                                      ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  RTOBJECT.C                                                            ##
+// ##                                                                        ##
+// ##  AESOP runtime code resource handlers for Eye III engine               ##
+// ##                                                                        ##
+// ##  Universal object management                                           ##
+// ##                                                                        ##
+// ##  Version: 1.00 of 23-Aug-92 -- Initial version                         ##
+// ##                                                                        ##
+// ##  Project: Eye III                                                      ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with Borland C++ v3.0 or later                    ##
+// ##  Large memory model (16-bit DOS)                                       ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  10926 Jollyville #308                                                 ##
+// ##  Austin, TX 78759                                                      ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
 #include <stdio.h>
 #include <stdlib.h>
-// #include <dos.h> // Tom: commented out
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
-// #include <io.h> // Tom: commented out
 #include <errno.h>
-#include <sys/stat.h> // Tom: replaced `\` with `/`
-#include <unistd.h>   // Tom: added for write
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "defs.h"
 #include "shared.h"
@@ -74,7 +72,7 @@ char *ltoa(long val, char *buffer, int radix)
 extern uint32_t check_on;
 
 //
-// objlist:  List of handles to all entities in "universe"
+// objlist: List of handles to all entities in "universe"
 //
 
 uint32_t objlist[NUM_OBJECTS];
@@ -98,6 +96,8 @@ void init_object_list(void)
 {
    int32_t i;
 
+   printf("[rtobject] init_object_list\n");
+
    for (i = 0; i < NUM_OBJECTS; i++)
       objlist[i] = UINT32_MAX;
 }
@@ -118,9 +118,15 @@ int32_t find_free_entry(int32_t min, int32_t end)
          break;
 
    if (i == end)
+   {
+      printf("[rtobject] find_free_entry: min=%i end=%i return=-1\n", min, end);
       return -1;
+   }
    else
+   {
+      printf("[rtobject] find_free_entry: min=%i end=%i return=%i\n", min, end, i);
       return i;
+   }
 }
 
 /***************************************************/
@@ -131,6 +137,8 @@ int32_t find_free_entry(int32_t min, int32_t end)
 
 void create_SOP_instance(uint32_t name, int32_t index)
 {
+   printf("[rtobject] create_SOP_instance: name=%u index=%i\n", name, index);
+
    objlist[index] = create_instance(RTR, name);
 
    RT_execute(index, MSG_CREATE, UINT32_MAX);
@@ -147,12 +155,14 @@ void create_SOP_instance(uint32_t name, int32_t index)
 int32_t create_object(int32_t argcnt, uint32_t name)
 {
    int32_t index;
-   (void)argcnt; // Tom: added
+   (void)argcnt;
 
    index = find_free_entry(0, NUM_ENTITIES);
 
    if (index != -1)
       create_SOP_instance(name, index);
+
+   printf("[rtobject] create_object: argcnt=%i name=%u return=%i\n", argcnt, name, index);
 
    return index;
 }
@@ -168,7 +178,9 @@ int32_t create_object(int32_t argcnt, uint32_t name)
 
 int32_t create_program(int32_t argcnt, int32_t index, uint32_t name)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[rtobject] create_program: argcnt=%i index=%i name=%u\n", argcnt, index, name);
 
    if (index == -1)
       index = find_free_entry(NUM_ENTITIES, NUM_OBJECTS);
@@ -191,7 +203,7 @@ int32_t create_program(int32_t argcnt, int32_t index, uint32_t name)
 int32_t destroy_object(int32_t argcnt, int32_t index)
 {
    int32_t rtn;
-   (void)argcnt; // Tom: added
+   (void)argcnt;
 
    rtn = RT_execute(index, MSG_DESTROY, UINT32_MAX);
 
@@ -201,6 +213,8 @@ int32_t destroy_object(int32_t argcnt, int32_t index)
    destroy_instance(RTR, objlist[index]);
 
    objlist[index] = -1;
+
+   printf("[rtobject] destroy_object: argcnt=%i index=%i return=%i\n", argcnt, index, rtn);
 
    return rtn;
 }
@@ -214,6 +228,8 @@ int32_t destroy_object(int32_t argcnt, int32_t index)
 void thrash_cache(void)
 {
    int32_t i, handles[50];
+
+   printf("[rtobject] thrash_cache\n");
 
    for (i = 0; i < 3; i++)
    {
@@ -234,7 +250,9 @@ void thrash_cache(void)
 
 uint32_t flush_cache(int32_t argcnt, uint32_t goal)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[rtobject] flush_cache: argcnt=%i goal=%u\n", argcnt, goal);
 
    return RTR_force_discard(RTR, goal);
 }
@@ -258,8 +276,7 @@ void dump_static_context(uint32_t index, TF_class *TF)
    int8_t type, *tag, *def, *size;
    void *inst, *d;
 
-   // Tom: new version?
-   // sprintf((char *)linbuf, "Entry %u: ", index);
+   printf("[rtobject] dump_static_context: index=%u TF=%p\n", index, (void *)TF);
 
    strcpy((char *)linbuf, "Entry ");
    ltoa(index, (char *)(&linbuf[6]), 10);
@@ -271,7 +288,7 @@ void dump_static_context(uint32_t index, TF_class *TF)
 
    instance = objlist[index];
 
-   if (instance == -1U)
+   if (instance == UINT32_MAX)
    {
       strcat((char *)linbuf, "Available");
       TF_writeln(TF, linbuf);
@@ -340,15 +357,15 @@ void dump_static_context(uint32_t index, TF_class *TF)
             {
             case 'B':
                ltoa(*(int8_t *)d, (char *)val, 10);
-               d = add_ptr(d, 1L);
+               d = add_ptr(d, 1);
                break;
             case 'W':
                ltoa(*(int16_t *)d, (char *)val, 10);
-               d = add_ptr(d, 2L);
+               d = add_ptr(d, 2);
                break;
             case 'L':
                ltoa(*(int32_t *)d, (char *)val, 10);
-               d = add_ptr(d, 4L);
+               d = add_ptr(d, 4);
                break;
             }
 
@@ -384,12 +401,14 @@ void dump_static_context(uint32_t index, TF_class *TF)
 int32_t readln(TF_class *TF, int8_t *buffer, int32_t maxlen)
 {
    int32_t status;
-   (void)buffer; // Tom: added
-   (void)maxlen; // Tom: added
+   (void)buffer;
+   (void)maxlen;
 
    do
       status = TF_readln(TF, linbuf, sizeof(linbuf));
    while (status && (linbuf[0] == ';'));
+
+   printf("[rtobject] readln: TF=%p buffer=%p maxlen=%i return=%i\n", (void *)TF, buffer, maxlen, status);
 
    return status;
 }
@@ -415,14 +434,16 @@ CDESC *read_context_descriptor(TF_class *TF)
 
    num = &linbuf[6];
 
-   // c.size = -1U; // Tom: commented out, new version below
-   c.size = UINT16_MAX; // Tom: added, old version above
+   // Tom: TODO start
+
+   c.size = UINT16_MAX;
    c.slot = (uint16_t)ascnum(num);
 
    name = (int8_t *)strchr((char *)num, '"');
    if (name == NULL)
    {
-      c.name = (uint32_t)-1L;
+      c.name = UINT32_MAX;
+      printf("[rtobject] read_context_descriptor: TF=%p return=%p\n", (void *)TF, (void *)&c);
       return &c;
    }
 
@@ -441,6 +462,8 @@ CDESC *read_context_descriptor(TF_class *TF)
 
    RTR_unlock(HROED);
 
+   printf("[rtobject] read_context_descriptor: TF=%p return=%p\n", (void *)TF, (void *)&c);
+
    return &c;
 }
 
@@ -458,6 +481,8 @@ void restore_static_context(uint32_t instance, TF_class *TF)
    SD_entry *SD;
    THDR thdr;
    int8_t *tag, *def, *size, *chrpnt;
+
+   printf("[rtobject] restore_static_context: instance=%u TF=%p\n", instance, (void *)TF);
 
    thunk = ((IHDR *)RTR_addr(instance))->thunk;
    thdr = *((THDR *)RTR_addr(thunk));
@@ -616,7 +641,10 @@ int32_t save_range(int8_t *filename, int32_t filetype, int32_t first, int32_t la
    {
       TF = TF_construct(filename, TF_WRITE);
       if (TF == NULL)
+      {
+         printf("[rtobject] save_range: filename=%s filetype=%i first=%i last=%i return=0\n", filename, filetype, first, last);
          return 0;
+      }
 
       for (index = first; index <= last; index++)
       {
@@ -635,7 +663,10 @@ int32_t save_range(int8_t *filename, int32_t filetype, int32_t first, int32_t la
    {
       handle = open((char *)filename, O_CREAT | O_RDWR | O_TRUNC | O_BINARY, S_IREAD | S_IWRITE);
       if (handle == -1)
+      {
+         printf("[rtobject] save_range: filename=%s filetype=%i first=%i last=%i return=0\n", filename, filetype, first, last);
          return 0;
+      }
 
       typetest = 26;
       write(handle, &typetest, 1);
@@ -674,6 +705,8 @@ int32_t save_range(int8_t *filename, int32_t filetype, int32_t first, int32_t la
 
       close(handle);
    }
+
+   printf("[rtobject] save_range: filename=%s filetype=%i first=%i last=%i return=%i\n", filename, filetype, first, last, good);
 
    return good;
 }
@@ -728,6 +761,8 @@ void restore_range(int8_t *filename, uint32_t first, uint32_t last, uint32_t res
    // uint32_t CDname; // code object name
    // uint16_t CDsize; // size of instance data (unused in text files)
 
+   printf("[rtobject] restore_range: filename=%s first=%u last=%u restoring=%u\n", filename, first, last, restoring);
+
    txttype = 0;
    bad = 0;
 
@@ -779,11 +814,9 @@ void restore_range(int8_t *filename, uint32_t first, uint32_t last, uint32_t res
       // CDname = CD->name;
       // CDsize = CD->size;
 
-      // if (CD->name == (uint32_t)-1L) // Tom: commented out, new version below
       if (CD->name == UINT32_MAX)
       {
-         // if (cur != -1) // Tom: commented out, might have originally had -1L
-         if (cur != UINT32_MAX) // Tom: added
+         if (cur != UINT32_MAX)
          {
             destroy_object(0, index);
          }
@@ -791,8 +824,7 @@ void restore_range(int8_t *filename, uint32_t first, uint32_t last, uint32_t res
          continue;
       }
 
-      // if (cur != -1) // Tom: commented out, original might have been -1L
-      if (cur != UINT32_MAX) // Tom: added
+      if (cur != UINT32_MAX)
       {
          sel = (HD_entry *)cur;
 
@@ -871,6 +903,8 @@ void translate_file(int8_t *TXT_filename, int8_t *BIN_filename, uint32_t first, 
    THDR thdr;
    uint8_t typetest;
 
+   printf("[rtobject] translate_file: TXT_filename=%s BIN_filename=%s first=%u last=%u\n", TXT_filename, BIN_filename, first, last);
+
    handle = open((char *)BIN_filename, O_CREAT | O_RDWR | O_TRUNC | O_BINARY, S_IREAD | S_IWRITE);
    if (handle == -1)
       abend(MSG_COOFFT); //"Couldn't open output file for translation"
@@ -882,12 +916,9 @@ void translate_file(int8_t *TXT_filename, int8_t *BIN_filename, uint32_t first, 
    if (TF == NULL)
       abend(MSG_COIFFT); //"Couldn't open input file for translation"
 
-   // Tom: original line commented out
-   // for (index = first; index <= last; index++)
    for (index = (int32_t)first; index <= (int32_t)last; index++) // Tom: added
    {
       CD = read_context_descriptor(TF);
-      // if ((CD == NULL) || (CD->slot != index)) // Tom: original line
       if ((CD == NULL) || (CD->slot != (uint16_t)index)) // Tom: added
       {
          abend(MSG_CTCFE, index); //"Couldn't translate context file entry %u"

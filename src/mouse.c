@@ -583,7 +583,7 @@ void MOUSE_set_pointer(void *table, int32_t shape)
    int32_t hot, res;
    int32_t w, h;
 
-   printf("[mouse] MOUSE_set_pointer(void *table, int32_t shape) - table=%u shape=%i\n", table, shape);
+   printf("[mouse] MOUSE_set_pointer(void *table, int32_t shape) - table=%p shape=%i\n", table, shape);
 
    if ((pointer_table == table) &&
        (pointer == shape))
@@ -628,7 +628,7 @@ void MOUSE_set_pointer(void *table, int32_t shape)
 
 void MOUSE_status(int32_t *mx, int32_t *my, int32_t *ml, int32_t *mr, int32_t *mc)
 {
-   printf("[mouse] MOUSE_status(int32_t *mx, int32_t *my, int32_t *ml, int32_t *mr, int32_t *mc) - mx=%u my=%u ml=%u mr=%u mc=%u\n", mx, my, ml, mr, mc);
+   printf("[mouse] MOUSE_status(int32_t *mx, int32_t *my, int32_t *ml, int32_t *mr, int32_t *mc) - mx=%p my=%p ml=%p mr=%p mc=%p\n", (void *)mx, (void *)my, (void *)ml, (void *)mr, (void *)mc);
 
    MOUSE_lock();
 

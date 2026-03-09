@@ -145,19 +145,19 @@ uint8_t text_colors[9] =
 
 void init_graphics(void)
 {
-   printf("[STUB] graphics:init_graphics: void\n");
+   printf("[STUB] [graphics] init_graphics\n");
 }
 
 void shutdown_graphics(void)
 {
-   printf("[STUB] graphics:shutdown_graphics: void\n");
+   printf("[STUB] [graphics] shutdown_graphics\n");
 }
 
 // void release_owned_windows(int32_t owner) // Tom: original
 void release_owned_windows(uint32_t owner) // Tom: new
 {
    (void)owner;
-   printf("[STUB] graphics:release_owned_windows: owner=%d\n", owner);
+   printf("[STUB] [graphics] release_owned_windows: owner=%u\n", owner);
 }
 
 void draw_dot(int32_t argcnt, uint32_t page, uint32_t x, uint32_t y, uint32_t color)
@@ -167,7 +167,7 @@ void draw_dot(int32_t argcnt, uint32_t page, uint32_t x, uint32_t y, uint32_t co
    (void)x;
    (void)y;
    (void)color;
-   printf("[STUB] graphics:draw_dot: argcnt=%i page=%u x=%u y=%u color=%u\n", argcnt, page, x, y, color);
+   printf("[STUB] [graphics] draw_dot: argcnt=%i page=%u x=%u y=%u color=%u\n", argcnt, page, x, y, color);
 }
 
 void draw_line(int32_t argcnt, uint32_t page, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2, uint32_t color)
@@ -179,7 +179,7 @@ void draw_line(int32_t argcnt, uint32_t page, uint32_t x1, uint32_t y1, uint32_t
    (void)x2;
    (void)y2;
    (void)color;
-   printf("[STUB] graphics:draw_line: argcnt=%i page=%u x1=%u y1=%u x2=%u y2=%u color=%u\n", argcnt, page, x1, y1, x2, y2, color);
+   printf("[STUB] [graphics] draw_line: argcnt=%i page=%u x1=%u y1=%u x2=%u y2=%u color=%u\n", argcnt, page, x1, y1, x2, y2, color);
 }
 
 void line_to(int32_t argcnt, uint32_t x, uint32_t y, uint32_t color, ...) // Tom: TODO
@@ -188,7 +188,7 @@ void line_to(int32_t argcnt, uint32_t x, uint32_t y, uint32_t color, ...) // Tom
    (void)x;
    (void)y;
    (void)color;
-   printf("[STUB] graphics:line_to: argcnt=%i x=%u y=%u color=%u\n", argcnt, x, y, color);
+   printf("[STUB] [graphics] line_to: argcnt=%i x=%u y=%u color=%u\n", argcnt, x, y, color);
 }
 
 void draw_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color)
@@ -200,7 +200,7 @@ void draw_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int
    (void)x2;
    (void)y2;
    (void)color;
-   printf("[STUB] graphics:draw_rectangle: argcnt=%i wndnum=%u x1=%i y1=%i x2=%i y2=%i color=%u\n", argcnt, wndnum, x1, y1, x2, y2, color);
+   printf("[STUB] [graphics] draw_rectangle: argcnt=%i wndnum=%u x1=%i y1=%i x2=%i y2=%i color=%u\n", argcnt, wndnum, x1, y1, x2, y2, color);
 }
 
 void fill_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color)
@@ -212,7 +212,7 @@ void fill_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int
    (void)x2;
    (void)y2;
    (void)color;
-   printf("[STUB] graphics:fill_rectangle: argcnt=%i wndnum=%u x1=%i y1=%i x2=%i y2=%i color=%u\n", argcnt, wndnum, x1, y1, x2, y2, color);
+   printf("[STUB] [graphics] fill_rectangle: argcnt=%i wndnum=%u x1=%i y1=%i x2=%i y2=%i color=%u\n", argcnt, wndnum, x1, y1, x2, y2, color);
 }
 
 void hash_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color)
@@ -224,7 +224,7 @@ void hash_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int
    (void)x2;
    (void)y2;
    (void)color;
-   printf("[STUB] graphics:hash_rectangle: argcnt=%i wndnum=%u x1=%i y1=%i x2=%i y2=%i color=%u\n", argcnt, wndnum, x1, y1, x2, y2, color);
+   printf("[STUB] [graphics] hash_rectangle: argcnt=%i wndnum=%u x1=%i y1=%i x2=%i y2=%i color=%u\n", argcnt, wndnum, x1, y1, x2, y2, color);
 }
 
 uint32_t get_bitmap_height(int32_t argcnt, uint32_t table, uint32_t number)
@@ -232,7 +232,7 @@ uint32_t get_bitmap_height(int32_t argcnt, uint32_t table, uint32_t number)
    (void)argcnt;
    (void)table;
    (void)number;
-   printf("[STUB] graphics:get_bitmap_height: argcnt=%i table=%u number=%u\n", argcnt, table, number);
+   printf("[STUB] [graphics] get_bitmap_height: argcnt=%i table=%u number=%u\n", argcnt, table, number);
    return 0;
 }
 
@@ -248,7 +248,7 @@ void draw_bitmap(int32_t argcnt, uint32_t page, uint32_t table, uint32_t number,
    (void)flip;
    (void)fade_table;
    (void)fade_level;
-   printf("[STUB] graphics:draw_bitmap: argcnt=%i page=%u table=%u number=%u x=%i y=%i scale=%u flip=%u fade_table=%u fade_level=%u\n", argcnt, page, table, number, x, y, scale, flip, fade_table, fade_level);
+   printf("[STUB] [graphics] draw_bitmap: argcnt=%i page=%u table=%u number=%u x=%i y=%i scale=%u flip=%u fade_table=%u fade_level=%u\n", argcnt, page, table, number, x, y, scale, flip, fade_table, fade_level);
 }
 
 uint32_t visible_bitmap_rect(int32_t argcnt, int32_t x, int32_t y, uint32_t flip, uint32_t table, uint32_t number, int16_t *array)
@@ -260,7 +260,7 @@ uint32_t visible_bitmap_rect(int32_t argcnt, int32_t x, int32_t y, uint32_t flip
    (void)table;
    (void)number;
    (void)array;
-   printf("[STUB] graphics:visible_bitmap_rect: argcnt=%i x=%i y=%i flip=%u table=%u number=%u array=%i\n", argcnt, x, y, flip, table, number, array);
+   printf("[STUB] [graphics] visible_bitmap_rect: argcnt=%i x=%i y=%i flip=%u table=%u number=%u array=%i\n", argcnt, x, y, flip, table, number, array);
    return 0;
 }
 
@@ -269,19 +269,19 @@ void set_palette(int32_t argcnt, uint32_t region, uint32_t resource)
    (void)argcnt;
    (void)region;
    (void)resource;
-   printf("[STUB] graphics:set_palette: argcnt=%i region=%u resource=%u\n", argcnt, region, resource);
+   printf("[STUB] [graphics] set_palette: argcnt=%i region=%u resource=%u\n", argcnt, region, resource);
 }
 
 void wait_vertical_retrace(void)
 {
-   printf("[STUB] graphics:wait_vertical_retrace: void\n");
+   printf("[STUB] [graphics] wait_vertical_retrace\n");
 }
 
 uint32_t read_palette(int32_t argcnt, uint32_t regnum)
 {
    (void)argcnt;
    (void)regnum;
-   printf("[STUB] graphics:read_palette: argcnt=%i regnum=%u\n", argcnt, regnum);
+   printf("[STUB] [graphics] read_palette: argcnt=%i regnum=%u\n", argcnt, regnum);
    return 0;
 }
 
@@ -290,7 +290,7 @@ void write_palette(int32_t argcnt, uint32_t regnum, uint32_t value)
    (void)argcnt;
    (void)regnum;
    (void)value;
-   printf("[STUB] graphics:write_palette: argcnt=%i regnum=%u value=%u\n", argcnt, regnum, value);
+   printf("[STUB] [graphics] write_palette: argcnt=%i regnum=%u value=%u\n", argcnt, regnum, value);
 }
 
 void pixel_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd, uint32_t intervals)
@@ -299,7 +299,7 @@ void pixel_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd, uint32_t in
    (void)src_wnd;
    (void)dest_wnd;
    (void)intervals;
-   printf("[STUB] graphics:pixel_fade: argcnt=%i src_wnd=%u dest_wnd=%u intervals=%u\n", argcnt, src_wnd, dest_wnd, intervals);
+   printf("[STUB] [graphics] pixel_fade: argcnt=%i src_wnd=%u dest_wnd=%u intervals=%u\n", argcnt, src_wnd, dest_wnd, intervals);
 }
 
 void color_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd)
@@ -307,7 +307,7 @@ void color_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd)
    (void)argcnt;
    (void)src_wnd;
    (void)dest_wnd;
-   printf("[STUB] graphics:color_fade: argcnt=%i src_wnd=%u dest_wnd=%u\n", argcnt, src_wnd, dest_wnd);
+   printf("[STUB] [graphics] color_fade: argcnt=%i src_wnd=%u dest_wnd=%u\n", argcnt, src_wnd, dest_wnd);
 }
 
 void light_fade(int32_t argcnt, uint32_t src_wnd, uint32_t color)
@@ -315,7 +315,7 @@ void light_fade(int32_t argcnt, uint32_t src_wnd, uint32_t color)
    (void)argcnt;
    (void)src_wnd;
    (void)color;
-   printf("[STUB] graphics:light_fade: arcnt=%i src_wnd=%u color=%u\n", argcnt, src_wnd, color);
+   printf("[STUB] [graphics] light_fade: arcnt=%i src_wnd=%u color=%u\n", argcnt, src_wnd, color);
 }
 
 uint32_t assign_window(int32_t argcnt, uint32_t owner, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
@@ -326,7 +326,7 @@ uint32_t assign_window(int32_t argcnt, uint32_t owner, uint32_t x1, uint32_t y1,
    (void)y1;
    (void)x2;
    (void)y2;
-   printf("[STUB] graphics:assign_window: argcnt=%i owner=%u x1=%u y1=%u x2=%u y2=%u\n", argcnt, owner, x1, y1, x2, y2);
+   printf("[STUB] [graphics] assign_window: argcnt=%i owner=%u x1=%u y1=%u x2=%u y2=%u\n", argcnt, owner, x1, y1, x2, y2);
    return 0;
 }
 
@@ -339,7 +339,7 @@ uint32_t assign_subwindow(int32_t argcnt, uint32_t owner, uint32_t parent, uint3
    (void)y1;
    (void)x2;
    (void)y2;
-   printf("[STUB] graphics:assign_subwindow: argcnt=%i owner=%u parent=%u x1=%u y1=%u x2=%u y2=%u\n", argcnt, owner, parent, x1, y1, x2, y2);
+   printf("[STUB] [graphics] assign_subwindow: argcnt=%i owner=%u parent=%u x1=%u y1=%u x2=%u y2=%u\n", argcnt, owner, parent, x1, y1, x2, y2);
    return 0;
 }
 
@@ -347,14 +347,14 @@ void release_window(int32_t argcnt, uint32_t window)
 {
    (void)argcnt;
    (void)window;
-   printf("[STUB] graphics:release_window: argcnt=%i window=%u\n", argcnt, window);
+   printf("[STUB] [graphics] release_window: argcnt=%i window=%u\n", argcnt, window);
 }
 
 uint32_t get_x1(int32_t argcnt, uint32_t window)
 {
    (void)argcnt;
    (void)window;
-   printf("[STUB] graphics:get_x1: argcnt=%i window=%u\n", argcnt, window);
+   printf("[STUB] [graphics] get_x1: argcnt=%i window=%u\n", argcnt, window);
    return 0;
 }
 
@@ -362,7 +362,7 @@ uint32_t get_x2(int32_t argcnt, uint32_t window)
 {
    (void)argcnt;
    (void)window;
-   printf("[STUB] graphics:get_x2: argcnt=%i window=%u\n", argcnt, window);
+   printf("[STUB] [graphics] get_x2: argcnt=%i window=%u\n", argcnt, window);
    return 0;
 }
 
@@ -370,7 +370,7 @@ uint32_t get_y1(int32_t argcnt, uint32_t window)
 {
    (void)argcnt;
    (void)window;
-   printf("[STUB] graphics:get_y1: argcnt=%i window=%u\n", argcnt, window);
+   printf("[STUB] [graphics] get_y1: argcnt=%i window=%u\n", argcnt, window);
    return 0;
 }
 
@@ -378,7 +378,7 @@ uint32_t get_y2(int32_t argcnt, uint32_t window)
 {
    (void)argcnt;
    (void)window;
-   printf("[STUB] graphics:get_y2: argcnt=%i window=%u\n", argcnt, window);
+   printf("[STUB] [graphics] get_y2: argcnt=%i window=%u\n", argcnt, window);
    return 0;
 }
 
@@ -387,7 +387,7 @@ void set_x1(int32_t argcnt, uint32_t window, uint32_t x1)
    (void)argcnt;
    (void)window;
    (void)x1;
-   printf("[STUB] graphics:set_x1: argcnt=%i window=%u x1=%u\n", argcnt, window, x1);
+   printf("[STUB] [graphics] set_x1: argcnt=%i window=%u x1=%u\n", argcnt, window, x1);
 }
 
 void set_x2(int32_t argcnt, uint32_t window, uint32_t x2)
@@ -395,7 +395,7 @@ void set_x2(int32_t argcnt, uint32_t window, uint32_t x2)
    (void)argcnt;
    (void)window;
    (void)x2;
-   printf("[STUB] graphics:set_x2: argcnt=%i window=%u x2=%u\n", argcnt, window, x2);
+   printf("[STUB] [graphics] set_x2: argcnt=%i window=%u x2=%u\n", argcnt, window, x2);
 }
 
 void set_y1(int32_t argcnt, uint32_t window, uint32_t y1)
@@ -403,7 +403,7 @@ void set_y1(int32_t argcnt, uint32_t window, uint32_t y1)
    (void)argcnt;
    (void)window;
    (void)y1;
-   printf("[STUB] graphics:set_y1: argcnt=%i window=%u y1=%u\n", argcnt, window, y1);
+   printf("[STUB] [graphics] set_y1: argcnt=%i window=%u y1=%u\n", argcnt, window, y1);
 }
 
 void set_y2(int32_t argcnt, uint32_t window, uint32_t y2)
@@ -411,7 +411,7 @@ void set_y2(int32_t argcnt, uint32_t window, uint32_t y2)
    (void)argcnt;
    (void)window;
    (void)y2;
-   printf("[STUB] graphics:set_y2: argcnt=%i window=%u y2=%u\n", argcnt, window, y2);
+   printf("[STUB] [graphics] set_y2: argcnt=%i window=%u y2=%u\n", argcnt, window, y2);
 }
 
 void wipe_window(int32_t argcnt, uint32_t window, uint32_t color)
@@ -419,7 +419,7 @@ void wipe_window(int32_t argcnt, uint32_t window, uint32_t color)
    (void)argcnt;
    (void)window;
    (void)color;
-   printf("[STUB] graphics:wipe_window: argcnt=%i window=%u color=%u\n", argcnt, window, color);
+   printf("[STUB] [graphics] wipe_window: argcnt=%i window=%u color=%u\n", argcnt, window, color);
 }
 
 void text_window(int32_t argcnt, uint32_t wndnum, uint32_t wnd)
@@ -427,7 +427,7 @@ void text_window(int32_t argcnt, uint32_t wndnum, uint32_t wnd)
    (void)argcnt;
    (void)wndnum;
    (void)wnd;
-   printf("[STUB] graphics:text_window: argcnt=%i wndnum=%u wnd=%u\n", argcnt, wndnum, wnd);
+   printf("[STUB] [graphics] text_window: argcnt=%i wndnum=%u wnd=%u\n", argcnt, wndnum, wnd);
 }
 
 void text_style(int32_t argcnt, uint32_t wndnum, uint32_t font, uint32_t justify)
@@ -436,7 +436,7 @@ void text_style(int32_t argcnt, uint32_t wndnum, uint32_t font, uint32_t justify
    (void)wndnum;
    (void)font;
    (void)justify;
-   printf("[STUB] graphics:text_style: argcnt=%i wndnum=%u font=%u justify=%u\n", argcnt, wndnum, font, justify);
+   printf("[STUB] [graphics] text_style: argcnt=%i wndnum=%u font=%u justify=%u\n", argcnt, wndnum, font, justify);
 }
 
 void text_xy(int32_t argcnt, uint32_t wndnum, uint32_t htab, uint32_t vtab)
@@ -445,14 +445,14 @@ void text_xy(int32_t argcnt, uint32_t wndnum, uint32_t htab, uint32_t vtab)
    (void)wndnum;
    (void)htab;
    (void)vtab;
-   printf("[STUB] graphics:text_xy: argcnt=%i wndnum=%u htab=%u vtab=%u\n", argcnt, wndnum, htab, vtab);
+   printf("[STUB] [graphics] text_xy: argcnt=%i wndnum=%u htab=%u vtab=%u\n", argcnt, wndnum, htab, vtab);
 }
 
 int32_t get_text_x(int32_t argcnt, uint32_t wndnum)
 {
    (void)argcnt;
    (void)wndnum;
-   printf("[STUB] graphics:get_text_x: argcnt=%i wndnum=%u\n", argcnt, wndnum);
+   printf("[STUB] [graphics] get_text_x: argcnt=%i wndnum=%u\n", argcnt, wndnum);
    return 0;
 }
 
@@ -460,7 +460,7 @@ int32_t get_text_y(int32_t argcnt, uint32_t wndnum)
 {
    (void)argcnt;
    (void)wndnum;
-   printf("[STUB] graphics:get_text_y: argcnt=%i wndnum=%u\n", argcnt, wndnum);
+   printf("[STUB] [graphics] get_text_y: argcnt=%i wndnum=%u\n", argcnt, wndnum);
    return 0;
 }
 
@@ -468,7 +468,7 @@ void home(int32_t argcnt, uint32_t wndnum)
 {
    (void)argcnt;
    (void)wndnum;
-   printf("[STUB] graphics:home: argcnt=%i wndnum=%u\n", argcnt, wndnum);
+   printf("[STUB] [graphics] home: argcnt=%i wndnum=%u\n", argcnt, wndnum);
 }
 
 void text_color(int32_t argcnt, uint32_t wndnum, uint32_t current, uint32_t new)
@@ -477,7 +477,7 @@ void text_color(int32_t argcnt, uint32_t wndnum, uint32_t current, uint32_t new)
    (void)wndnum;
    (void)current;
    (void)new;
-   printf("[STUB] graphics:text_color: argcnt=%i wndnum=%u current=%u new=%u\n", argcnt, wndnum, current, new);
+   printf("[STUB] [graphics] text_color: argcnt=%i wndnum=%u current=%u new=%u\n", argcnt, wndnum, current, new);
 }
 
 void text_refresh_window(int32_t argcnt, uint32_t wndnum, int32_t wnd)
@@ -485,7 +485,7 @@ void text_refresh_window(int32_t argcnt, uint32_t wndnum, int32_t wnd)
    (void)argcnt;
    (void)wndnum;
    (void)wnd;
-   printf("[STUB] graphics:text_refresh_window: argcnt=%i wndnum=%u wnd=%i\n", argcnt, wndnum, wnd);
+   printf("[STUB] [graphics] text_refresh_window: argcnt=%i wndnum=%u wnd=%i\n", argcnt, wndnum, wnd);
 }
 
 void vsprint(int32_t argcnt, uint32_t wndnum, int8_t *format, va_list argptr)
@@ -494,7 +494,7 @@ void vsprint(int32_t argcnt, uint32_t wndnum, int8_t *format, va_list argptr)
    (void)wndnum;
    (void)format;
    (void)argptr;
-   printf("[STUB] graphics:vsprint: argcnt=%i wndnum=%u format=%i argprt=%i\n", argcnt, wndnum, format, argptr);
+   printf("[STUB] [graphics] vsprint: argcnt=%i wndnum=%u format=%p argprt=%i\n", argcnt, wndnum, (void *)format, argptr);
 }
 
 void print(int32_t argcnt, uint32_t wndnum, uint32_t format, ...)
@@ -502,7 +502,7 @@ void print(int32_t argcnt, uint32_t wndnum, uint32_t format, ...)
    (void)argcnt;
    (void)wndnum;
    (void)format;
-   printf("[STUB] graphics:print: argcnt=%i wndnum=%u format=%u\n", argcnt, wndnum, format);
+   printf("[STUB] [graphics] print: argcnt=%i wndnum=%u format=%u\n", argcnt, wndnum, format);
 }
 
 void sprint(int32_t argcnt, uint32_t wndnum, int8_t *format, ...)
@@ -510,21 +510,21 @@ void sprint(int32_t argcnt, uint32_t wndnum, int8_t *format, ...)
    (void)argcnt;
    (void)wndnum;
    (void)format;
-   printf("[STUB] graphics:sprint: argcnt=%i wndnum=%u format=%i\n", argcnt, wndnum, format);
+   printf("[STUB] [graphics] sprint: argcnt=%i wndnum=%u format=%p\n", argcnt, wndnum, (void *)format);
 }
 
 void dprint(int32_t argcnt, int8_t *format, ...)
 {
    (void)argcnt;
    (void)format;
-   printf("[STUB] graphics:dprint: argcnt=%i format=%i\n", argcnt, format);
+   printf("[STUB] [graphics] dprint: argcnt=%i format=%p\n", argcnt, (void *)format);
 }
 
 void crout(int32_t argcnt, uint32_t wndnum)
 {
    (void)argcnt;
    (void)wndnum;
-   printf("[STUB] graphics:crout: argcnt=%i wndnum=%u\n", argcnt, wndnum);
+   printf("[STUB] [graphics] crout: argcnt=%i wndnum=%u\n", argcnt, wndnum);
 }
 
 uint32_t char_width(int32_t argcnt, uint32_t wndnum, uint32_t ch)
@@ -532,7 +532,7 @@ uint32_t char_width(int32_t argcnt, uint32_t wndnum, uint32_t ch)
    (void)argcnt;
    (void)wndnum;
    (void)ch;
-   printf("[STUB] graphics:char_width: argcnt=%i wndnum=%u ch=%u\n", argcnt, wndnum, ch);
+   printf("[STUB] [graphics] char_width: argcnt=%i wndnum=%u ch=%u\n", argcnt, wndnum, ch);
    return 0;
 }
 
@@ -540,7 +540,7 @@ uint32_t font_height(int32_t argcnt, uint32_t wndnum)
 {
    (void)argcnt;
    (void)wndnum;
-   printf("[STUB] graphics:font_height: argcnt=%i wndnum=%u\n", argcnt, wndnum);
+   printf("[STUB] [graphics] font_height: argcnt=%i wndnum=%u\n", argcnt, wndnum);
    return 0;
 }
 
@@ -561,12 +561,12 @@ void solid_bar_graph(int32_t argcnt, int32_t x0, int32_t y0, int32_t x1, int32_t
    (void)min;
    (void)crit;
    (void)max;
-   printf("[STUB] graphics:solid_bar_graph: argcnt=%i x0=%i y0=%i x1=%i y1=%i lb_border=%u tr_border=%u bkgnd=%u grn=%u yel=%u red=%u val=%i min=%i crit=%i max=%i\n", argcnt, x0, y0, x1, y1, lb_border, tr_border, bkgnd, grn, yel, red, val, min, crit, max);
+   printf("[STUB] [graphics] solid_bar_graph: argcnt=%i x0=%i y0=%i x1=%i y1=%i lb_border=%u tr_border=%u bkgnd=%u grn=%u yel=%u red=%u val=%i min=%i crit=%i max=%i\n", argcnt, x0, y0, x1, y1, lb_border, tr_border, bkgnd, grn, yel, red, val, min, crit, max);
 }
 
 void aprint(int32_t argcnt, int8_t *format, ...)
 {
    (void)argcnt;
    (void)format;
-   printf("[STUB] graphics:aprint argcnt=%i format=%i\n", argcnt, format);
+   printf("[STUB] [graphics] aprint argcnt=%i format=%p\n", argcnt, (void *)format);
 }

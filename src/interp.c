@@ -86,8 +86,6 @@ RTR_class *RTR;
 uint32_t HROED;
 uint32_t heap_size;
 
-int8_t *pathname;
-
 /*************************************************************/
 // void main(int argc, char *argv[]) // Tom: commented out, new version below
 int main(int argc, char *argv[]) // Tom: added
@@ -98,15 +96,13 @@ int main(int argc, char *argv[]) // Tom: added
    uint32_t code;
    int32_t rtn;
 
-   printf("[interp.c:main]\n");
-
-   pathname = (int8_t *)argv[0];
-
+   printf("[interp] main: set stdout to unbuffered\n");
    setbuf(stdout, NULL);
 
+   printf("[interp] main: set ENABLED to 1\n");
    ENABLED = 1;
 
-   // AIL_startup(); // Tom commented out
+   // AIL_startup(); // Tom: commented out
    mem_init();
 
    if (argc < 3)
@@ -118,14 +114,20 @@ int main(int argc, char *argv[]) // Tom: added
 
    strcpy((char *)RES_name, argv[1]);
    for (i = 0; i < strlen((char *)RES_name); i++)
+   {
       if (RES_name[i] == '.')
       {
          RES_name[i] = 0;
          break;
       }
+   }
    strcat((char *)RES_name, ".RES");
 
+   printf("[interp] main: resource file: %s\n", RES_name);
+
    strcpy((char *)code_name, argv[2]);
+
+   printf("[interp] main: code name: %s\n", code_name);
 
    heap_size = mem_avail() -
                WINDOW_SIZE -
@@ -141,16 +143,23 @@ int main(int argc, char *argv[]) // Tom: added
    if (heap_size > MAX_RES_SIZE)
       heap_size = MAX_RES_SIZE;
 
-   RTR = RTR_construct(mem_alloc(heap_size), heap_size, MAX_OBJ_TYPES, RES_name);
+   printf("[interp] main: heap size: %u\n", heap_size);
 
+   RTR = RTR_construct(mem_alloc(heap_size), heap_size, MAX_OBJ_TYPES, RES_name);
    if (RTR == NULL)
+   {
       abend(MSG_RIF, RES_name);
+   }
+
+   printf("[interp] main: RTR contructed\n");
 
    init_object_list();
    init_notify_list();
    init_event_queue();
 
    RT_init(RTR, STK_SIZE, objlist);
+
+   printf("[interp] main: RT initialised\n");
 
    HROED = RTR_get_resource_handle(RTR, ROED, DA_TEMPORARY | DA_EVANESCENT);
    RTR_lock(RTR, HROED);
@@ -159,6 +168,8 @@ int main(int argc, char *argv[]) // Tom: added
 
    if (code == UINT32_MAX)
       abend(MSG_SPNF);
+
+   printf("[interp] main: running create_program with code=%u\n", code);
 
    rtn = create_program(1, bootstrap, code);
    rtn = destroy_object(1, rtn);
@@ -189,13 +200,8 @@ int main(int argc, char *argv[]) // Tom: added
 
    if (envval(0, (int8_t *)"AESOP_DIAG") == 1)
    {
-      // Tom: added 2 new lines below, old version commented out below
       printf("%u bytes in heap\n", heap_size);
       printf("%u bytes left\n", mem_headroom());
-
-      // Tom: commented out, new versions above
-      // printf("%lu bytes in heap\n", heap_size);
-      // printf("%lu bytes left\n", mem_headroom());
    }
 
    exit(rtn);

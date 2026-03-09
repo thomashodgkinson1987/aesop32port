@@ -1,40 +1,34 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  EYE.C                                                                 ��
-// ��                                                                        ��
-// ��  Eye III engine support functions                                      ��
-// ��                                                                        ��
-// ��  Version: 1.00 of 28-Oct-92 -- Initial version                         ��
-// ��                                                                        ��
-// ��  Project: Eye III                                                      ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with Borland C++ v3.0 or later                    ��
-// ��  Large memory model (16-bit DOS)                                       ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  10926 Jollyville #308                                                 ��
-// ��  Austin, TX 78759                                                      ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  EYE.C                                                                 ##
+// ##                                                                        ##
+// ##  Eye III engine support functions                                      ##
+// ##                                                                        ##
+// ##  Version: 1.00 of 28-Oct-92 -- Initial version                         ##
+// ##                                                                        ##
+// ##  Project: Eye III                                                      ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with Borland C++ v3.0 or later                    ##
+// ##  Large memory model (16-bit DOS)                                       ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  10926 Jollyville #308                                                 ##
+// ##  Austin, TX 78759                                                      ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
 #include <stdio.h>
 #include <stdlib.h>
-// #include <dos.h> // Tom: commented out
-#include <sys/types.h> // Tom: replaced `\` with `/`
-// #include <direct.h> // Tom: commented out
+#include <sys/types.h>
 #include <string.h>
 #include <stddef.h>
-// #include <process.h> // Tom: commented out
-#include <stdint.h> // Tom: added
-
-// #include "vfx.h" // Tom: commented out
-// #include "gil2vfx.h" // Tom: commented out
+#include <stdint.h>
 
 #include "defs.h"
 #include "shared.h"
@@ -47,22 +41,21 @@
 #include "intrface.h"
 #include "rtres.h"
 #include "rt.h"
-// #include "modsnd32.h" // Tom: commented out
 #include "sound.h"
 
 #define SAVETYPE (diag_flag ? SF_TXT : SF_BIN)
 
-#define SAVEDIR_FN "SAVEGAME/SAVEGAME.DIR" // Tom: changed `\\` to `/`
+#define SAVEDIR_FN "SAVEGAME/SAVEGAME.DIR"
 
 int8_t savegame_dir[NUM_SAVEGAMES][SAVE_LEN + 1];
 
-static int8_t items_bin[] = "SAVEGAME/ITEMS_yy.BIN"; // Tom: changed `\\` to `/`
-static int8_t items_txt[] = "SAVEGAME/ITEMS_yy.TXT"; // Tom: changed `\\` to `/`
-static int8_t lvl_bin[] = "SAVEGAME/LVLxx_yy.BIN";   // Tom: changed `\\` to `/`
-static int8_t lvl_txt[] = "SAVEGAME/LVLxx_yy.TXT";   // Tom: changed `\\` to `/`
+static int8_t items_bin[] = "SAVEGAME/ITEMS_yy.BIN";
+static int8_t items_txt[] = "SAVEGAME/ITEMS_yy.TXT";
+static int8_t lvl_bin[] = "SAVEGAME/LVLxx_yy.BIN";
+static int8_t lvl_txt[] = "SAVEGAME/LVLxx_yy.TXT";
 
-static int8_t lvl_tmp[] = "SAVEGAME/LVLxx.TMP"; // Tom: changed `\\` to `/`
-static int8_t itm_tmp[] = "SAVEGAME/ITEMS.TMP"; // Tom: changed `\\` to `/`
+static int8_t lvl_tmp[] = "SAVEGAME/LVLxx.TMP";
+static int8_t itm_tmp[] = "SAVEGAME/ITEMS.TMP";
 
 int8_t DX_offset[6][4] = {{0, 0, 0, 0},
                           {0, 1, 0, -1},
@@ -84,7 +77,9 @@ extern int8_t txtbuf[2400]; // used as dot buffer -- needs 8 * MAXDOTS words
 int32_t step_X(int32_t argcnt, uint32_t x, uint32_t fdir, uint32_t mtype, uint32_t distance)
 {
    int8_t xx = (int8_t)x;
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] step_X\n");
 
    if (!distance)
       return x;
@@ -116,7 +111,9 @@ int32_t step_X(int32_t argcnt, uint32_t x, uint32_t fdir, uint32_t mtype, uint32
 int32_t step_Y(int32_t argcnt, uint32_t y, uint32_t fdir, uint32_t mtype, uint32_t distance)
 {
    int8_t yy = (int8_t)y;
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] step_Y\n");
 
    if (!distance)
       return y;
@@ -148,7 +145,9 @@ int32_t step_Y(int32_t argcnt, uint32_t y, uint32_t fdir, uint32_t mtype, uint32
 uint32_t step_FDIR(int32_t argcnt, uint32_t fdir, uint32_t mtype)
 {
    uint8_t f = (uint8_t)fdir;
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] step_FDIR\n");
 
    switch (mtype)
    {
@@ -165,7 +164,9 @@ uint32_t step_FDIR(int32_t argcnt, uint32_t fdir, uint32_t mtype)
 /*********************************************************/
 int32_t step_square_X(int32_t argcnt, uint32_t x, uint32_t r, uint32_t dir)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] step_square_X\n");
 
    switch (dir)
    {
@@ -182,7 +183,9 @@ int32_t step_square_X(int32_t argcnt, uint32_t x, uint32_t r, uint32_t dir)
 
 int32_t step_square_Y(int32_t argcnt, uint32_t y, uint32_t r, uint32_t dir)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] step_square_Y\n");
 
    switch (dir)
    {
@@ -199,7 +202,9 @@ int32_t step_square_Y(int32_t argcnt, uint32_t y, uint32_t r, uint32_t dir)
 
 int32_t step_region(int32_t argcnt, uint32_t r, uint32_t dir)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] step_region\n");
 
    switch (dir)
    {
@@ -226,7 +231,9 @@ uint32_t distance(int32_t argcnt, uint32_t x1, uint32_t y1, uint32_t x2, uint32_
        {
            0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225, 256,
            289, 324, 361, 400, 441, 484, 529, 576, 625, 676, 729, 784, 841, 900, 961};
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] distance\n");
 
    dx = absv(0, x1 - x2);
    dy = absv(0, y1 - y2);
@@ -259,7 +266,9 @@ uint32_t distance(int32_t argcnt, uint32_t x1, uint32_t y1, uint32_t x2, uint32_
 uint32_t seek_direction(int32_t argcnt, uint32_t cur_x, uint32_t cur_y, uint32_t dest_x, uint32_t dest_y)
 {
    int32_t dx, dy;
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] seek_direction\n");
 
    dx = dest_x - cur_x;
    dy = dest_y - cur_y;
@@ -308,8 +317,10 @@ uint32_t seek_direction(int32_t argcnt, uint32_t cur_x, uint32_t cur_y, uint32_t
 uint32_t spell_request(int32_t argcnt, int8_t *stat, int8_t *cnt, uint32_t typ, uint32_t num)
 {
    uint32_t i, toff;
-   int n, h;     // LUM changed to int (original BYTE) lead to a warning in on condition below
-   (void)argcnt; // Tom: added
+   int n, h; // LUM changed to int (original BYTE) lead to a warning in on condition below
+   (void)argcnt;
+
+   printf("[eye] spell_request\n");
 
    toff = typ ? 110 : 10;
 
@@ -341,8 +352,10 @@ uint32_t spell_request(int32_t argcnt, int8_t *stat, int8_t *cnt, uint32_t typ, 
 uint32_t spell_list(int32_t argcnt, int8_t *cnt, uint32_t typ, uint32_t lvl, int8_t *list, uint32_t max)
 {
    uint32_t i, l, num;
-   int m, n, j;  // LUM changed to int (original BYTE) lead to a warning in on condition below
-   (void)argcnt; // Tom: added
+   int m, n, j; // LUM changed to int (original BYTE) lead to a warning in on condition below
+   (void)argcnt;
+
+   printf("[eye] spell_list\n");
 
    l = (10 * (lvl - 1));
    num = 0;
@@ -385,7 +398,9 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
    static int8_t _y[] = {2, 54, 106};
    int16_t red, yel /*, color //Tom: commented out, not currently used */;
    int16_t x, y, lp, save;
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] magic_field\n");
 
    red = 0x23;
    yel = 0x37;
@@ -463,6 +478,8 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
 /*=========================================================================*/
 int32_t Coord_In_Region(int32_t x, int32_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
 {
+   printf("[eye] Coord_In_Region\n");
+
    if ((x < x1) || (x > x2))
       return (0); /* if it exceeds x bound then false     */
    if ((y < y1) || (y > y2))
@@ -478,6 +495,8 @@ int32_t Coord_In_Region(int32_t x, int32_t y, int32_t x1, int32_t y1, int32_t x2
 
 void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t exp_y, int32_t scale, int32_t power, int32_t dots, int32_t life, int32_t upval, int8_t *colors)
 {
+   printf("[eye] do_dots\n");
+
    static int16_t _floor[] =
        {
            119,
@@ -489,9 +508,9 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
    int16_t *xpos, *ypos, *xvel, *yvel, *color, *colcnt, *colidx, *dotbuffer;
    int16_t lside, rside, top, bottom;
    int16_t roof, floor, lwall, rwall;
-   (void)argcnt; // Tom: added
-   (void)view;   // Tom: not currently used
-   (void)scrn;   // Tom: not currently used
+   (void)argcnt;
+   (void)view; // Tom: not currently used
+   (void)scrn; // Tom: not currently used
 
    hide_mouse();
 
@@ -628,11 +647,13 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
    int16_t i, pixcol, active, cx, cy, px, py, mask, count;
    int16_t *xpos, *ypos, *xvel, *yvel, *color, *colcnt, *colidx, *delay, *dotbuffer;
    int16_t m, v, grav78, t;
-   (void)argcnt; // Tom: added
-   (void)px;     // Tom: not currently used
-   (void)py;     // Tom: not currently used
-   (void)view;   // Tom: not currently used
-   (void)scrn;   // Tom: not currently used
+   (void)argcnt;
+   (void)px;   // Tom: not currently used
+   (void)py;   // Tom: not currently used
+   (void)view; // Tom: not currently used
+   (void)scrn; // Tom: not currently used
+
+   printf("[eye] do_ice\n");
 
    hide_mouse();
 
@@ -799,6 +820,8 @@ void read_save_directory(void)
    int32_t i;
    TF_class *TF;
 
+   printf("[eye] read_save_directory\n");
+
    TF = TF_construct((int8_t *)SAVEDIR_FN, TF_READ);
 
    if (TF == NULL)
@@ -819,7 +842,9 @@ void read_save_directory(void)
 
 int8_t *savegame_title(int32_t argcnt, uint32_t num)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] savegame_title\n");
 
    return savegame_dir[num];
 }
@@ -833,7 +858,9 @@ int8_t *savegame_title(int32_t argcnt, uint32_t num)
 
 void set_savegame_title(int32_t argcnt, int8_t *string, uint32_t num)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] set_savegame_title\n");
 
    strcpy((char *)savegame_dir[num], (char *)string);
 }
@@ -848,6 +875,8 @@ void write_save_directory(void)
 {
    int32_t i;
    TF_class *TF;
+
+   printf("[eye] write_save_directory\n");
 
    TF = TF_construct((int8_t *)SAVEDIR_FN, TF_WRITE);
 
@@ -871,6 +900,8 @@ void set_save_slotnum(uint32_t slot)
 {
    int8_t num[3];
 
+   printf("[eye] set_save_slotnum\n");
+
    sprintf((char *)num, "%02u", slot);
 
    strncpy((char *)&items_bin[15], (char *)num, 2);
@@ -893,6 +924,8 @@ void set_save_lvlnum(uint32_t lvl)
 {
    int8_t num[3];
 
+   printf("[eye] set_save_lvlnum\n");
+
    sprintf((char *)num, "%02u", lvl);
 
    strncpy((char *)&lvl_bin[12], (char *)num, 2);
@@ -911,6 +944,8 @@ void set_save_lvlnum(uint32_t lvl)
 void remove_temporary_save_files(void)
 {
    int32_t lvl;
+
+   printf("[eye] remove_temporary_save_files\n");
 
    for (lvl = 1; lvl <= NUM_LEVELS; lvl++)
    {
@@ -931,7 +966,9 @@ void remove_temporary_save_files(void)
 uint32_t save_game(int32_t argcnt, uint32_t slotnum, uint32_t lvlnum)
 {
    uint32_t lvl;
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] save_game\n");
 
    if (slotnum == 0)
       abend(MSG_IASS0);
@@ -972,7 +1009,9 @@ uint32_t save_game(int32_t argcnt, uint32_t slotnum, uint32_t lvlnum)
 
 void suspend_game(int32_t argcnt, uint32_t cur_lvl)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] suspend_game\n");
 
    if (!save_range(itm_tmp, SAVETYPE, FIRST_ITEM, LAST_ITEM))
       abend(MSG_CNSI);
@@ -996,7 +1035,9 @@ void suspend_game(int32_t argcnt, uint32_t cur_lvl)
 
 void resume_level(int32_t argcnt, uint32_t cur_lvl)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] resume_level\n");
 
    set_save_lvlnum(cur_lvl);
 
@@ -1021,7 +1062,9 @@ void resume_level(int32_t argcnt, uint32_t cur_lvl)
 
 void resume_items(int32_t argcnt, uint32_t first, uint32_t last, uint32_t restoring)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] resume_items\n");
 
    release_owned_windows(-1);
    cancel_entity_requests(-1);
@@ -1043,7 +1086,9 @@ void resume_items(int32_t argcnt, uint32_t first, uint32_t last, uint32_t restor
 
 void change_level(int32_t argcnt, uint32_t old_lvl, uint32_t new_lvl)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] change_level\n");
 
    set_save_lvlnum(old_lvl);
 
@@ -1073,7 +1118,9 @@ void change_level(int32_t argcnt, uint32_t old_lvl, uint32_t new_lvl)
 
 void restore_items(int32_t argcnt, uint32_t slotnum)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] restore_items\n");
 
    set_save_slotnum(slotnum);
 
@@ -1099,7 +1146,9 @@ void restore_items(int32_t argcnt, uint32_t slotnum)
 void restore_level_objects(int32_t argcnt, uint32_t slotnum, uint32_t lvlnum)
 {
    uint32_t lvl;
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] restore_level_objects\n");
 
    set_save_slotnum(slotnum);
    set_save_lvlnum(lvlnum);
@@ -1132,6 +1181,8 @@ void restore_level_objects(int32_t argcnt, uint32_t slotnum, uint32_t lvlnum)
 
 void read_initial_items(void)
 {
+   printf("[eye] read_initial_items\n");
+
    set_save_slotnum(0);
 
    restore_range(items_bin, FIRST_ITEM, LAST_ITEM, 0);
@@ -1151,6 +1202,8 @@ void read_initial_items(void)
 void write_initial_tempfiles(void)
 {
    uint32_t lvl;
+
+   printf("[eye] write_initial_tempfiles\n");
 
    if (!save_range(itm_tmp, SAVETYPE /* SF_TXT */, FIRST_ITEM, LAST_ITEM))
       abend(MSG_CNSI);
@@ -1175,6 +1228,8 @@ void write_initial_tempfiles(void)
 void create_initial_binary_files(void)
 {
    uint32_t lvl;
+
+   printf("[eye] create_initial_binary_files\n");
 
    set_save_slotnum(0);
 
@@ -1202,25 +1257,27 @@ void create_initial_binary_files(void)
 
 void mono_on(void)
 {
-   printf("[STUB] mono_on\n");
+   printf("[STUB] [eye] mono_on\n");
 }
 
 void mono_off(void)
 {
-   printf("[STUB] mono_off\n");
+   printf("[STUB] [eye] mono_off\n");
 }
 
 void *open_transfer_file(int32_t argcnt, int8_t *filename)
 {
    (void)argcnt;
    (void)filename;
-   printf("[STUB] open_transfer_file\n");
+
+   printf("[STUB] [eye] open_transfer_file\n");
+
    return NULL;
 }
 
 void close_transfer_file(void)
 {
-   printf("[STUB] close_transfer_file\n");
+   printf("[STUB] [eye] close_transfer_file\n");
 }
 
 int32_t player_attrib(int32_t argcnt, uint32_t plrnum, uint32_t offset, uint32_t size)
@@ -1229,7 +1286,9 @@ int32_t player_attrib(int32_t argcnt, uint32_t plrnum, uint32_t offset, uint32_t
    (void)plrnum;
    (void)offset;
    (void)size;
-   printf("[STUB] player_attrib\n");
+
+   printf("[STUB] [eye] player_attrib\n");
+
    return 0;
 }
 
@@ -1239,7 +1298,9 @@ int32_t item_attrib(int32_t argcnt, uint32_t plrnum, uint32_t invslot, uint32_t 
    (void)plrnum;
    (void)invslot;
    (void)attrib;
-   printf("[STUB] item_attrib\n");
+
+   printf("[STUB] [eye] item_attrib\n");
+
    return 0;
 }
 
@@ -1247,7 +1308,9 @@ int32_t arrow_count(int32_t argcnt, uint32_t plrnum)
 {
    (void)argcnt;
    (void)plrnum;
-   printf("[STUB] arrow_count\n");
+
+   printf("[STUB] [eye] arrow_count\n");
+
    return 0;
 }
 
@@ -1274,11 +1337,11 @@ void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int
 
    stag *s;
    int8_t dir[128];
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[eye] launch\n");
 
    s = *(stag **)0x4fa;
-
-   printf("[TOM] launch: argcnt= dirname= prgname= argn1= argn2=\n"); // Tom: added
 
    strcpy((char *)dir, (char *)dirname);
    strcpy(s->prg, (char *)prgname);

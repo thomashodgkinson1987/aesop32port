@@ -39,141 +39,6 @@
 
 #define FAST_LOCK 1 // user field = resource name if 0, file offset if 1
 
-/******************************************/
-//
-// Diagnostic code
-//
-/******************************************/
-
-#if 0
-uint32_t RTR_chksum(uint32_t entry)
-{
-   HD_entry *sel;
-   uint8_t *ptr;
-   uint32_t chksum;
-
-   sel = (HD_entry *)entry;
-   ptr = sel->seg;
-
-   chksum = 0;
-   while (((uint32_t)ptr) < ((uint32_t)(sel->seg) + sel->size))
-   {
-      chksum += (uint32_t)*ptr;
-      ptr++;
-   }
-
-   return (uint32_t)chksum;
-}
-
-void RTR_double_check(uint32_t caller, uint32_t entry)
-{
-   HD_entry *sel;
-   uint8_t *ptr;
-   uint32_t chksum;
-   uint8_t *cname;
-
-   sel = (HD_entry *)entry;
-   ptr = sel->seg;
-
-   chksum = 0;
-   while (((uint32_t)ptr) < ((uint32_t)(sel->seg) + sel->size))
-   {
-      chksum += (uint32_t)*ptr;
-      ptr++;
-   }
-
-   if (sel->chksum != chksum)
-   {
-      if (caller > 10)
-      {
-         cname = (uint8_t *)caller;
-      }
-      else
-      {
-         switch (caller)
-         {
-         case 6:
-            cname = "before RT_execute: do_END";
-            break;
-         case 5:
-            cname = "in RT_execute";
-            break;
-         case 4:
-            cname = "before get_res_handle";
-            break;
-         case 3:
-            cname = "during PASS";
-            break;
-         case 2:
-            cname = "during SEND";
-            break;
-         case 1:
-            cname = "during LOCK";
-            break;
-         case 0:
-            cname = "during CALL";
-            break;
-         }
-      }
-      abend("RES# %d trashed %s.\n  HRES=%x -> %x  Size = %x  Flags = %x  Old=%x New=%x\n",
-            sel->user, cname, sel, sel->seg, sel->size, sel->flags, sel->chksum, chksum);
-   }
-}
-
-void resource_chksum(int8_t *situation)
-{
-   uint32_t res = CHKRES;
-   int32_t i;
-
-   if (CHKRES == 0)
-      return;
-
-   if (RTR == NULL)
-      return;
-
-   for (i = 0; i < RTR->nentries; i++)
-      if (RTR->dir[i].user == res)
-         break;
-
-   if (i != RTR->nentries)
-   {
-      if (!(RTR->dir[i].flags & DA_DISCARDED))
-         RTR_double_check((uint32_t)situation, (uint32_t)&RTR->dir[i]);
-      else
-         printf("Resource # %d discarded %s\n", res, situation);
-   }
-}
-
-void RTR_flag_check(int8_t *situation)
-{
-   HD_entry *sel;
-
-   if ((uint32_t)situation > 10)
-   {
-      sel = (HD_entry *)HRES_to_check;
-
-      if ((sel->flags & DA_DISCARDED) || (sel->flags & DA_FREE))
-      {
-         abend("RES# %d flags trashed %s.\n  HRES=%x -> %x  Size = %x  Flags = %x \n",
-               sel->user, situation, sel, sel->seg, sel->size, sel->flags);
-      }
-   }
-}
-
-void RTR_HRES_chksum(int8_t *situation)
-{
-   if (HRES_to_check == 0)
-      return;
-
-   if (check_on == 0)
-      return;
-
-   // RTR_flag_check(situation);
-
-   // RTR_double_check((uint32_t)situation, (uint32_t) HRES_to_check);
-}
-#endif
-
 /***************************************************/
 //
 // Discard a given resource to expand free space
@@ -194,8 +59,6 @@ static uint32_t RTR_discard(RTR_class *RTR, uint32_t index, uint32_t do_move)
    uint32_t nbytes, size;
    HD_entry *sel;
 
-   printf("[rtres] RTR_discard(RTR_class *RTR, uint32_t index, uint32_t do_move) - RTR=%u index=%u do_move=%u\n", RTR, index, do_move);
-
    sel = &RTR->dir[index];
 
    size = sel->size;
@@ -215,7 +78,6 @@ static uint32_t RTR_discard(RTR_class *RTR, uint32_t index, uint32_t do_move)
 
    if (do_move)
    {
-      // PollMod(); // Tom: commented out
       far_memmove(dest, src, nbytes);
    }
 
@@ -228,6 +90,8 @@ static uint32_t RTR_discard(RTR_class *RTR, uint32_t index, uint32_t do_move)
    {
       RTR_free(RTR, (uint32_t)sel);
    }
+
+   printf("[rtres] RTR_discard: RTR=%p index=%u do_move=%u return=%u\n", (void *)RTR, index, do_move, size);
 
    return size;
 }
@@ -242,8 +106,6 @@ static uint32_t RTR_LRU(RTR_class *RTR)
 {
    uint32_t i, oldest;
    uint32_t n, age;
-
-   printf("[rtres] RTR_LRU(RTR_class *RTR) - RTR=%u\n", RTR);
 
    n = RTR->nentries;
    oldest = age = -1;
@@ -263,6 +125,8 @@ static uint32_t RTR_LRU(RTR_class *RTR)
          oldest = i;
       }
    }
+
+   printf("[rtres] RTR_LRU: RTR=%p return=%u\n", (void *)RTR, oldest);
 
    return oldest;
 }
@@ -297,14 +161,15 @@ static uint32_t RTR_make_room(RTR_class *RTR, uint32_t goal)
    uint32_t next_seg, size_deleted, nbytes;
    void *dest, *src, *end;
 
-   printf("[rtres] RTR_make_room(RTR_class *RTR, uint32_t goal) - RTR=%u goal=%u\n", RTR, goal);
-
    //
    // 1) If /goal/ bytes already free, return immediately
    //
 
    if (RTR->free >= goal)
+   {
+      printf("[rtres] RTR_make_room: RTR=%p goal=%u return=1\n", (void *)RTR, goal);
       return 1;
+   }
 
    standby_cursor();
 
@@ -326,6 +191,7 @@ static uint32_t RTR_make_room(RTR_class *RTR, uint32_t goal)
    if (RTR->free >= goal)
    {
       resume_cursor();
+      printf("[rtres] RTR_make_room: RTR=%p goal=%u return=1\n", (void *)RTR, goal);
       return 1;
    }
 
@@ -341,7 +207,7 @@ static uint32_t RTR_make_room(RTR_class *RTR, uint32_t goal)
 
       if (RTR->dir[first].locks > 0)
          continue;
-#if 1
+
       //
       // Found at least one unlocked TEMPORARY entry; try to merge adjacent
       // entries' blocks to avoid redundant calls to far_memmove()
@@ -372,13 +238,9 @@ static uint32_t RTR_make_room(RTR_class *RTR, uint32_t goal)
       src = add_ptr(dest, size_deleted);
       nbytes = ptr_dif(end, src);
 
-      // PollMod(); // Tom: commented out
       far_memmove(dest, src, nbytes);
 
       first = next + 1;
-#else
-      RTR_discard(RTR, first, 1);
-#endif
    }
 
    //
@@ -391,9 +253,10 @@ static uint32_t RTR_make_room(RTR_class *RTR, uint32_t goal)
       // If no LRU candidates available, return FALSE
       //
       index = RTR_LRU(RTR);
-      if (index == -1)
+      if (index == UINT32_MAX)
       {
          resume_cursor();
+         printf("[rtres] RTR_make_room: RTR=%p goal=%u return=0\n", (void *)RTR, goal);
          return 0;
       }
 
@@ -404,6 +267,8 @@ static uint32_t RTR_make_room(RTR_class *RTR, uint32_t goal)
    }
 
    resume_cursor();
+
+   printf("[rtres] RTR_make_room: RTR=%p goal=%u return=1\n", (void *)RTR, goal);
 
    return 1;
 }
@@ -420,12 +285,13 @@ static uint32_t RTR_assign_space(RTR_class *RTR, uint32_t bytes, uint32_t attrib
 {
    HD_entry *sel;
 
-   printf("[rtres] RTR_assign_space(RTR_class *RTR, uint32_t bytes, uint32_t attrib, uint32_t entry) - RTR=%u bytes=%u attrib=%u entry=%u\n", RTR, bytes, attrib, entry);
-
    sel = (HD_entry *)entry;
 
    if (!RTR_make_room(RTR, bytes))
+   {
+      printf("[rtres] RTR_assign_space: RTR=%p bytes=%u attrib=%u entry=%u return=0\n", (void *)RTR, bytes, attrib, entry);
       return 0;
+   }
 
    sel->flags = attrib & 0xffffffff;
    sel->locks = 0;
@@ -445,6 +311,8 @@ static uint32_t RTR_assign_space(RTR_class *RTR, uint32_t bytes, uint32_t attrib
       RTR->next_M = (uint8_t *)RTR->next_M + bytes;
    }
 
+   printf("[rtres] RTR_assign_space: RTR=%p bytes=%u attrib=%u entry=%u return=1\n", (void *)RTR, bytes, attrib, entry);
+
    return 1;
 }
 
@@ -458,7 +326,7 @@ static void RTR_init_dir(RTR_class *RTR, uint32_t first)
 {
    uint32_t i, j;
 
-   printf("[rtres] RTR_init_dir(RTR_class *RTR, uint32_t first) - RTR=%u first=%u\n", RTR, first);
+   printf("[rtres] RTR_init_dir: RTR=%p first=%u\n", (void *)RTR, first);
 
    for (i = 0, j = first; i < DIR_BLK; i++, j++)
    {
@@ -484,23 +352,30 @@ static uint32_t RTR_new_entry(RTR_class *RTR)
    uint32_t nbytes;
    void *dest, *src;
 
-   printf("[rtres] RTR_new_entry(RTR_class *RTR) - RTR=%u\n", RTR);
-
    n = RTR->nentries;
 
    if (n >= (unsigned)(-DIR_BLK))
+   {
+      printf("[rtres] RTR_new_entry: RTR=%p return=%u\n", (void *)RTR, UINT32_MAX);
       return UINT32_MAX;
+   }
 
    for (i = 0; i < n; i++)
    {
       f = RTR->dir[i].flags;
 
       if ((f & DA_FREE) && (f & DA_DISCARDED))
+      {
+         printf("[rtres] RTR_new_entry: RTR=%p return=%u\n", (void *)RTR, (uint32_t)&RTR->dir[i]);
          return (uint32_t)&RTR->dir[i];
+      }
    }
 
    if (!RTR_make_room(RTR, SIZE_DB))
+   {
+      printf("[rtres] RTR_new_entry: RTR=%p return=%u\n", (void *)RTR, UINT32_MAX);
       return UINT32_MAX;
+   }
 
    for (i = 0; i < n; i++)
    {
@@ -513,7 +388,6 @@ static uint32_t RTR_new_entry(RTR_class *RTR)
    dest = add_ptr(src, SIZE_DB);
    nbytes = ptr_dif(RTR->next_M, src);
 
-   // PollMod(); // Tom: commented out
    far_memmove(dest, src, nbytes);
 
    RTR->next_M = (int8_t *)RTR->next_M + SIZE_DB;
@@ -521,6 +395,8 @@ static uint32_t RTR_new_entry(RTR_class *RTR)
    RTR->nentries += DIR_BLK;
 
    RTR_init_dir(RTR, n);
+
+   printf("[rtres] RTR_new_entry: RTR=%p return=%u\n", (void *)RTR, (uint32_t)&RTR->dir[n]);
 
    return (uint32_t)&RTR->dir[n];
 }
@@ -545,8 +421,6 @@ uint32_t RTR_seek(RTR_class *RTR, uint32_t rnum)
    uint32_t dirblk, next;
    uint16_t dirent;
 
-   printf("[rtres] RTR_seek(RTR_class *RTR, uint32_t rnum) - RTR=%u rnum=%u\n", RTR, rnum);
-
    dirblk = (rnum / (uint32_t)OD_SIZE);
    dirent = (uint16_t)(rnum % (uint32_t)OD_SIZE);
 
@@ -561,8 +435,6 @@ uint32_t RTR_seek(RTR_class *RTR, uint32_t rnum)
          lseek(RTR->file, next, SEEK_SET);
          read(RTR->file, &RTR->OD, sizeof(OD_block));
          next = RTR->OD.next;
-
-         // PollMod(); // Tom: commented out
       } while (dirblk--);
    }
 
@@ -570,7 +442,12 @@ uint32_t RTR_seek(RTR_class *RTR, uint32_t rnum)
    read(RTR->file, &RTR->REH, sizeof(RF_entry_hdr));
 
    if (RTR->REH.data_attrib & DA_PLACEHOLDER)
+   {
+      printf("[rtres] RTR_seek: RTR=%p rnum=%u return=0\n", (void *)RTR, rnum);
       return 0;
+   }
+
+   printf("[rtres] RTR_seek: RTR=%p rnum=%u return=%u\n", (void *)RTR, rnum, RTR->REH.data_size);
 
    return RTR->REH.data_size;
 }
@@ -589,7 +466,7 @@ static void RTR_read(RTR_class *RTR, uint32_t entry)
    HD_entry *sel;
    uint32_t len;
 
-   printf("[rtres] RTR_read(RTR_class *RTR, uint32_t entry) - RTR=%u entry=%u\n", RTR, entry);
+   printf("[rtres] RTR_read: RTR=%p entry=%u\n", (void *)RTR, entry);
 
    sel = (HD_entry *)entry;
 
@@ -598,15 +475,11 @@ static void RTR_read(RTR_class *RTR, uint32_t entry)
 
    while (len > (uint32_t)DOS_BUFFSIZE)
    {
-      // PollMod(); // Tom: commented out
-
       read(RTR->file, ptr, DOS_BUFFSIZE);
       len -= DOS_BUFFSIZE;
       ptr += DOS_BUFFSIZE;
    }
    read(RTR->file, ptr, len);
-
-   // PollMod(); // Tom: commented out
 }
 
 /***************************************************/
@@ -628,13 +501,14 @@ RTR_class *RTR_construct(void *base, uint32_t size, uint32_t nnames, int8_t *fil
    RTR_class *RTR;
    void *beg, *end;
 
-   printf("[rtres] RTR_construct(void *base, uint32_t size, uint32_t nnames, int8_t *filename) - base=%u size=%u nnames=%u filename=%s\n", base, size, nnames, filename);
-
    RTR = mem_alloc(sizeof(RTR_class));
 
    RTR->file = open((char *)filename, O_RDONLY | O_BINARY);
    if (RTR->file == -1)
+   {
+      printf("[rtres] RTR_construct: base=%p size=%u nnames=%u filename=%s return=NULL\n", base, size, nnames, filename);
       return NULL;
+   }
 
    read(RTR->file, &RTR->RFH, sizeof(RF_file_hdr));
 
@@ -657,9 +531,10 @@ RTR_class *RTR_construct(void *base, uint32_t size, uint32_t nnames, int8_t *fil
 
    RTR->cur_blk = UINT32_MAX;
 
-   // RTR->name_dir = RTR_alloc(RTR, (uint32_t)((uint32_t)nnames * sizeof(ND_entry)), DA_FIXED | DA_PRECIOUS); // Tom: commented out
-   RTR->name_dir = RTR_alloc(RTR, nnames * sizeof(ND_entry), DA_FIXED | DA_PRECIOUS); // Tom: new version
+   RTR->name_dir = RTR_alloc(RTR, nnames * ((uint32_t)sizeof(ND_entry)), DA_FIXED | DA_PRECIOUS);
    RTR->nd_entries = 0;
+
+   printf("[rtres] RTR_construct: base=%p size=%u nnames=%u filename=%s return=%p\n", base, size, nnames, filename, (void *)RTR);
 
    return RTR;
 }
@@ -674,7 +549,7 @@ RTR_class *RTR_construct(void *base, uint32_t size, uint32_t nnames, int8_t *fil
 
 void RTR_destroy(RTR_class *RTR, uint32_t flags)
 {
-   printf("[rtres] RTR_destroy(RTR_class *RTR, uint32_t flags) - RTR=%u flags=%u\n", RTR, flags);
+   printf("[rtres] RTR_destroy: RTR=%p flags=%u\n", (void *)RTR, flags);
 
    close(RTR->file);
 
@@ -706,17 +581,23 @@ uint32_t RTR_alloc(RTR_class *RTR, uint32_t bytes, uint32_t attrib)
    uint32_t entry;
    HD_entry *sel;
 
-   printf("[rtres] RTR_alloc(RTR_class *RTR, uint32_t bytes, uint32_t attrib) - RTR=%u bytes=%u attrib=%u\n", RTR, bytes, attrib);
-
    entry = RTR_new_entry(RTR);
    if (entry == UINT32_MAX)
+   {
+      printf("[rtres] RTR_alloc: RTR=%p bytes=%u attrib=%u return=%u\n", (void *)RTR, bytes, attrib, UINT32_MAX);
       return UINT32_MAX;
+   }
 
    if (!RTR_assign_space(RTR, bytes, attrib, entry))
+   {
+      printf("[rtres] RTR_alloc: RTR=%p bytes=%u attrib=%u return=%u\n", (void *)RTR, bytes, attrib, UINT32_MAX);
       return UINT32_MAX;
+   }
 
    sel = (HD_entry *)entry;
    sel->user = UINT32_MAX;
+
+   printf("[rtres] RTR_alloc: RTR=%p bytes=%u attrib=%u return=%u\n", (void *)RTR, bytes, attrib, entry);
 
    return entry;
 }
@@ -740,7 +621,7 @@ void RTR_free(RTR_class *RTR, uint32_t entry)
    HD_entry *sel;
    ND_entry *dir;
 
-   printf("[rtres] RTR_free(RTR_class *RTR, uint32_t entry) - RTR=%u entry=%u\n", RTR, entry);
+   printf("[rtres] RTR_free: RTR=%p entry=%u\n", (void *)RTR, entry);
 
    if (entry == UINT32_MAX)
       return;
@@ -807,7 +688,7 @@ void RTR_free(RTR_class *RTR, uint32_t entry)
 
 uint32_t RTR_force_discard(RTR_class *RTR, uint32_t goal)
 {
-   printf("[rtres] RTR_force_discard(RTR_class *RTR, uint32_t goal) - RTR=%u goal=%u\n", RTR, goal);
+   printf("[rtres] RTR_force_discard: RTR=%p goal=%u\n", (void *)RTR, goal);
 
    return RTR_make_room(RTR, goal);
 }
@@ -830,9 +711,7 @@ void RTR_lock(RTR_class *RTR, uint32_t entry)
    uint32_t i, n;
    HD_entry *sel;
 
-   printf("[rtres] RTR_lock(RTR_class *RTR, uint32_t entry) - RTR=%u entry=%u\n", RTR, entry);
-
-   // PollMod(); // Tom: commented out
+   printf("[rtres] RTR_lock: RTR=%p entry=%u\n", (void *)RTR, entry);
 
    sel = (HD_entry *)entry;
 
@@ -844,11 +723,7 @@ void RTR_lock(RTR_class *RTR, uint32_t entry)
       if (RTR_assign_space(RTR, sel->size, sel->flags, entry) == UINT32_MAX)
          return;
 
-#if FAST_LOCK
       lseek(RTR->file, sel->user, SEEK_SET);
-#else
-      RTR_seek(RTR, sel->user);
-#endif
 
       RTR_read(RTR, entry);
 
@@ -859,7 +734,7 @@ void RTR_lock(RTR_class *RTR, uint32_t entry)
 
    sel->history = ++RTR->LRU_cnt;
 
-   if (RTR->LRU_cnt == 65535U)
+   if (RTR->LRU_cnt == UINT16_MAX)
    {
       n = RTR->nentries;
       for (i = 0; i < n; i++)
@@ -882,7 +757,7 @@ void RTR_unlock(uint32_t entry)
 {
    HD_entry *sel;
 
-   printf("[rtres] RTR_unlock(uint32_t entry) - entry=%u\n", entry);
+   printf("[rtres] RTR_unlock: entry=%u\n", entry);
 
    sel = (HD_entry *)entry;
 
@@ -900,12 +775,14 @@ void RTR_unlock(uint32_t entry)
 uint32_t RTR_size(uint32_t entry)
 {
    HD_entry *sel;
-
-   printf("[rtres] RTR_size(uint32_t entry) - entry=%u\n", entry);
+   uint32_t size;
 
    sel = (HD_entry *)entry;
+   size = sel->size;
 
-   return sel->size;
+   printf("[rtres] RTR_size: entry=%u return=%u\n", entry, size);
+
+   return size;
 }
 
 /***************************************************/
@@ -928,14 +805,14 @@ uint32_t RTR_size(uint32_t entry)
 //
 /***************************************************/
 
-#ifndef RTR_addr
+// #ifndef RTR_addr
 
-void *RTR_addr(uint32_t entry)
-{
-   return (void *)(*(uint32_t *)entry);
-}
+// void *RTR_addr(uint32_t entry)
+// {
+//    return (void *)(*(uint32_t *)entry);
+// }
 
-#endif
+// #endif
 
 /***************************************************/
 //
@@ -948,7 +825,7 @@ void *RTR_addr(uint32_t entry)
 
 void RTR_read_resource(RTR_class *RTR, void *dest, uint32_t len)
 {
-   printf("[rtres] RTR_read_resource(RTR_class *RTR, void *dest, uint32_t len) - RTR=%u dest=%u len=%u\n", RTR, dest, len);
+   printf("[rtres] RTR_read_resource: RTR=%p dest=%p len=%u\n", (void *)RTR, dest, len);
 
    while (len > (uint32_t)DOS_BUFFSIZE)
    {
@@ -979,26 +856,22 @@ uint32_t RTR_load_resource(RTR_class *RTR, uint32_t resource, uint32_t attrib)
    HD_entry *sel;
    uint32_t entry;
 
-   printf("[rtres] RTR_load_resource(RTR_class *RTR, uint32_t resource, uint32_t attrib) - RTR=%u resource=%u attrib=%u\n", RTR, resource, attrib);
-
    if (!RTR_seek(RTR, resource))
+   {
+      printf("[rtres] RTR_load_resource: RTR=%p resource=%u attrib=%u return=%u\n", (void *)RTR, resource, attrib, UINT32_MAX);
       return UINT32_MAX;
+   }
 
    entry = RTR_alloc(RTR, RTR->REH.data_size, (attrib == DA_DEFAULT) ? RTR->REH.data_attrib : attrib);
 
    if (entry != UINT32_MAX)
    {
       sel = (HD_entry *)entry;
-
-#if FAST_LOCK
-      // sel->user = tell(RTR->file);
-      sel->user = lseek(RTR->file, 0, SEEK_CUR); // Tom: tell() replaced with lseek
-#else
-      sel->user = resource;
-#endif
-
+      sel->user = lseek(RTR->file, 0, SEEK_CUR);
       RTR_read(RTR, entry);
    }
+
+   printf("[rtres] RTR_load_resource: RTR=%p resource=%u attrib=%u return=%u\n", (void *)RTR, resource, attrib, entry);
 
    return entry;
 }
@@ -1022,8 +895,6 @@ uint32_t RTR_get_resource_handle(RTR_class *RTR, uint32_t resource, uint32_t att
    ND_entry *dir;
    void *dest, *src;
    uint32_t nbytes;
-
-   printf("[rtres] RTR_get_resource_handle(RTR_class *RTR, uint32_t resource, uint32_t attrib) - RTR=%u resource=%u attrib=%u\n", RTR, resource, attrib);
 
    dir = RTR_search_name_dir(RTR, resource);
 
@@ -1054,7 +925,6 @@ uint32_t RTR_get_resource_handle(RTR_class *RTR, uint32_t resource, uint32_t att
          dest = add_ptr(src, (uint32_t)sizeof(ND_entry));
          nbytes = (uint32_t)((RTR->nd_entries - i) * sizeof(ND_entry));
 
-         // PollMod(); // Tom: commented out
          far_memmove(dest, src, nbytes);
       }
 
@@ -1068,6 +938,8 @@ uint32_t RTR_get_resource_handle(RTR_class *RTR, uint32_t resource, uint32_t att
 
    if (dir->handle == UINT32_MAX)
       dir->handle = 0;
+
+   printf("[rtres] RTR_get_resource_handle: RTR=%p resource=%u attrib=%u return=%u\n", (void *)RTR, resource, attrib, dir->handle);
 
    return dir->handle;
 }
@@ -1086,12 +958,15 @@ void RTR_free_resource(RTR_class *RTR, uint32_t resource)
 {
    ND_entry *dir;
 
-   printf("[rtres] RTR_free_resource(RTR_class *RTR, uint32_t resource) - RTR=%u resource=%u\n", RTR, resource);
-
    dir = RTR_search_name_dir(RTR, resource);
 
    if (dir == NULL)
+   {
+      printf("[rtres] RTR_free_resource: RTR=%p resource=%u dir=NULL\n", (void *)RTR, resource);
       return;
+   }
+
+   printf("[rtres] RTR_free_resource: RTR=%p resource=%u handle=%u\n", (void *)RTR, resource, dir->handle);
 
    RTR_free(RTR, dir->handle);
 }
@@ -1111,8 +986,6 @@ ND_entry *RTR_search_name_dir(RTR_class *RTR, uint32_t resource)
    ND_entry *dir, *try;
    uint32_t entry;
 
-   printf("[rtres] RTR_search_name_dir(RTR_class *RTR, uint32_t resource) - RTR=%u resource=%u\n", RTR, resource);
-
    dir = RTR_addr(RTR->name_dir);
 
    min = 0;
@@ -1130,124 +1003,19 @@ ND_entry *RTR_search_name_dir(RTR_class *RTR, uint32_t resource)
          max = mid - 1;
       else if (entry < resource)
          min = mid + 1;
+      else if (try->handle == 0)
+      {
+         printf("[rtres] RTR_search_name_dir: RTR=%p resource=%u ND_entry=NULL\n", (void *)RTR, resource);
+         return NULL;
+      }
       else
-         return (try->handle == 0) ? NULL : try;
+      {
+         printf("[rtres] RTR_search_name_dir: RTR=%p resource=%u ND_entry=%p\n", (void *)RTR, resource, (void *)try);
+         return try;
+      }
    }
+
+   printf("[rtres] RTR_search_name_dir: RTR=%p resource=%u ND_entry=NULL\n", (void *)RTR, resource);
 
    return NULL;
 }
-
-#if 0
-
-/***************************************************/
-//
-// Show ASCII resource name
-//
-/***************************************************/
-
-int8_t *ASCII_name(uint32_t name)
-{
-   extern uint32_t HROED;
-   static int8_t aname[35];
-   uint8_t *dict;
-   int8_t *tag, *def;
-   uint32_t num;
-   int32_t i;
-
-   dict = RTD_first(RTR_addr(HROED));
-   while ((dict = RTD_iterate(RTR_addr(HROED), dict, &tag, &def)) != NULL)
-   {
-      num = ascnum(def);
-
-      if (num == name)
-         break;
-   }
-
-   if (dict == NULL)
-      sprintf(aname, "Not found (%ld)", name);
-   else
-      strncpy(aname, tag, 34);
-
-   for (i = strlen(aname); i < 34; i++)
-      aname[i] = ' ';
-
-   aname[34] = 0;
-
-   return aname;
-}
-
-/***************************************************/
-//
-// Show resource cache stats (for diagnostic purposes)
-//
-/***************************************************/
-
-void RTR_dump(RTR_class *RTR)
-{
-   uint32_t i, j, f;
-   HD_entry R;
-   uint32_t cs;
-   uint8_t *ptr;
-   uint32_t cnt;
-   extern uint32_t heap_size;
-   uint32_t present;
-
-   fprintf(stdout, " # of entries: %u\n", RTR->nentries);
-   fprintf(stdout, "         Size: %lu\n", heap_size);
-   fprintf(stdout, "         Base: %Fp\n\n", RTR->base);
-
-   fprintf(stdout, "Next moveable: %Fp\n", RTR->next_M);
-   fprintf(stdout, "   Last fixed: %Fp\n", RTR->last_F);
-   fprintf(stdout, "         Free: %lu\n\n", RTR->free);
-
-   present = 0;
-
-   for (i = 0; i < RTR->nentries; i++)
-   {
-      f = RTR->dir[i].flags;
-
-      if ((f & DA_FREE) && (f & DA_DISCARDED) && (!RTR->dir[i].seg))
-         break;
-   }
-
-   fprintf(stdout, "Entries avail: %u\n", RTR->nentries);
-   fprintf(stdout, "       In use: %u\n\n", i);
-
-   for (j = 0; j < i; j++)
-   {
-      R = RTR->dir[j];
-
-      for (cnt = 0, cs = 0, ptr = RTR_addr(norm(&RTR->dir[j]));
-           cnt < R.size; cnt++)
-         cs += ptr[cnt];
-
-      fprintf(stdout, "%s %.06lu bytes, lock %.02d, LRU %.05u) ",
-              ASCII_name(R.user), R.size, R.locks, R.history);
-
-      if (R.flags & DA_FIXED)
-         fprintf(stdout, "Fix ");
-      else
-         fprintf(stdout, "Mov ");
-
-      if (R.flags & DA_PRECIOUS)
-         fprintf(stdout, "Prec ");
-      if (R.flags & DA_DISCARDABLE)
-         fprintf(stdout, "D'ble ");
-      if (R.flags & DA_EVANESCENT)
-         fprintf(stdout, "Ev ");
-
-      if (R.flags & DA_DISCARDED)
-         fprintf(stdout, "DISC ");
-      if (R.flags & DA_FREE)
-         fprintf(stdout, "FREE ");
-
-      if (!(R.flags & (DA_DISCARDED | DA_FREE)))
-         present += R.size;
-
-      fprintf(stdout, "\n");
-   }
-
-   fprintf(stdout, "\n%lu bytes present\n", present);
-}
-
-#endif

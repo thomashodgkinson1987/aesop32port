@@ -1,34 +1,31 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  RTCODE.C                                                              ��
-// ��                                                                        ��
-// ��  AESOP runtime code resource handlers for Eye III engine               ��
-// ��                                                                        ��
-// ��  Version: 1.00 of 6-May-92 -- Initial version                          ��
-// ��                                                                        ��
-// ��  Project: Eye III                                                      ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with Borland C++ v3.0 or later                    ��
-// ��  Large memory model (16-bit DOS)                                       ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  10926 Jollyville #308                                                 ��
-// ��  Austin, TX 78759                                                      ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  RTCODE.C                                                              ##
+// ##                                                                        ##
+// ##  AESOP runtime code resource handlers for Eye III engine               ##
+// ##                                                                        ##
+// ##  Version: 1.00 of 6-May-92 -- Initial version                          ##
+// ##                                                                        ##
+// ##  Project: Eye III                                                      ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with Borland C++ v3.0 or later                    ##
+// ##  Large memory model (16-bit DOS)                                       ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  10926 Jollyville #308                                                 ##
+// ##  Austin, TX 78759                                                      ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
-// #include <conio.h> // Tom: commented out
 #include <stdio.h>
-// #include <dos.h> // Tom: commented out
 #include <stdlib.h>
 #include <stdarg.h>
-// #include <string.h> // Tom: commented out, moved to define block below
 
 // Tom: added
 #ifdef _WIN32
@@ -39,9 +36,9 @@
 #define stricmp strcasecmp
 #endif
 
-#include <stdint.h> // Tom: added
-#include <time.h>   // Tom: added, for time()
-#include <ctype.h>  // Tom: added, for strlwr and strupr
+#include <stdint.h>
+#include <time.h>
+#include <ctype.h>
 
 #include "defs.h"
 #include "shared.h"
@@ -106,10 +103,10 @@ void load_string(int32_t argcnt, int8_t *array, uint32_t string)
    int8_t *ptr;
    int8_t *new_array;
    uint32_t array_offset;
-   (void)argcnt; // Tom: added
-   printf("[rtcode] load_string\n");
+   (void)argcnt;
 
-   // array_offset = (uint32_t)array - (uint32_t)RTR_addr(objlist[current_this]); // Tom: commented out, new version below
+   printf("[rtcode] load_string: argcnt=%i array=%p string=%u\n", argcnt, (void *)array, string);
+
    array_offset = (uint32_t)((uintptr_t)array - (uintptr_t)RTR_addr(objlist[current_this]));
 
    handle = RTR_get_resource_handle(RTR, string, DA_DEFAULT);
@@ -120,26 +117,14 @@ void load_string(int32_t argcnt, int8_t *array, uint32_t string)
 
    ptr = RTR_addr(handle);
 
-   // Tom: added, old version below
    if (ptr[0] == 'S' && ptr[1] == ':')
    {
-      far_memmove(new_array, ptr + 2, RTR_size(handle) - 2L); // Tom: remove L?
+      far_memmove(new_array, ptr + 2, RTR_size(handle) - 2);
    }
    else
    {
       abend(MSG_SRRLS);
    }
-
-   // Tom: commented out, new version above
-   // switch (*(uint16_t *)ptr)
-   // {
-   // case ':S':
-   //    far_memmove(new_array, ptr + 2, RTR_size(handle) - 2L);
-   //    break;
-
-   // default:
-   //    abend(MSG_SRRLS);
-   // }
 
    RTR_unlock(handle);
 }
@@ -160,11 +145,9 @@ void load_resource(int32_t argcnt, int8_t *array, uint32_t resource)
    int8_t *new_array;
    (void)argcnt; // Tom: added
 
-   printf("[rtcode] load_resource\n");
+   printf("[rtcode] load_resource: argcnt=%i array=%p resource=%u\n", argcnt, (void *)array, resource);
 
-   // array_offset = FP_OFF(array) - FP_OFF(RTR_addr(objlist[current_this])); // Tom: commented out, new version below
-   // array_offset = (uint32_t)ptr_dif(array, RTR_addr(objlist[current_this])); // Tom: possible new version using existing ptr_dif macro
-   array_offset = (uint32_t)((uintptr_t)array - (uintptr_t)RTR_addr(objlist[current_this])); // Tom: added, new version
+   array_offset = (uint32_t)((uintptr_t)array - (uintptr_t)RTR_addr(objlist[current_this]));
 
    handle = RTR_get_resource_handle(RTR, resource, DA_DEFAULT);
 
@@ -179,39 +162,54 @@ void load_resource(int32_t argcnt, int8_t *array, uint32_t resource)
 
 void copy_string(int32_t argcnt, int8_t *src, int8_t *dest)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] copy_string\n");
+   (void)argcnt;
+
+   printf("[rtcode] copy_string: argcnt=%i src=%p dest=%p\n", argcnt, (void *)src, (void *)dest);
+
    strcpy((char *)dest, (char *)src);
 }
 
 void string_force_lower(int32_t argcnt, int8_t *dest)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] string_force_lower\n");
+   (void)argcnt;
+
+   printf("[rtcode] string_force_lower: argcnt=%i dest=%p\n", argcnt, (void *)dest);
+
    strlwr((char *)dest);
 }
 
 void string_force_upper(int32_t argcnt, int8_t *dest)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] string_force_upper\n");
+   (void)argcnt;
+
+   printf("[rtcode] string_force_upper: argcnt=%i dest=%p\n", argcnt, (void *)dest);
+
    strupr((char *)dest);
 }
 
 uint32_t string_len(int32_t argcnt, int8_t *string)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] string_len\n");
-   // return strlen((char *)string); // Tom: commented out, new version below
-   return (uint32_t)strlen((char *)string);
+   uint32_t len;
+   (void)argcnt;
+
+   len = (uint32_t)strlen((char *)string);
+
+   printf("[rtcode] string_len: argcnt=%i string=%s return=%u\n", argcnt, string, len);
+
+   return len;
 }
 
 uint32_t string_compare(int32_t argcnt, int8_t *str1, int8_t *str2)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] string_compare\n");
+   uint32_t ret;
+   (void)argcnt;
+
+   ret = stricmp((char *)str1, (char *)str2);
+
+   printf("[rtcode] string_compare: argcnt=%i str1=%s str2=%s return=%u\n", argcnt, str1, str2, ret);
+
    // Tom: stricmp can return -1 on Windows
-   return stricmp((char *)str1, (char *)str2);
+   return ret;
 }
 
 //
@@ -220,10 +218,13 @@ uint32_t string_compare(int32_t argcnt, int8_t *str1, int8_t *str2)
 
 int32_t strval(int32_t argcnt, int8_t *string)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] strval\n");
+   (void)argcnt;
+
    if (string == NULL)
+   {
+      printf("[rtcode] strval: argcnt=%i string=%s return=-1\n", argcnt, string);
       return -1;
+   }
 
    return ascnum(string);
 }
@@ -238,11 +239,13 @@ int32_t strval(int32_t argcnt, int8_t *string)
 int32_t envval(int32_t argcnt, int8_t *name)
 {
    int8_t *env;
-   (void)argcnt; // Tom: added
-   printf("[rtcode] envval\n");
+   (void)argcnt;
 
    if ((env = (int8_t *)getenv((char *)name)) == NULL)
-      return -1L;
+   {
+      printf("[rtcode] envval: argcnt=%i name=%s return=-1\n", argcnt, name);
+      return -1;
+   }
 
    return ascnum(env);
 }
@@ -254,41 +257,29 @@ int32_t envval(int32_t argcnt, int8_t *name)
 void beep(void)
 {
    printf("[rtcode] beep\n");
-   // Tom: commented out
-
-   // uint16_t dx, ax;
-
-   // outp(0x43, 0x0b6);
-   // outp(0x42, 169);
-   // outp(0x42, 4);
-
-   // outp(0x61, (inp(0x61) | 3));
-
-   // for (dx = 5; dx > 0; dx--)
-   //    for (ax = 65535; ax > 0; ax--)
-   //       ;
-
-   // outp(0x61, (inp(0x61) & 0x0fc));
 }
 
 void pokemem(int32_t argcnt, int32_t *addr, int32_t data)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] pokemem\n");
+   (void)argcnt;
+
+   printf("[rtcode] pokemem: argcnt=%i addr=%p data=%i\n", argcnt, (void *)addr, data);
+
    if (addr == NULL)
    {
       printf("[rtcode] pokemem: attempt to write %d to NULL address, ignoring\n", data);
       return;
    }
-   printf("[rtcode] pokemem: addr=%p data=%d\n", (void *)addr, data);
+
    *addr = data;
 }
 
 int32_t peekmem(int32_t argcnt, int32_t *addr)
 {
    static int first_call = 1;
-   (void)argcnt; // Tom: added
-   printf("[rtcode] peekmem\n");
+   (void)argcnt;
+
+   printf("[rtcode] peekmem: argcnt=%i addr=%p\n", argcnt, (void *)addr);
 
    if (first_call)
    {
@@ -303,7 +294,8 @@ int32_t peekmem(int32_t argcnt, int32_t *addr)
       return 0;
    }
 
-   printf("[rtcode] peekmem: addr=%p\n", (void *)addr);
+   printf("[rtcode] peekmem: argcnt=%i addr=%p return=%i\n", argcnt, (void *)addr, *addr);
+
    return *addr;
 }
 
@@ -311,67 +303,86 @@ uint32_t rnd(int32_t argcnt, uint32_t low, uint32_t high)
 {
    // LUM add type int
    static int init = 0;
-   (void)argcnt; // Tom: added
-   printf("[rtcode] rnd\n");
+   uint32_t ret;
+   (void)argcnt;
 
    if (!init)
    {
       init = 1;
-      // srand(*(uint16_t *)0x0000046c); // Tom: commented out, new version below
       srand((unsigned int)time(NULL));
    }
 
-   return low + ((uint32_t)rand() % (high - low + 1L));
+   ret = low + ((uint32_t)rand() % (high - low + 1));
+
+   printf("[rtcode] rnd: argcnt=%i low=%u high=%u result=%u\n", argcnt, low, high, ret);
+
+   return ret;
 }
 
 uint32_t dice(int32_t argcnt, uint32_t ndice, uint32_t nsides, uint32_t bonus)
 {
    uint32_t n, total;
-   (void)argcnt; // Tom: added
-   printf("[rtcode] dice\n");
+   (void)argcnt;
 
    total = bonus;
 
    for (n = 0; n < ndice; n++)
       total += rnd(0, 1, nsides);
 
+   printf("[rtcode] dice: argcnt=%i ndice=%u nsides=%u bonus=%u return=%u\n", argcnt, ndice, nsides, bonus, total);
+
    return total;
 }
 
 uint32_t inkey(void)
 {
-   printf("[rtcode] inkey\n");
-   // Tom: TODO: replace with SDL_PollEvent keyboard state checking later
-   return 0; // Pretend no keys are ever pressed for now
+   printf("[STUB] [rtcode] inkey: return=0\n");
 
-   // return (uint32_t)kbhit(); // Tom: commented out
+   return 0;
 }
 
 uint32_t absv(int32_t argcnt, int32_t val)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] absv\n");
-   return (val < 0L) ? -val : val;
+   uint32_t ret;
+   (void)argcnt;
+
+   ret = (val < 0) ? -val : val;
+
+   printf("[rtcode] absv: argcnt=%i val=%i return=%u\n", argcnt, val, ret);
+
+   return ret;
 }
 
 int32_t minv(int32_t argcnt, int32_t val1, int32_t val2)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] minv\n");
-   return min(val1, val2);
+   int32_t ret;
+   (void)argcnt;
+
+   ret = min(val1, val2);
+
+   printf("[rtcode] minv: argcnt=%i val1=%i val2=%i return=%i\n", argcnt, val1, val2, ret);
+
+   return ret;
 }
 
 int32_t maxv(int32_t argcnt, int32_t val1, int32_t val2)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] maxv\n");
-   return max(val1, val2);
+   int32_t ret;
+   (void)argcnt;
+
+   ret = max(val1, val2);
+
+   printf("[rtcode] maxv: argcnt=%i val1=%i val2=%i return=%i\n", argcnt, val1, val2, ret);
+
+   return ret;
 }
 
 void diagnose(int32_t argcnt, uint32_t dtype, uint32_t parm)
 {
-   (void)argcnt; // Tom: added
-   printf("[rtcode] diagnose\n");
+   (void)argcnt;
+
+   printf("[rtcode] diagnose: argcnt=%i dtype=%u parm=%u\n", argcnt, dtype, parm);
+
    switch (dtype)
    {
    case 1:
@@ -386,6 +397,11 @@ void diagnose(int32_t argcnt, uint32_t dtype, uint32_t parm)
 
 uint32_t heapfree(void)
 {
-   printf("[rtcode] heapfree\n");
-   return RTR->free;
+   uint32_t ret;
+
+   ret = RTR->free;
+
+   printf("[rtcode] heapfree: %u\n", ret);
+
+   return ret;
 }

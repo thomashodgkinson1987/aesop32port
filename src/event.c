@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h> // Tom: added
+#include <stdint.h>
 
 #include "defs.h"
 #include "shared.h"
@@ -35,7 +35,6 @@
 #include "rt.h"
 #include "rtsystem.h"
 #include "rtmsg.h"
-// #include "modsnd32.h" // Tom: commented out
 
 int32_t ENABLED;
 
@@ -76,11 +75,15 @@ static char *strs[] = {"SYS_FREE",
 
 void ENABLE(void)
 {
+   printf("[event] ENABLE\n");
+
    ++ENABLED;
 }
 
 void DISABLE(void)
 {
+   printf("[event] DISABLE\n");
+
    --ENABLED;
 }
 
@@ -101,6 +104,8 @@ void DISABLE(void)
 int32_t match_parameter(int32_t event_type, int32_t event_parameter, int32_t test_parameter)
 {
    int32_t match;
+
+   printf("[event] match_parameter\n");
 
    if (event_type == SYS_FREE)
       return 0;
@@ -126,6 +131,8 @@ int32_t match_parameter(int32_t event_type, int32_t event_parameter, int32_t tes
 void init_notify_list(void)
 {
    uint32_t i;
+
+   printf("[event] init_notify_list\n");
 
    DISABLE();
 
@@ -157,6 +164,8 @@ void add_notify_request(int32_t client, int32_t message, int32_t event, int32_t 
 {
    int32_t i, nxt, cur;
    NREQ *NR;
+
+   printf("[event] add_notify_request\n");
 
    DISABLE();
 
@@ -229,6 +238,8 @@ void delete_notify_request(int32_t client, int32_t message, int32_t event, int32
    int32_t fnxt, fcur;
    NREQ *NR;
    int32_t all_events;
+
+   printf("[event] delete_notify_request\n");
 
    DISABLE();
 
@@ -307,6 +318,8 @@ void cancel_entity_requests(int32_t client)
    int32_t fnxt, fcur;
    NREQ *NR;
 
+   printf("[event] cancel_entity_requests\n");
+
    DISABLE();
 
    for (event = 1; event < NUM_EVTYPES; event++) // for all event types...
@@ -365,6 +378,8 @@ void cancel_entity_requests(int32_t client)
 /*********************************************************/
 void init_event_queue(void)
 {
+   printf("[event] init_event_queue\n");
+
    EV_head = 0;
    EV_tail = 0;
 }
@@ -375,6 +390,8 @@ EVENT *find_event(int32_t type, int32_t parameter)
    uint32_t t;
    EVENT *EV;
 
+   printf("[event] find_event\n");
+
    DISABLE();
 
    t = EV_tail;
@@ -382,8 +399,7 @@ EVENT *find_event(int32_t type, int32_t parameter)
    while (t != EV_head)
    {
       EV = &EV_queue[t];
-      // t = ++t % EV_QSIZE; // Tom: commented out, new version below
-      t = (t + 1) % EV_QSIZE; // Tom: added
+      t = (t + 1) % EV_QSIZE;
 
       if (EV->type != type)
          continue;
@@ -404,6 +420,8 @@ void remove_event(int32_t type, int32_t parameter, int32_t owner)
 {
    uint32_t t;
    EVENT *EV;
+
+   printf("[event] remove_event\n");
 
    DISABLE();
 
@@ -429,18 +447,18 @@ void remove_event(int32_t type, int32_t parameter, int32_t owner)
 /*********************************************************/
 void add_event(int32_t type, int32_t parameter, int32_t owner)
 {
+   printf("[event] add_event\n");
+
    DISABLE();
 
    EV_queue[EV_head].type = type;
    EV_queue[EV_head].owner = owner;
    EV_queue[EV_head].parameter = parameter;
 
-   // EV_head = ++EV_head % EV_QSIZE; // Tom: commented out, new version below
-   EV_head = (EV_head + 1) % EV_QSIZE; // Tom: added
+   EV_head = (EV_head + 1) % EV_QSIZE;
 
    if (EV_head == EV_tail)
    {
-      // EV_tail = ++EV_tail % EV_QSIZE; // Tom: commented out, new version below
       EV_tail = (EV_tail + 1) % EV_QSIZE;
    }
 
@@ -451,6 +469,8 @@ void add_event(int32_t type, int32_t parameter, int32_t owner)
 EVENT *next_event(void)
 {
    EVENT *EV;
+
+   printf("[event] next_event\n");
 
    DISABLE();
 
@@ -468,13 +488,14 @@ EVENT *fetch_event(void)
 {
    EVENT *EV;
 
+   printf("[event] fetch_event\n");
+
    DISABLE();
 
    if (EV_tail != EV_head)
    {
       EV = &EV_queue[EV_tail];
-      // EV_tail = ++EV_tail % EV_QSIZE; // Tom: commented out, new version below
-      EV_tail = (EV_tail + 1) % EV_QSIZE; // Tom: added
+      EV_tail = (EV_tail + 1) % EV_QSIZE;
    }
    else
       EV = NULL;
@@ -490,6 +511,8 @@ EVENT *scan_event_range(int32_t first_type, int32_t last_type)
    EVENT *EV;
    uint32_t t;
 
+   printf("[event] scan_event_range\n");
+
    DISABLE();
 
    t = EV_tail;
@@ -497,8 +520,7 @@ EVENT *scan_event_range(int32_t first_type, int32_t last_type)
    while (t != EV_head)
    {
       EV = &EV_queue[t];
-      // t = ++t % EV_QSIZE; // Tom: commented out, new version below
-      t = (t + 1) % EV_QSIZE; // Tom: added
+      t = (t + 1) % EV_QSIZE;
 
       if ((EV->type < first_type) || (EV->type > last_type))
          continue;
@@ -515,6 +537,8 @@ EVENT *scan_event_range(int32_t first_type, int32_t last_type)
 void dump_event_queue(void)
 {
    EVENT *e;
+
+   printf("[event] dump_event_queue\n");
 
    // Tom: added, old version commented out below
    while ((e = fetch_event()) != NULL)
@@ -540,7 +564,9 @@ void dump_event_queue(void)
 
 void notify(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int32_t parameter)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[event] notify\n");
 
    add_notify_request(index, message, event, parameter);
 }
@@ -553,7 +579,9 @@ void notify(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int
 
 void cancel(int32_t argcnt, uint32_t index, uint32_t message, int32_t event, int32_t parameter)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[event] cancel\n");
 
    delete_notify_request(index, message, event, parameter);
 }
@@ -568,24 +596,9 @@ uint32_t peek_event(void)
 {
    EVENT *EV;
 
-   // PollMod(); // Tom: commented out (see modsnd32.h)
+   printf("[event] peek_event\n");
 
    EV = next_event();
-
-#if 0
-   if (kbhit())
-   {
-      hide_mouse();
-      lock_mouse();
-      GIL_set_video_mode(3);
-      dump_event_queue();
-      getch();
-      GIL_set_video_mode(19);
-      unlock_mouse();
-      refresh_window(0, PAGE2, PAGE1);
-      show_mouse();
-   }
-#endif
 
    return (EV != NULL);
 }
@@ -617,7 +630,7 @@ void dispatch_event(void)
       int32_t owner;
    } event_message_descriptor;
 
-   // PollMod(); // Tom: commented out (see modsnd32.h)
+   printf("[event] dispatch_event\n");
 
    if ((EV = fetch_event()) == NULL)
       return;
@@ -672,6 +685,8 @@ void dispatch_event(void)
 
 void drain_event_queue(void)
 {
+   printf("[event] drain_event_queue\n");
+
    while (peek_event())
       dispatch_event();
 }
@@ -685,7 +700,9 @@ void drain_event_queue(void)
 
 void post_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[event] post_event\n");
 
    add_event(event, parameter, owner);
 }
@@ -699,7 +716,9 @@ void post_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter
 
 void send_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[event] send_event\n");
 
    add_event(event, parameter, owner);
    drain_event_queue();
@@ -714,7 +733,9 @@ void send_event(int32_t argcnt, uint32_t owner, int32_t event, int32_t parameter
 
 void flush_event_queue(int32_t argcnt, int32_t owner, int32_t event, int32_t parameter)
 {
-   (void)argcnt; // Tom: added
+   (void)argcnt;
+
+   printf("[event] flush_event_queue\n");
 
    remove_event(event, parameter, owner);
 }
@@ -731,6 +752,8 @@ void flush_event_queue(int32_t argcnt, int32_t owner, int32_t event, int32_t par
 void flush_input_events(void)
 {
    int32_t i;
+
+   printf("[event] flush_input_events\n");
 
    for (i = FIRST_INPUT_EVENT; i <= LAST_INPUT_EVENT; i++)
       remove_event(i, -1, -1);

@@ -102,7 +102,7 @@ typedef struct // DPMI real-mode interrupt structure
 /*********************************************************/
 void getkey(void)
 {
-   printf("[intrface] getkey(void)\n");
+   printf("[intrface] getkey\n");
 
    while (!find_event(SYS_KEYDOWN, -1L))
       ;
@@ -117,7 +117,7 @@ void add_region_event(int32_t type, int32_t owner)
    uint32_t r;
    NREQ *NR;
 
-   printf("[intrface] add_region_event(int32_t type, int32_t owner) - type=%i owner=%i\n", type, owner);
+   printf("[intrface] add_region_event: type=%i owner=%i\n", type, owner);
 
    DISABLE();
 
@@ -167,7 +167,7 @@ static void timer_callback(void) // Warning: called during IRQ 0
    static uint16_t *buffer = (uint16_t *)0x41eL;
    (void)scan; // Tom: added, not used?
 
-   printf("[intrface] timer_callback(void)\n");
+   printf("[intrface] timer_callback\n");
 
    if (ENABLED <= 0)
       return;
@@ -207,7 +207,7 @@ static void mouse_event_handler(int32_t px, int32_t py)
    NREQ *NR;
    EVENT *EV;
 
-   printf("[intrface] mouse_event_handler(int32_t px, int32_t py) - px=%i py=%i\n", px, py);
+   printf("[intrface] mouse_event_handler: px=%i py=%i\n", px, py);
 
    if (entry)
       return;
@@ -269,7 +269,7 @@ static void mouse_button_event_handler(int32_t left, int32_t right, int32_t cent
    static int32_t entry = 0;
    (void)center; // Tom: added
 
-   printf("[intrface] mouse_button_event_handler(int32_t left, int32_t right, int32_t center) - left=%i right=%i center=%i\n", left, right, center);
+   printf("[intrface] mouse_button_event_handler: left=%i right=%i center=%i\n", left, right, center);
 
    if (entry)
       return;
@@ -306,7 +306,7 @@ void init_interface(void) // Tom: TODO
 {
    // Tom: added new version
 
-   printf("[intrface] init_interface(void)\n");
+   printf("[intrface] init_interface\n");
 
    in_BIOS = 0;
    heartbeat = 0L;
@@ -383,7 +383,7 @@ void init_interface(void) // Tom: TODO
 /*********************************************************/
 void shutdown_interface(void) // Tom: TODO
 {
-   printf("[intrface] shutdown_interface(void)\n");
+   printf("[intrface] shutdown_interface\n");
 
    // Tom: added new version
 
@@ -430,7 +430,7 @@ void set_mouse_pointer(int32_t argcnt, uint32_t table, uint32_t number, int32_t 
 {
    ND_entry *entry;
 
-   printf("[intrface] set_mouse_pointer(int32_t argcnt, uint32_t table, uint32_t number, int32_t hot_X, int32_t hot_Y, uint32_t scale, uint32_t fade_table, uint32_t fade_level) - argcnt=%i table=%u number=%u hot_X=%i hot_Y=%i scale=%u fade_table=%u fade_level=%u\n", argcnt, table, number, hot_X, hot_Y, scale, fade_table, fade_level);
+   printf("[intrface] set_mouse_pointer: argcnt=%i table=%u number=%u hot_X=%i hot_Y=%i scale=%u fade_table=%u fade_level=%u\n", argcnt, table, number, hot_X, hot_Y, scale, fade_table, fade_level);
 
    if ((wait_ptr_state != 0) && (argcnt != 0))
    {
@@ -486,7 +486,7 @@ void set_wait_pointer(int32_t argcnt, uint32_t number, int32_t hot_X, int32_t ho
 {
    (void)argcnt; // Tom: added
 
-   printf("[intrface] set_wait_pointer(int32_t argcnt, uint32_t number, int32_t hot_X, int32_t hot_Y) - argcnt=%i number=%u hot_X=%i hot_Y=%i\n", argcnt, number, hot_X, hot_Y);
+   printf("[intrface] set_wait_pointer: argcnt=%i number=%u hot_X=%i hot_Y=%i\n", argcnt, number, hot_X, hot_Y);
 
    if (number == UINT32_MAX)
    {
@@ -504,7 +504,7 @@ void set_wait_pointer(int32_t argcnt, uint32_t number, int32_t hot_X, int32_t ho
 /*********************************************************/
 void standby_cursor(void)
 {
-   printf("[intrface] standby_cursor(void)\n");
+   printf("[intrface] standby_cursor\n");
 
    if (!wait_ptr_valid)
       return;
@@ -531,7 +531,7 @@ void standby_cursor(void)
 
 void resume_cursor(void)
 {
-   printf("[intrface] resume_cursor(void)\n");
+   printf("[intrface] resume_cursor\n");
 
    if (!wait_ptr_valid)
       return;
@@ -552,7 +552,7 @@ void resume_cursor(void)
 
 void lock_mouse(void)
 {
-   printf("[intrface] lock_mouse(void)\n");
+   printf("[intrface] lock_mouse\n");
 
    MOUSE_lock();
 }
@@ -567,7 +567,7 @@ void lock_mouse(void)
 
 void unlock_mouse(void)
 {
-   printf("[intrface] unlock_mouse(void)\n");
+   printf("[intrface] unlock_mouse\n");
 
    MOUSE_unlock();
 }
@@ -575,7 +575,7 @@ void unlock_mouse(void)
 /*********************************************************/
 void show_mouse(void)
 {
-   printf("[intrface] show_mouse(void)\n");
+   printf("[intrface] show_mouse\n");
 
    MOUSE_show();
 }
@@ -583,7 +583,7 @@ void show_mouse(void)
 /*********************************************************/
 void hide_mouse(void)
 {
-   printf("[intrface] hide_mouse(void)\n");
+   printf("[intrface] hide_mouse\n");
 
    MOUSE_hide();
 }
@@ -593,7 +593,7 @@ uint32_t mouse_XY(void)
 {
    uint32_t xy;
 
-   printf("[intrface] mouse_XY(void)\n");
+   printf("[intrface] mouse_XY\n");
 
    DISABLE();
 
@@ -616,7 +616,7 @@ uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd)
    (void)argcnt; // Tom: added
    (void)wnd;    // Tom: added
 
-   printf("[intrface] mouse_in_window(int32_t argcnt, uint32_t wnd) - argcnt=%i wnd=%u\n", argcnt, wnd);
+   printf("[intrface] mouse_in_window: argcnt=%i wnd=%u\n", argcnt, wnd);
 
    stat = 0; // Tom: added, stubbed version
 
@@ -643,14 +643,14 @@ void refresh_window(int32_t argcnt, uint32_t src, uint32_t target)
    (void)src;    // Tom: added
    (void)target; // Tom: added
 
-   printf("[intrface] refresh_window(int32_t argcnt, uint32_t src, uint32_t target) - argcnt=%i src=%u target=%u\n", argcnt, src, target);
+   printf("[intrface] refresh_window: argcnt=%i src=%u target=%u\n", argcnt, src, target);
 
    // GIL2VFX_refresh_window(src, target); // Tom: commented out
 }
 
 void intrface_entry()
 {
-   printf("[intrface] intrface_entry()\n");
+   printf("[intrface] intrface_entry\n");
 
    // wvideo
 }

@@ -1,33 +1,32 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  RTLINK.C                                                              ��
-// ��                                                                        ��
-// ��  AESOP runtime object linker                                           ��
-// ��                                                                        ��
-// ��  Version: 1.00 of 13-Jun-92 -- Initial version                         ��
-// ��                                                                        ��
-// ��  Project: Extensible State-Object Processor (AESOP/16)                 ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with IBM PC ANSI C/C++ implementations            ��
-// ��  Large memory model (16-bit DOS)                                       ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  10926 Jollyville #308                                                 ��
-// ��  Austin, TX 78759                                                      ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  RTLINK.C                                                              ##
+// ##                                                                        ##
+// ##  AESOP runtime object linker                                           ##
+// ##                                                                        ##
+// ##  Version: 1.00 of 13-Jun-92 -- Initial version                         ##
+// ##                                                                        ##
+// ##  Project: Extensible State-Object Processor (AESOP/16)                 ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with IBM PC ANSI C/C++ implementations            ##
+// ##  Large memory model (16-bit DOS)                                       ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  10926 Jollyville #308                                                 ##
+// ##  Austin, TX 78759                                                      ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
 #include <stdio.h>
 #include <stdlib.h>
-// #include <dos.h> // Tom: commented out
 #include <string.h>
-#include <stdint.h> // Tom: added
+#include <stdint.h>
 
 #include "defs.h"
 #include "rtres.h"
@@ -119,16 +118,6 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
    void *thunk_ptr;
    uint32_t def_off;
    uint32_t *XR_ptr, *CR_ptr;
-
-   // Tom: added these to zero local arrays
-
-   memset(code, 0, sizeof(code));
-   memset(impt, 0, sizeof(impt));
-   memset(expt, 0, sizeof(expt));
-   memset(exports, 0, sizeof(exports));
-   memset(s_S, 0, sizeof(s_S));
-   memset(x_S, 0, sizeof(x_S));
-   memset(SD_offset, 0, sizeof(SD_offset));
 
    //
    // Load programs and dictionaries, calculate thunk size
@@ -228,7 +217,7 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
       if (++depth == MAX_G)
          abend(MSG_AILE); // "AESOP inheritance limit exceeded"
 
-      if (tsize > 65535L)
+      if (tsize > UINT16_MAX)
          abend(MSG_TTL); // "Thunk too large"
    }
 
@@ -240,7 +229,7 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
    *(THDR *)RTR_addr(thunk) = thdr;
 
-   // SD = (SD_entry *)thdr.SD_list; // Tom: commented out, new possibly broken version below
+   // SD = (SD_entry *)thdr.SD_list; // Tom: new version below might be better?
    SD = (SD_entry *)((uint32_t)thdr.SD_list); // Tom: added
 
    i = depth - 1;
@@ -259,7 +248,6 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
       SD_offset[i] = n;
 
-      // XR = (void *)m; // Tom: commented out, new possibly broken version below
       XR = (void *)((uint32_t)m);
 
       dict = RTD_first(RTR_addr(impt[i]));
@@ -281,8 +269,9 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
             thunk_ptr = RTR_addr(thunk);
             def_off = ascnum(def);
             XR_ptr = (void *)((uint32_t)thunk_ptr + (uint32_t)XR + def_off);
-            CR_ptr = (void *)((uint32_t)&code_resources + offset);
+            CR_ptr = (void *)((uint32_t)&code_resources + offset); // Tom: commented out
             *XR_ptr = *CR_ptr;
+            // *XR_ptr = (uint32_t)code_resources[offset]; // Use offset as index into pointer array
 
             break;
 
@@ -296,7 +285,6 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
             index = sizeof(IHDR);
             found = 0;
 
-            // while (xclass != -1L) // Tom: commented out, new version below
             while (xclass != UINT32_MAX)
             {
                xcode = RTR_get_resource_handle(RTR, xclass, DA_DEFAULT);
@@ -407,6 +395,8 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
       RTR_unlock(code[i]);
    }
 
+   printf("[rtlink] construct_thunk: RTR=%p LNK=%p object=%u return=%u\n", (void *)RTR, (void *)LNK, object, thunk);
+
    return thunk;
 }
 
@@ -448,6 +438,8 @@ uint32_t create_instance(RTR_class *RTR, uint32_t object)
 
    *(IHDR *)RTR_addr(instance) = ihdr;
 
+   printf("[rtlink] create_instance: RTR=%p object=%u instance=%u\n", (void *)RTR, object, instance);
+
    return instance;
 }
 
@@ -464,6 +456,8 @@ void destroy_instance(RTR_class *RTR, uint32_t instance)
    uint32_t thunk;
 
    thunk = ((IHDR *)RTR_addr(instance))->thunk;
+
+   printf("[rtlink] destroy_instance: RTR=%p instance=%u\n", (void *)RTR, instance);
 
    if (!(--(((THDR *)RTR_addr(thunk))->use_cnt)))
       RTR_free(RTR, thunk);
