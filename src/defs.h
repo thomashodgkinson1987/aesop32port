@@ -33,7 +33,7 @@ typedef uint16_t HSTR; // run-time len-prefixed string descriptor
 
 #define MAX_G 16 // Maximum depth of "family trees"
 
-#pragma pack(push, 1) // Tom: added
+#pragma pack(push, 1)
 
 typedef struct
 {
@@ -85,6 +85,6 @@ typedef struct
    uint16_t fade[11];
 } PAL_HDR; // Palette resource header
 
-#pragma pack(pop) // Tom: added
+#pragma pack(pop)
 
 #endif

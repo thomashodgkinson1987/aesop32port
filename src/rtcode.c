@@ -285,7 +285,8 @@ int32_t peekmem(int32_t argcnt, int32_t *addr)
    {
       first_call = 0;
       printf("[rtcode] peekmem: first call (addr=%p), returning 'CINE' magic cookie\n", (void *)addr);
-      return 0x43494e45; // "CINE"
+      return 0;
+      // return 0x43494e45; // "CINE"
    }
 
    if (addr == NULL)

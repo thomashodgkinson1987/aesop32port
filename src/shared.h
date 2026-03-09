@@ -1,11 +1,11 @@
 #ifndef SHARED_H
 #define SHARED_H
 
-// �������������������������������������������
-// ��                                       ��
-// �� Extended key name definitions         ��
-// ��                                       ��
-// �������������������������������������������
+// ###########################################
+// ##                                       ##
+// ## Extended key name definitions         ##
+// ##                                       ##
+// ###########################################
 
 #define FK_1 0x3b00
 #define FK_2 0x3c00
@@ -57,11 +57,11 @@
 #define K_ESC 0x001b
 #define K_BS 0x0008
 
-// �������������������������������������������
-// ��                                       ��
-// �� System and input event types          ��
-// ��                                       ��
-// �������������������������������������������
+// ###########################################
+// ##                                       ##
+// ## System and input event types          ##
+// ##                                       ##
+// ###########################################
 
 #define SYS_FREE 0
 #define SYS_TIMER 1
@@ -93,11 +93,11 @@
 #define FIRST_APP_EVENT 32
 #define LAST_APP_EVENT (NUM_EVTYPES - 1)
 
-// �������������������������������������������
-// ��                                       ��
-// �� Shared application equates            ��
-// ��                                       ��
-// �������������������������������������������
+// ###########################################
+// ##                                       ##
+// ## Shared application equates            ##
+// ##                                       ##
+// ###########################################
 
 #define NUM_OBJECTS 2048  // Up to 2,048 objects in Eye III universe
 #define NUM_ENTITIES 2000 // Up to 2,000 physical entities in Eye III universe

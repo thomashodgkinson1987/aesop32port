@@ -30,6 +30,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "vfx.h"
+
 #include "defs.h"
 #include "shared.h"
 #include "rtcode.h"
@@ -400,7 +402,7 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
    int16_t x, y, lp, save;
    (void)argcnt;
 
-   printf("[eye] magic_field\n");
+   printf("[STUB] [eye] magic_field\n");
 
    red = 0x23;
    yel = 0x37;
@@ -495,7 +497,7 @@ int32_t Coord_In_Region(int32_t x, int32_t y, int32_t x1, int32_t y1, int32_t x2
 
 void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t exp_y, int32_t scale, int32_t power, int32_t dots, int32_t life, int32_t upval, int8_t *colors)
 {
-   printf("[eye] do_dots\n");
+   printf("[STUB] [eye] do_dots\n");
 
    static int16_t _floor[] =
        {
@@ -624,8 +626,13 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
       }
 
       // PollMod(); // Tom: commented out
-      // VFX_wait_vblank_leading(); // Tom: commented out
-      // VFX_wait_vblank_leading(); // Tom: commented out
+
+      // Tom: TODO
+      if (VFX_wait_vblank_leading)
+      {
+         VFX_wait_vblank_leading();
+         VFX_wait_vblank_leading();
+      }
    }
 
    show_mouse();
@@ -653,7 +660,7 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
    (void)view; // Tom: not currently used
    (void)scrn; // Tom: not currently used
 
-   printf("[eye] do_ice\n");
+   printf("[STUB] [eye] do_ice\n");
 
    hide_mouse();
 
@@ -802,7 +809,10 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
       }
 
       // PollMod(); // Tom: commented out
-      // VFX_wait_vblank_leading(); // Tom: commented out
+
+      if (VFX_wait_vblank_leading) // Tom: TODO
+         VFX_wait_vblank_leading();
+
       count++;
    }
 
@@ -1339,7 +1349,7 @@ void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int
    int8_t dir[128];
    (void)argcnt;
 
-   printf("[eye] launch\n");
+   printf("[STUB] [eye] launch: argcnt=%i dirname=%s prgname=%s argn1%s argn2%s\n", argcnt, dirname, prgname, argn1, argn2);
 
    s = *(stag **)0x4fa;
 
@@ -1356,7 +1366,7 @@ void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int
    else
       s->arg2[0] = 0;
 
-   RT_execute(bootstrap, MSG_DESTROY, -1U);
+   RT_execute(bootstrap, MSG_DESTROY, UINT32_MAX);
 
    shutdown_sound();
    RTR_destroy(RTR, RTR_FREEBASE);

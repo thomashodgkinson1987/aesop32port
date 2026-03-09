@@ -50,6 +50,12 @@
 #include "sound.h"
 #include "graphics.h"
 
+uint32_t headroom;
+uint32_t checksum;
+uint32_t init;
+
+int16_t disk_err;
+
 void breakpoint(void)
 {
    printf("[rtsystem] breakpoint\n");
@@ -76,12 +82,6 @@ int32_t filelength(int16_t handle)
 
    return filelength;
 }
-
-uint32_t headroom;
-uint32_t checksum;
-uint32_t init;
-
-int16_t disk_err;
 
 void mem_init(void)
 {

@@ -141,9 +141,6 @@ uint32_t RTR_load_resource(RTR_class *RTR, uint32_t resource, uint32_t attrib);
 void RTR_read_resource(RTR_class *RTR, void *dest, uint32_t len);
 uint32_t RTR_seek(RTR_class *RTR, uint32_t rnum);
 
-#ifndef RTR_addr
-void *RTR_addr(uint32_t entry);
-#endif
 void RTR_fixup(void **ptr, uint32_t entry);
 
 ND_entry *RTR_search_name_dir(RTR_class *RTR, uint32_t resource);

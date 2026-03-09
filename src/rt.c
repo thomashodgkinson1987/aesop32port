@@ -602,7 +602,8 @@ __handle_msg:
             switch (arg_count)
             {
             case 0:
-                ret_val = ((int32_t (*)(int32_t))func_ptr)(arg_count);
+                // ret_val = ((int32_t (*)(int32_t))func_ptr)(arg_count); // Tom: broken version?
+                ret_val = ((int32_t (*)(void))func_ptr)(); // Tom: new version?
                 break;
             case 1:
                 ret_val = ((int32_t (*)(int32_t, int32_t))func_ptr)(arg_count, args[0]);

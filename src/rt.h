@@ -5,10 +5,10 @@
 #ifndef RT_H
 #define RT_H
 
-#include <stdint.h> // Tom: added
-#include <string.h> // Tom: added
+#include <stdint.h>
+#include <string.h>
 
-#include "rtres.h" // Tom: added
+#include "rtres.h"
 
 typedef struct // fundamental stack value structure
 {

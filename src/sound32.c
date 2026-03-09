@@ -1,123 +1,111 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  SOUND32.C                                                             ��
-// ��                                                                        ��
-// ��  AESOP sound system code resources for Eye III engine                  ��
-// ��                                                                        ��
-// ��  Version: 1.00 of 6-May-92 -- Initial version                          ��
-// ��                                                                        ��
-// ��  Project: Eye III                                                      ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with Watcom C v9.0 or later                       ��
-// ��  Flat memory model (32-bit DOS)                                        ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1993 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  6702 Cat Creek Trail                                                  ��
-// ��  Austin, TX 78731                                                      ��
-// ��                                                                        ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  SOUND32.C                                                             ##
+// ##                                                                        ##
+// ##  AESOP sound system code resources for Eye III engine                  ##
+// ##                                                                        ##
+// ##  Version: 1.00 of 6-May-92 -- Initial version                          ##
+// ##                                                                        ##
+// ##  Project: Eye III                                                      ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with Watcom C v9.0 or later                       ##
+// ##  Flat memory model (32-bit DOS)                                        ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1993 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  6702 Cat Creek Trail                                                  ##
+// ##  Austin, TX 78731                                                      ##
+// ##                                                                        ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
-// #include <conio.h> // Tom: commented out
 #include <stdio.h>
-// #include <dos.h> // Tom: commented out
 #include <stdlib.h>
-// #include <stdarg.h> // Tom: commented out
-// #include <string.h> // Tom: commented out
-// #include <fcntl.h> // Tom: commented out
-// #include <io.h> // Tom: commented out
-#include <stdint.h> // Tom: added
+#include <stdint.h>
 
-// #include "vfx.h" // Tom: commented out
-// #include "dll.h" // Tom: commented out
-// #include "mouse.h" // Tom: commented out
-// #include "gil2vfx.h" // Tom: commented out
-// #include "gil2vfxa.h" // Tom: commented out
+#include "mouse.h"
+#include "vfx.h"
 
-// #include "defs.h" // Tom: commented out
-// #include "rtsystem.h" // Tom: commented out
-// #include "rtmsg.h" // Tom: commented out
-// #include "rtres.h" // Tom: commented out
-// #include "rtlink.h" // Tom: commented out
-// #include "rt.h" // Tom: commented out
-// #include "rtmsg.h" // Tom: commented out
-// #include "ail32.h" // Tom: commented out
-// #include "modsnd32.h" // Tom: commented out
+#include "defs.h"
+#include "rtsystem.h"
+#include "rtres.h"
+#include "rtlink.h"
+#include "rt.h"
+#include "rtmsg.h"
 #include "sound.h"
-// #include "graphics.h" // Tom: commented out
+#include "graphics.h"
 
-// #define CFG_FN "SOUND.CFG" // Tom: commented out
-// #define GTL_PFX "STDPATCH." // Tom: commented out
+#define CFG_FN "SOUND.CFG"
+#define GTL_PFX "STDPATCH."
 
-// #define ROLAND_DRV_NAME "A32MT32.DLL" // Tom: commented out
-// #define PCSPKR_DRV_NAME "A32SPKR.DLL" // Tom: commented out
-// #define ADLIB_DRV_NAME "A32ADLIB.DLL" // Tom: commented out
-// #define SBDIG_DRV_NAME "A32SBDG.DLL" // Tom: commented out
+#define ROLAND_DRV_NAME "A32MT32.DLL"
+#define PCSPKR_DRV_NAME "A32SPKR.DLL"
+#define ADLIB_DRV_NAME "A32ADLIB.DLL"
+#define SBDIG_DRV_NAME "A32SBDG.DLL"
 
-// #define EMSHCNT 15       // 15 EMS handles for 64K sound blocks // Tom: commented out
-// #define XMI_BUFSIZE 2048 // Size of reserved XMIDI sequence buffer // Tom: commented out
+#define EMSHCNT 15       // 15 EMS handles for 64K sound blocks
+#define XMI_BUFSIZE 2048 // Size of reserved XMIDI sequence buffer
 
-// #define XMID_LA 0 // LAPC-1/MT-32 in use // Tom: commented out
-// #define XMID_AD 1 // Ad Lib in use // Tom: commented out
-// #define XMID_PC 2 // PC speaker in use // Tom: commented out
+#define XMID_LA 0 // LAPC-1/MT-32 in use
+#define XMID_AD 1 // Ad Lib in use
+#define XMID_PC 2 // PC speaker in use
 
-// uint8_t *PCM_storage; // "Simulated EMS" memory for flat-model SFX // Tom: commented out
+uint8_t *PCM_storage; // "Simulated EMS" memory for flat-model SFX
 
-// int16_t XMI_device_type; // _LA, _AD, or _PC // Tom: commented out
+int16_t XMI_device_type; // _LA, _AD, or _PC
 
-// int16_t PCM_active = 0; // Tom: commented out
-// int16_t XMI_active = 0; // Tom: commented out
+int16_t PCM_active = 0;
+int16_t XMI_active = 0;
 
-// int16_t sound_on; // Tom: commented out
-// int16_t music_resident; // Tom: commented out
+int16_t sound_on;
+int16_t music_resident;
 
 // drvr_desc XMI_desc; // Tom: commented out
 
-// int16_t GTL = -1; // Tom: commented out
+int16_t GTL = -1;
 
 // HDRIVER hXMI, hPCM; // Tom: commented out
 // HSEQUENCE hSEQ; // Tom: commented out
 
-// int8_t XMI_fn[32]; // Tom: commented out
+int8_t XMI_fn[32];
 
-// void *XMI_driver; // Tom: commented out
-// uint32_t hXMI_buffer; // Tom: commented out
-// uint32_t hXMI_state; // Tom: commented out
-// uint32_t hXMI_cache; // Tom: commented out
+void *XMI_driver;
+uint32_t hXMI_buffer;
+uint32_t hXMI_state;
+uint32_t hXMI_cache;
 
-// uint16_t EMS_offset[EMSHCNT]; // First free byte in each 64K block // Tom: commented out
+uint16_t EMS_offset[EMSHCNT]; // First free byte in each 64K block
 
-// int16_t SND_blk[64];   // EMS block of sound effect at index # // Tom: commented out
-// uint16_t SND_off[64];  // EMS offset of sound effect at index # // Tom: commented out
-// uint16_t SND_size[64]; // Size of sound effect at index # // Tom: commented out
+int16_t SND_blk[64];   // EMS block of sound effect at index #
+uint16_t SND_off[64];  // EMS offset of sound effect at index #
+uint16_t SND_size[64]; // Size of sound effect at index #
 
-// struct // SSI MEL sound system config file
-// {
-//    int16_t XMI_IO;
-//    int16_t XMI_IRQ;
-//    int16_t XMI_DMA;
-//    int16_t XMI_DRQ;
-//    int16_t XMI_CARDTYPE;
+struct // SSI MEL sound system config file
+{
+   int16_t XMI_IO;
+   int16_t XMI_IRQ;
+   int16_t XMI_DMA;
+   int16_t XMI_DRQ;
+   int16_t XMI_CARDTYPE;
 
-//    int16_t PCM_IO;
-//    int16_t PCM_IRQ;
-//    int16_t PCM_DMA;
-//    int16_t PCM_DRQ;
-//    int16_t PCM_CARDTYPE;
+   int16_t PCM_IO;
+   int16_t PCM_IRQ;
+   int16_t PCM_DMA;
+   int16_t PCM_DRQ;
+   int16_t PCM_CARDTYPE;
 
-//    int16_t PCM_ENABLED;
+   int16_t PCM_ENABLED;
 
-//    int8_t XMI_fn[14];
-//    int8_t PCM_fn[14];
+   int8_t XMI_fn[14];
+   int8_t PCM_fn[14];
 
-//    int8_t dummy[32];
-// } MEL;  // Tom: commented out
+   int8_t dummy[32];
+} MEL;
 
 /****************************************************************************/
 //
@@ -127,9 +115,10 @@
 
 static void *load_driver(int8_t *filename)
 {
-   // Tom: stubbed
    (void)filename;
-   printf("[STUB] load_driver: filename=\n"); // Tom: TODO add filename to printout
+
+   printf("[STUB] [sound32] load_driver: filename=\n"); // Tom: TODO add filename to printout
+
    return NULL;
 
    // void *DLL, *drvr;
@@ -157,11 +146,11 @@ static void *load_driver(int8_t *filename)
 
 static void *load_global_timbre(uint32_t bank, uint32_t patch)
 {
-   // Tom: stubbed
    (void)bank;
    (void)patch;
 
-   printf("[STUB] load_global_timbre: bank= patch=\n"); // Tom: TODO add bank and patch
+   printf("[STUB] [sound32] load_global_timbre: bank= patch=\n"); // Tom: TODO add bank and patch
+
    return NULL;
 
    // uint16_t *timb_ptr;
@@ -218,13 +207,12 @@ static void *load_global_timbre(uint32_t bank, uint32_t patch)
 
 void load_sound_block(int32_t argcnt, uint32_t first_block, uint32_t last_block, uint32_t *array)
 {
-   // Tom: stubbed
    (void)argcnt;
    (void)first_block;
    (void)last_block;
    (void)array;
 
-   printf("[STUB] load_sound_block: argcnt= first_block= last_block= array=\n"); // Tom: TODO add parameters to print out
+   printf("[STUB] [sound32] load_sound_block: argcnt= first_block= last_block= array=\n"); // Tom: TODO add parameters to print out
 
    // uint32_t index;
    // uint32_t i, cur;
@@ -278,11 +266,10 @@ void load_sound_block(int32_t argcnt, uint32_t first_block, uint32_t last_block,
 
 void sound_effect(int32_t argcnt, uint32_t index)
 {
-   // Tom: stubbed
    (void)argcnt;
    (void)index;
 
-   printf("[STUB] sound_effect: argcnt= index=\n"); // Tom: TODO add prints
+   printf("[STUB] [sound32] sound_effect: argcnt= index=\n"); // Tom: TODO add prints
 
    // int16_t ch;
    // (void)argcnt; // Tom: added
@@ -313,13 +300,12 @@ void sound_effect(int32_t argcnt, uint32_t index)
 
 void play_sequence(int32_t argcnt, uint32_t LA_version, uint32_t AD_version, uint32_t PC_version)
 {
-   // Tom: stubbed
    (void)argcnt;
    (void)LA_version;
    (void)AD_version;
    (void)PC_version;
 
-   printf("[STUB] play_sequence: argcnt= LA_version= AD_version= PC_version=\n"); // Tom: TODO add prints
+   printf("[STUB] [sound32] play_sequence: argcnt= LA_version= AD_version= PC_version=\n"); // Tom: TODO add prints
 
    // uint32_t XMI_res;
    // uint32_t size;
@@ -387,9 +373,7 @@ void play_sequence(int32_t argcnt, uint32_t LA_version, uint32_t AD_version, uin
 
 void load_music(void)
 {
-   // Tom: stubbed
-
-   printf("[STUB] load_music\n");
+   printf("[STUB] [sound32] load_music\n");
 
    // int32_t tsize;
 
@@ -433,9 +417,7 @@ void load_music(void)
 
 void unload_music(void)
 {
-   // Tom: stubbed
-
-   printf("[STUB] unload_music\n");
+   printf("[STUB] [sound32] unload_music\n");
 
    // int32_t i;
 
@@ -478,11 +460,10 @@ void unload_music(void)
 
 void set_sound_status(int32_t argcnt, uint32_t status)
 {
-   // Tom: stubbed
    (void)argcnt;
    (void)status;
 
-   printf("[STUB] set_sound_status: argcnt= status=\n"); // Tom: TODO add prints
+   printf("[STUB] [sound32] set_sound_status: argcnt= status=\n"); // Tom: TODO add prints
 
    // (void)argcnt; // Tom: added
 
@@ -525,9 +506,7 @@ void set_sound_status(int32_t argcnt, uint32_t status)
 
 void shutdown_sound(void)
 {
-   // Tom: stubbed
-
-   printf("[STUB] shutdown_sound\n");
+   printf("[STUB] [sound32] shutdown_sound\n");
 
    // if (!(PCM_active || XMI_active))
    //    return;
@@ -570,11 +549,11 @@ void shutdown_sound(void)
 
 void init_sound(int32_t argcnt, uint32_t errprompt)
 {
-   // Tom: stubbed
    (void)argcnt;
    (void)errprompt;
 
-   printf("[STUB] init_sound: argcnt= errprompt=\n"); // Tom: TODO add prints
+   printf("[STUB] [sound32] init_sound: argcnt= errprompt=\n"); // Tom: TODO add prints
+
    // sound_on = 1; // Tom: TODO see if this needs setting
 
    // int16_t PCM_requested, XMI_requested;

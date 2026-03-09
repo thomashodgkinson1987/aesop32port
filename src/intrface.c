@@ -29,7 +29,10 @@
 #include <string.h>
 #include <stdint.h>
 
+#include "vfx.h"
 #include "mouse.h"
+
+extern VFX_DESC *VFX;
 
 #include "defs.h"
 #include "shared.h"
@@ -45,7 +48,7 @@
 
 int32_t interface_active = 0;
 
-// HTIMER htimer; // Tom: commented out
+int32_t htimer;
 uint32_t volatile heartbeat;
 uint32_t volatile in_BIOS;
 
@@ -318,8 +321,8 @@ void init_interface(void) // Tom: TODO
    wait_ptr_state = 0;
 
    // LUM the parameters have changed ("background" added)
-   // MOUSE_init(VFX->scrn_width, VFX->scrn_height, 1); // Tom: commented out, new version below
-   MOUSE_init(320, 200, 1); // Tom: added
+   MOUSE_init(VFX->scrn_width, VFX->scrn_height, 1); // Tom: original version
+   // MOUSE_init(320, 200, 1); // Tom: hardcoded version
 
    MOUSE_register_mouse_event_callback(mouse_event_handler);
    MOUSE_register_button_event_callback(mouse_button_event_handler);
@@ -333,51 +336,8 @@ void init_interface(void) // Tom: TODO
    // AIL_set_timer_frequency(htimer, 60); // Tom: commented out
    // AIL_start_timer(htimer); // Tom: commented out
 
+   htimer = 0; // Tom: hardcoded
    interface_active = 1;
-
-   // Tom: commented out original version below, see above for new version
-
-   // union REGS inregs, outregs;
-
-   // in_BIOS = 0;
-   // heartbeat = 0L;
-
-   // inregs.w.ax = 0;
-   // int386(0x33, &inregs, &outregs);
-
-   // if (outregs.w.ax == 0xffff)
-   // {
-   //    pointer_set = -1U;
-   //    pointer_set_entry = -1L;
-   //    ptr_valid = 0;
-   //    wait_ptr_valid = 0;
-   //    wait_ptr_state = 0;
-
-   //    // LUM the parameters have changed ("background" added)
-   //    MOUSE_init(VFX->scrn_width, VFX->scrn_height, 1);
-
-   //    MOUSE_register_mouse_event_callback(mouse_event_handler);
-   //    MOUSE_register_button_event_callback(mouse_button_event_handler);
-
-   //    inregs.x.eax = 3;
-   //    int386(0x33, &inregs, &outregs);
-
-   //    point_X = last_X = last_cursor_X = outregs.w.cx >> 3;
-   //    point_Y = last_Y = last_cursor_Y = outregs.w.dx >> 3;
-   //    btn_left = last_left = outregs.w.bx & 1;
-   //    btn_right = last_right = outregs.w.bx & 2;
-   // }
-   // else
-   // {
-   //    GIL2VFX_shutdown_driver();
-   //    abend(MSG_MMR);
-   // }
-
-   // htimer = AIL_register_timer(timer_callback);
-   // AIL_set_timer_frequency(htimer, 60);
-   // AIL_start_timer(htimer);
-
-   // interface_active = 1;
 }
 
 /*********************************************************/
@@ -385,13 +345,9 @@ void shutdown_interface(void) // Tom: TODO
 {
    printf("[intrface] shutdown_interface\n");
 
-   // Tom: added new version
-
    if (!interface_active)
       return;
    interface_active = 0;
-
-   // AIL_release_timer_handle(htimer); // Tom: commented out
 
    hide_mouse();
 
@@ -401,28 +357,6 @@ void shutdown_interface(void) // Tom: TODO
    {
       RTR_unlock(pointer_set);
    }
-
-   // Tom: commented out old version, new version above
-
-   // union REGS inregs, outregs;
-
-   // if (!interface_active)
-   //    return;
-   // interface_active = 0;
-
-   // AIL_release_timer_handle(htimer);
-
-   // hide_mouse();
-
-   // MOUSE_shutdown();
-
-   // inregs.w.ax = 0;
-   // int386(0x33, &inregs, &outregs);
-
-   // if (pointer_set != -1U)
-   // {
-   //    RTR_unlock(pointer_set);
-   // }
 }
 
 /*********************************************************/
@@ -593,13 +527,13 @@ uint32_t mouse_XY(void)
 {
    uint32_t xy;
 
-   printf("[intrface] mouse_XY\n");
-
    DISABLE();
 
    xy = ((uint32_t)point_Y << 16) + point_X;
 
    ENABLE();
+
+   printf("[intrface] mouse_XY: return=%u\n", xy);
 
    return xy;
 }
@@ -613,18 +547,16 @@ uint32_t mouse_XY(void)
 uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd)
 {
    uint32_t stat;
-   (void)argcnt; // Tom: added
-   (void)wnd;    // Tom: added
 
-   printf("[intrface] mouse_in_window: argcnt=%i wnd=%u\n", argcnt, wnd);
-
-   stat = 0; // Tom: added, stubbed version
+   printf("[STUB] [intrface] mouse_in_window: argcnt=%i wnd=%u\n", argcnt, wnd);
 
    // Tom: commented out, stubbed version above
    // stat = ((point_X >= GIL2VFX_get_x1(wnd)) &&
    //         (point_X <= GIL2VFX_get_x2(wnd)) &&
    //         (point_Y >= GIL2VFX_get_y1(wnd)) &&
    //         (point_Y <= GIL2VFX_get_y2(wnd)));
+
+   stat = 0; // Tom: added, stubbed version
 
    return stat;
 }
@@ -643,7 +575,7 @@ void refresh_window(int32_t argcnt, uint32_t src, uint32_t target)
    (void)src;    // Tom: added
    (void)target; // Tom: added
 
-   printf("[intrface] refresh_window: argcnt=%i src=%u target=%u\n", argcnt, src, target);
+   printf("[STUB] [intrface] refresh_window: argcnt=%i src=%u target=%u\n", argcnt, src, target);
 
    // GIL2VFX_refresh_window(src, target); // Tom: commented out
 }
