@@ -1,25 +1,25 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  TEST.H                                                                ��
-// ��                                                                        ��
-// ��  Sample AESOP code resource/attribute header file                      ��
-// ��                                                                        ��
-// ��  Project: Extensible State-Object Processor (AESOP/16)                 ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with IBM PC ANSI C/C++ implementations            ��
-// ��  AESOP source compatible with AESOP/16 v1.0                            ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  10926 Jollyville #308                                                 ��
-// ��  Austin, TX 78759                                                      ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  TEST.H                                                                ##
+// ##                                                                        ##
+// ##  Sample AESOP code resource/attribute header file                      ##
+// ##                                                                        ##
+// ##  Project: Extensible State-Object Processor (AESOP/16)                 ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with IBM PC ANSI C/C++ implementations            ##
+// ##  AESOP source compatible with AESOP/16 v1.0                            ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  10926 Jollyville #308                                                 ##
+// ##  Austin, TX 78759                                                      ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
 #include <stdint.h> // Tom: added
 
@@ -195,11 +195,11 @@ int32_t arrow_count(int32_t argcnt, uint32_t plrnum);
 
 #ifdef __AESOP__
 
-//�������������������������������������������
-//��                                       ��
-//�� AESOP resource attribute declarations ��
-//��                                       ��
-//�������������������������������������������
+//##########################################�
+//##                                       ##
+//## AESOP resource attribute declarations ##
+//##                                       ##
+//##########################################�
 
 attrib sequence fixed,precious
 attrib sample fixed,precious
@@ -212,11 +212,11 @@ attrib file moveable,discardable
 
 #endif
 
-//����������������������������������������
-//��                                    ��
-//�� AESOP/C code resource declarations ��
-//��                                    ��
-//����������������������������������������
+//########################################
+//##                                    ##
+//## AESOP/C code resource declarations ##
+//##                                    ##
+//########################################
 
 code_resources
 {
@@ -402,5 +402,5 @@ code_resources
    PROCDEF close_transfer_file,
    PROCDEF player_attrib,
    PROCDEF item_attrib,
-   PROCDEF arrow_count,
+   PROCDEF arrow_count
 };

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -m32 -g -Wall -Wextra -I./src
+CFLAGS = -m32 -g -Wall -Wextra -rdynamic -I./src
 SRC_DIR = src
 OBJ_DIR = obj
 TARGET = aesop_game

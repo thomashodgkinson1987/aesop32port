@@ -14,6 +14,8 @@
 #include "rtsystem.h"
 #include "rtcode.h"
 
+#include <execinfo.h>
+
 /*
  * VALUE Union - Represents a generic value on the interpreter stack.
  * In the original ASM, this was 4 bytes.
@@ -442,6 +444,7 @@ __handle_msg:
         {
             int32_t val = edi->val;
             uint16_t num_cases = *(uint16_t *)esi;
+            printf("num_cases=%u\n", num_cases);
             esi += 2;
             int found = 0;
             for (uint16_t i = 0; i < num_cases; i++)
@@ -455,6 +458,7 @@ __handle_msg:
                 }
                 esi += 6;
             }
+            printf("found=%i\n", found);
             if (!found)
             {
                 GET_WORD();
@@ -582,6 +586,10 @@ __handle_msg:
             uint32_t ebx = index + extern_offset;
             void *code_addr = *(void **)(ptr_thunk + ebx);
             edi->addr_flat = code_addr;
+
+            printf("  RCRS function: ");
+            backtrace_symbols_fd(&code_addr, 1, 1);
+
             break;
         }
         case 33: // do_CALL
@@ -595,6 +603,10 @@ __handle_msg:
             }
 
             void *func_ptr = edi[arg_count].addr_flat;
+
+            // printf("  CALL function: ");
+            // backtrace_symbols_fd(&func_ptr, 1, 1);
+
             int32_t ret_val = 0;
 
             /* Unrolled call dispatcher to emulate generic stack call */
