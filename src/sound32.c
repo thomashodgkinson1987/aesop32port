@@ -113,6 +113,7 @@ struct // SSI MEL sound system config file
 //
 /****************************************************************************/
 
+/*
 static void *load_driver(int8_t *filename)
 {
    printf("[STUB] [sound32] load_driver: filename=%s\n", filename);
@@ -135,6 +136,7 @@ static void *load_driver(int8_t *filename)
 
    // return drvr;
 }
+*/
 
 /****************************************************************************/
 //
@@ -142,6 +144,7 @@ static void *load_driver(int8_t *filename)
 //
 /****************************************************************************/
 
+/*
 static void *load_global_timbre(uint32_t bank, uint32_t patch)
 {
    printf("[STUB] [sound32] load_global_timbre: bank=%u patch=%u\n", bank, patch);
@@ -181,6 +184,7 @@ static void *load_global_timbre(uint32_t bank, uint32_t patch)
 
    // return timb_ptr; // else return pointer to timbre
 }
+*/
 
 /****************************************************************************/
 //

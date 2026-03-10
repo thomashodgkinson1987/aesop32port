@@ -180,10 +180,12 @@ static void timer_callback(void) // Warning: called during IRQ 0
       ++heartbeat;
 
       if (!(heartbeat & 1L))
+      {
          if ((EV = find_event(SYS_TIMER, -1)) == NULL)
             add_event(SYS_TIMER, heartbeat >> 1, -1);
          else
             EV->parameter = heartbeat >> 1;
+      }
    }
 
    if ((*head != *tail) && (!in_BIOS))

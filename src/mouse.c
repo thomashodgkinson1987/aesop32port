@@ -73,9 +73,9 @@ static int32_t volatile locked;
 static int32_t volatile held;
 static RECT saved;
 
-static int32_t real_event_sel;
+// static int32_t real_event_sel;
 
-static int32_t real_event_seg;
+// static int32_t real_event_seg;
 static int32_t timer;
 static WINDOW save;
 static WINDOW work;
@@ -1262,7 +1262,7 @@ void MOUSE_pane_list_refresh(PANE_LIST *list)
 {
    printf("[mouse] MOUSE_pane_list_refresh: list=%p\n", (void *)list);
 
-   uint32_t i;
+   int32_t i;
    PANE *a;
 
    for (i = 0; i < list->size; i++)
