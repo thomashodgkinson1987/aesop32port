@@ -331,9 +331,6 @@ code_resources
 
    PROCDEF solid_bar_graph,
 
-   PROCDEF mono_on,
-   PROCDEF mono_off,
-
    //
    // Sound-related functions
    //
@@ -402,5 +399,7 @@ code_resources
    PROCDEF close_transfer_file,
    PROCDEF player_attrib,
    PROCDEF item_attrib,
-   PROCDEF arrow_count
+   PROCDEF arrow_count,
+   PROCDEF mono_on,
+   PROCDEF mono_off
 };

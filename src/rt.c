@@ -44,7 +44,7 @@ uint32_t current_index;
 /* Local State */
 static RTR_class *RTR_ptr;
 static uint8_t *stk_base;
-static VALUE *stk_off;
+static uint8_t *stk_off;
 static uint32_t *objlist_ptr;
 
 const char *case_list_strings[] = {
@@ -195,8 +195,9 @@ int8_t *RTD_lookup(uint32_t HRES, void *Key)
         {
             if (memcmp(edi, Key, tag_len) == 0)
             {
-                printf("[rt] RTD_lookup: HRES=%u Key=%p return=%u\n", HRES, Key, (int8_t *)(edi + tag_len + 2));
-                return (int8_t *)(edi + tag_len + 2);
+                int8_t *def_ptr = (int8_t *)(edi + tag_len + 2);
+                printf("[rt] RTD_lookup: HRES=%u Key=%s return=%s\n", HRES, (char *)Key, (char *)def_ptr);
+                return def_ptr;
             }
         }
 
@@ -270,7 +271,7 @@ void RT_init(RTR_class *RTR, uint32_t StkSize, uint32_t *ObjectList)
     objlist_ptr = ObjectList;
     RTR_ptr = RTR;
     stk_base = (uint8_t *)mem_alloc(StkSize);
-    stk_off = (VALUE *)(stk_base + StkSize);
+    stk_off = stk_base + StkSize;
 }
 
 void RT_shutdown(void)
@@ -284,7 +285,7 @@ void RT_arguments(void *Base, uint32_t Bytes)
 {
     printf("[rt] RT_arguments: Base=%p Bytes=%u\n", Base, Bytes);
 
-    stk_off = (VALUE *)((uint8_t *)stk_off - Bytes);
+    stk_off = stk_off - Bytes;
     memcpy(stk_off, Base, Bytes);
 }
 
@@ -296,7 +297,7 @@ int32_t RT_execute(uint32_t Index, uint32_t Message, uint32_t Vector)
     // uint8_t **h_thunk; // Tom: removed, not used?
     uint8_t *ptr_thunk;
     void **h_instance;
-    VALUE *fptr;
+    uint8_t *fptr;
     uint32_t static_offset;
     uint32_t extern_offset;
     uint32_t cur_vector;
@@ -312,7 +313,7 @@ int32_t RT_execute(uint32_t Index, uint32_t Message, uint32_t Vector)
         uint8_t *ds32;
         uint8_t *esi;
         VALUE *edi;
-        VALUE *fptr;
+        uint8_t *fptr;
     } call_stack[256];
     int call_stack_ptr = 0;
 
@@ -391,16 +392,14 @@ __handle_msg:
     ds32 = (uint8_t *)RTR_addr(h_prg);
     esi = ds32 + handler_offset;
 
-    edi = stk_off;
-    fptr = edi;
+    fptr = stk_off;
 
-    // Use a full VALUE slot for Index at fptr - 4 to maintain 32-bit alignment
-    ((VALUE *)fptr - 1)->val = (int32_t)Index;
+    // Initialize manifest THIS var at fptr - 2 (matches RT.ASM OFF_THIS = 2)
+    *(uint16_t *)(fptr - 2) = (uint16_t)Index;
 
     uint16_t auto_size = ((MHDR *)esi)->auto_size;
-    // Align auto_size to 4 bytes to keep edi aligned
-    uint32_t aligned_auto = (auto_size + 3) & ~3;
-    edi = (VALUE *)((uint8_t *)edi - aligned_auto - sizeof(VALUE));
+    // Set edi to first free stack location: fptr - auto_size - SIZE VALUE
+    edi = (VALUE *)(fptr - auto_size - sizeof(VALUE));
     esi += sizeof(MHDR);
 
 #define GET_WORD()                     \
@@ -587,7 +586,7 @@ __handle_msg:
             void *code_addr = *(void **)(ptr_thunk + ebx);
             edi->addr_flat = code_addr;
 
-            printf("  RCRS function: ");
+            printf("  RCRS index=%u function: ", index);
             backtrace_symbols_fd(&code_addr, 1, 1);
 
             break;
@@ -610,7 +609,7 @@ __handle_msg:
             int32_t ret_val = 0;
 
             /* Unrolled call dispatcher to emulate generic stack call */
-            stk_off = edi;
+            stk_off = (uint8_t *)edi;
             switch (arg_count)
             {
             case 0:
@@ -672,10 +671,10 @@ __handle_msg:
                 ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[17], args[16], args[15], args[14], args[13], args[12], args[11], args[10], args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
             }
-            stk_off = fptr;
+            stk_off = (uint8_t *)fptr;
 
-            edi += arg_count + 1; // Correct: edi was at func_ptr, pop it and all args
-            edi->val = ret_val;   // Current slot is now where return value goes
+            edi += arg_count; // Correct: edi now points to func_ptr slot
+            edi->val = ret_val;   // Return value overwrites func_ptr slot
 
             /* Re-derive DS32 in case of resource move */
             uint8_t *new_ds32 = (uint8_t *)RTR_addr(h_prg);
@@ -693,13 +692,13 @@ __handle_msg:
             }
             edi += arg_count;
 
-            stk_off = new_stack;
+            stk_off = (uint8_t *)new_stack;
             uint32_t instance_handle = edi->val;
             uint16_t msg_num = *(uint16_t *)(esi + 1);
 
             int32_t ret_val = RT_execute(instance_handle, msg_num, UINT32_MAX);
 
-            stk_off = fptr;
+            stk_off = (uint8_t *)fptr;
             edi->val = ret_val; // Overwrite instance handle with return value
             esi += 3;
 
@@ -726,9 +725,9 @@ __handle_msg:
                         ebx->val = edi->val;
                         edi++;
                     }
-                    stk_off = ebx;
+                    stk_off = (uint8_t *)ebx;
                     ret_val = RT_execute(Index, Message, next_vector);
-                    stk_off = fptr;
+                    stk_off = (uint8_t *)fptr;
                 }
                 else
                 {
@@ -759,12 +758,11 @@ __handle_msg:
             call_stack_ptr++;
 
             esi = ds32 + target;
-            fptr = edi;
-            ((VALUE *)fptr - 1)->val = (int32_t)Index;
+            fptr = (uint8_t *)edi;
+            *(uint16_t *)(fptr - 2) = (uint16_t)Index;
 
             uint16_t auto_sz = ((MHDR *)esi)->auto_size;
-            uint32_t aligned_auto = (auto_sz + 3) & ~3;
-            edi = (VALUE *)((uint8_t *)edi - aligned_auto - sizeof(VALUE));
+            edi = (VALUE *)(fptr - auto_sz - sizeof(VALUE));
             esi += sizeof(MHDR);
             break;
         }

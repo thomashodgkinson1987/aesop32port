@@ -219,27 +219,32 @@ int32_t ascnum(int8_t *string)
    }
 
    if (base == 10 && isdigit(*string))
-      return neg ? -atol((char *)string) : atol((char *)string);
-   else
-      return -1;
-
-   total = 0;
-   len = strlen((char *)string);
-
-   for (i = 0; i < len; i++)
    {
-      chr = toupper(string[i]);
-
-      for (j = 0; j < base; j++)
-         if (chr == "0123456789ABCDEF"[j])
-         {
-            total = (total * base) + j;
-            break;
-         }
-
-      if (j == base)
-         return -1;
+      total = atol((char *)string);
    }
+   else
+   {
+      total = 0;
+      len = strlen((char *)string);
+
+      for (i = 0; i < len; i++)
+      {
+         chr = toupper(string[i]);
+
+         for (j = 0; j < base; j++)
+            if (chr == "0123456789ABCDEF"[j])
+            {
+               total = (total * base) + j;
+               break;
+            }
+
+         if (j == base)
+            return -1;
+      }
+   }
+
+   if (neg)
+      total = -total;
 
    printf("[rtsystem] ascnum: string=%s total=%i\n", string, total);
 

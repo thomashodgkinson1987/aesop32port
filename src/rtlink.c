@@ -262,6 +262,7 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
             // LUM fixed the testing of the RTD_lookup result
             loRTDLookupResult = RTD_lookup(HCRFD, &tag[2]);
             offset = (uint16_t)ascnum(loRTDLookupResult);
+            printf("[rtlink] construct_thunk: Mapping %s to offset %u\n", &tag[2], offset);
             // if (offset == -1U)
             if (loRTDLookupResult == NULL)
                abend(MSG_MCR, &tag[2]); // "Missing code resource '%s'"
