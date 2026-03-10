@@ -62,7 +62,22 @@
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-static int32_t dos_bda_04f0 = 0; // Virtualise the BIOS Data Area address 0x04f0
+// static int32_t dos_bda_04f0 = 0; // Virtualise the BIOS Data Area address 0x04f0
+static int32_t dos_bda_04f0 = 1229870162; // Virtualise the BIOS Data Area address 0x04f0
+
+/*
+   43494e45 / 1128877637 = CINE
+   56494354 / 1447641940 = VICT
+   4348474e / 1128810318 = CHGN
+   494e5452 / 1229870162 = INTR
+   0 = default case
+
+   660 (000294): 45 4e 49 43 a2 00 CASE_ENTRY  #43494e45, LBL_162     ;1128877637, 162
+   666 (00029a): 54 43 49 56 c0 00 CASE_ENTRY  #56494354, LBL_192     ;1447641940, 192
+   672 (0002a0): 4e 47 48 43 de 00 CASE_ENTRY  #4348474e, LBL_222     ;1128810318, 222
+   678 (0002a6): 52 54 4e 49 1f 01 CASE_ENTRY  #494e5452, LBL_287     ;1229870162, 287
+   684 (0002ac): 4f 00             CASE_DEFAULT  LBL_79     ;79
+*/
 
 uint32_t diag_flag = 0;
 

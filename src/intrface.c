@@ -321,8 +321,8 @@ void init_interface(void) // Tom: TODO
    wait_ptr_state = 0;
 
    // LUM the parameters have changed ("background" added)
-   MOUSE_init(VFX->scrn_width, VFX->scrn_height, 1); // Tom: original version
-   // MOUSE_init(320, 200, 1); // Tom: hardcoded version
+   // MOUSE_init(VFX->scrn_width, VFX->scrn_height, 1); // Tom: original version
+   MOUSE_init(320, 200, 1); // Tom: hardcoded version
 
    MOUSE_register_mouse_event_callback(mouse_event_handler);
    MOUSE_register_button_event_callback(mouse_button_event_handler);

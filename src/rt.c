@@ -443,7 +443,6 @@ __handle_msg:
         {
             int32_t val = edi->val;
             uint16_t num_cases = *(uint16_t *)esi;
-            printf("num_cases=%u\n", num_cases);
             esi += 2;
             int found = 0;
             for (uint16_t i = 0; i < num_cases; i++)
@@ -457,7 +456,6 @@ __handle_msg:
                 }
                 esi += 6;
             }
-            printf("found=%i\n", found);
             if (!found)
             {
                 GET_WORD();
@@ -673,8 +671,8 @@ __handle_msg:
             }
             stk_off = (uint8_t *)fptr;
 
-            edi += arg_count; // Correct: edi now points to func_ptr slot
-            edi->val = ret_val;   // Return value overwrites func_ptr slot
+            edi += arg_count;   // Correct: edi now points to func_ptr slot
+            edi->val = ret_val; // Return value overwrites func_ptr slot
 
             /* Re-derive DS32 in case of resource move */
             uint8_t *new_ds32 = (uint8_t *)RTR_addr(h_prg);

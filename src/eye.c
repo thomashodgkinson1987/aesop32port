@@ -1347,9 +1347,8 @@ void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int
 
    stag *s;
    int8_t dir[128];
-   (void)argcnt;
 
-   printf("[STUB] [eye] launch: argcnt=%i dirname=%s prgname=%s argn1%s argn2%s\n", argcnt, dirname, prgname, argn1, argn2);
+   printf("[STUB] [eye] launch: argcnt=%i dirname=%s prgname=%s argn1=%s argn2=%s\n", argcnt, dirname, prgname, argn1, argn2);
 
    s = *(stag **)0x4fa;
 

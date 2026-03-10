@@ -549,10 +549,7 @@ void shutdown_sound(void)
 
 void init_sound(int32_t argcnt, uint32_t errprompt)
 {
-   (void)argcnt;
-   (void)errprompt;
-
-   printf("[STUB] [sound32] init_sound: argcnt= errprompt=\n"); // Tom: TODO add prints
+   printf("[STUB] [sound32] init_sound: argcnt=%i errprompt=%u\n", argcnt, errprompt);
 
    // sound_on = 1; // Tom: TODO see if this needs setting
 
