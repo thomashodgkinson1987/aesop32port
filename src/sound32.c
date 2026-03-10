@@ -115,9 +115,7 @@ struct // SSI MEL sound system config file
 
 static void *load_driver(int8_t *filename)
 {
-   (void)filename;
-
-   printf("[STUB] [sound32] load_driver: filename=\n"); // Tom: TODO add filename to printout
+   printf("[STUB] [sound32] load_driver: filename=%s\n", filename);
 
    return NULL;
 
@@ -146,10 +144,7 @@ static void *load_driver(int8_t *filename)
 
 static void *load_global_timbre(uint32_t bank, uint32_t patch)
 {
-   (void)bank;
-   (void)patch;
-
-   printf("[STUB] [sound32] load_global_timbre: bank= patch=\n"); // Tom: TODO add bank and patch
+   printf("[STUB] [sound32] load_global_timbre: bank=%u patch=%u\n", bank, patch);
 
    return NULL;
 
@@ -207,12 +202,7 @@ static void *load_global_timbre(uint32_t bank, uint32_t patch)
 
 void load_sound_block(int32_t argcnt, uint32_t first_block, uint32_t last_block, uint32_t *array)
 {
-   (void)argcnt;
-   (void)first_block;
-   (void)last_block;
-   (void)array;
-
-   printf("[STUB] [sound32] load_sound_block: argcnt= first_block= last_block= array=\n"); // Tom: TODO add parameters to print out
+   printf("[STUB] [sound32] load_sound_block: argcnt=%i first_block=%u last_block=%u array=%p\n", argcnt, first_block, last_block, (void *)array);
 
    // uint32_t index;
    // uint32_t i, cur;
@@ -266,10 +256,7 @@ void load_sound_block(int32_t argcnt, uint32_t first_block, uint32_t last_block,
 
 void sound_effect(int32_t argcnt, uint32_t index)
 {
-   (void)argcnt;
-   (void)index;
-
-   printf("[STUB] [sound32] sound_effect: argcnt= index=\n"); // Tom: TODO add prints
+   printf("[STUB] [sound32] sound_effect: argcnt=%i index=%u\n", argcnt, index);
 
    // int16_t ch;
    // (void)argcnt; // Tom: added
@@ -300,12 +287,7 @@ void sound_effect(int32_t argcnt, uint32_t index)
 
 void play_sequence(int32_t argcnt, uint32_t LA_version, uint32_t AD_version, uint32_t PC_version)
 {
-   (void)argcnt;
-   (void)LA_version;
-   (void)AD_version;
-   (void)PC_version;
-
-   printf("[STUB] [sound32] play_sequence: argcnt= LA_version= AD_version= PC_version=\n"); // Tom: TODO add prints
+   printf("[STUB] [sound32] play_sequence: argcnt=%i LA_version=%u AD_version=%u PC_version=%u\n", argcnt, LA_version, AD_version, PC_version);
 
    // uint32_t XMI_res;
    // uint32_t size;
@@ -460,10 +442,7 @@ void unload_music(void)
 
 void set_sound_status(int32_t argcnt, uint32_t status)
 {
-   (void)argcnt;
-   (void)status;
-
-   printf("[STUB] [sound32] set_sound_status: argcnt= status=\n"); // Tom: TODO add prints
+   printf("[STUB] [sound32] set_sound_status: argcnt=%i status=%u\n", argcnt, status);
 
    // (void)argcnt; // Tom: added
 
