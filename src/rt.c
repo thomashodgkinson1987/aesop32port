@@ -593,7 +593,7 @@ __handle_msg:
         }
         case 33: // do_CALL
         {
-            current_this = (uint32_t)((VALUE *)fptr - 1)->val;
+            current_this = *(uint16_t *)(fptr - 2);
             uint8_t arg_count = *esi++;
             uint32_t args[256];
             for (int i = 0; i < arg_count; i++)
