@@ -24,8 +24,8 @@
 #define S_IWRITE S_IWUSR
 #endif
 
-typedef uint32_t HRES; // run-time resource handle
-typedef uint16_t HSTR; // run-time len-prefixed string descriptor
+// typedef uint32_t HRES; // run-time resource handle
+// typedef uint16_t HSTR; // run-time len-prefixed string descriptor
 
 #define MSG_CREATE 0 // predefined message tokens (sent by system)
 #define MSG_DESTROY 1

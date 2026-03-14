@@ -31,6 +31,7 @@
 #include <stdint.h>
 
 #include "vfx.h"
+#include "gil2vfx.h"
 
 #include "defs.h"
 #include "shared.h"
@@ -398,7 +399,7 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
 {
    static uint8_t _x[] = {8, 80};
    static int8_t _y[] = {2, 54, 106};
-   int16_t red, yel /*, color //Tom: commented out, not currently used */;
+   int16_t red, yel, color;
    int16_t x, y, lp, save;
    (void)argcnt;
 
@@ -413,7 +414,7 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
       yel += sparkle;
    }
 
-   // color = red; // Tom: commented out, not currently used
+   color = red;
 
    x = _x[p & 1];
    y = _y[p >> 1];
@@ -422,11 +423,11 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
 
    if ((redfield) && (!yelfield))
    {
-      // GIL2VFX_draw_rect(PAGE2, x, y, x + 63, y + 49, color); // Tom: commented out
+      GIL2VFX_draw_rect(PAGE2, x, y, x + 63, y + 49, color);
    }
    else if ((yelfield) && (!redfield))
    {
-      // GIL2VFX_draw_rect(PAGE2, x, y, x + 63, y + 49, yel); // Tom: commented out
+      GIL2VFX_draw_rect(PAGE2, x, y, x + 63, y + 49, yel);
    }
    else
    {
@@ -436,14 +437,14 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
          x = save + lp;
          if (redfield)
          {
-            // GIL2VFX_draw_line(PAGE2, x, y, x + 7, y, color); // Tom: commented out
-            // GIL2VFX_draw_line(PAGE2, x + 8, y + 49, x + 15, y + 49, color); // Tom: commented out
+            GIL2VFX_draw_line(PAGE2, x, y, x + 7, y, color);
+            GIL2VFX_draw_line(PAGE2, x + 8, y + 49, x + 15, y + 49, color);
          }
 
          if (yelfield)
          {
-            // GIL2VFX_draw_line(PAGE2, x + 8, y, x + 15, y, yel); // Tom: commented out
-            // GIL2VFX_draw_line(PAGE2, x, y + 49, x + 7, y + 49, yel); // Tom: commented out
+            GIL2VFX_draw_line(PAGE2, x + 8, y, x + 15, y, yel);
+            GIL2VFX_draw_line(PAGE2, x, y + 49, x + 7, y + 49, yel);
          }
       }
 
@@ -455,14 +456,14 @@ void magic_field(int32_t argcnt, uint32_t p, uint32_t redfield, uint32_t yelfiel
          y = save + lp - 1;
          if (yelfield)
          {
-            // GIL2VFX_draw_line(PAGE2, x, y + 1, x, y + 6, yel); // Tom: commented out
-            // GIL2VFX_draw_line(PAGE2, x + 63, y + 7, x + 63, y + 12, yel); // Tom: commented out
+            GIL2VFX_draw_line(PAGE2, x, y + 1, x, y + 6, yel);
+            GIL2VFX_draw_line(PAGE2, x + 63, y + 7, x + 63, y + 12, yel);
          }
 
          if (redfield)
          {
-            // GIL2VFX_draw_line(PAGE2, x, y + 7, x, y + 12, color); // Tom: commented out
-            // GIL2VFX_draw_line(PAGE2, x + 63, y + 1, x + 63, y + 6, color); // Tom: commented out
+            GIL2VFX_draw_line(PAGE2, x, y + 7, x, y + 12, color);
+            GIL2VFX_draw_line(PAGE2, x + 63, y + 1, x + 63, y + 6, color);
          }
       }
    }
@@ -497,8 +498,6 @@ int32_t Coord_In_Region(int32_t x, int32_t y, int32_t x1, int32_t y1, int32_t x2
 
 void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t exp_y, int32_t scale, int32_t power, int32_t dots, int32_t life, int32_t upval, int8_t *colors)
 {
-   printf("[STUB] [eye] do_dots\n");
-
    static int16_t _floor[] =
        {
            119,
@@ -511,8 +510,8 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
    int16_t lside, rside, top, bottom;
    int16_t roof, floor, lwall, rwall;
    (void)argcnt;
-   (void)view; // Tom: not currently used
-   (void)scrn; // Tom: not currently used
+
+   printf("[STUB] [eye] do_dots\n");
 
    hide_mouse();
 
@@ -525,17 +524,10 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
    lwall = -100;
    rwall = 276;
 
-   // Tom: added zeroed version
-   top = 0;
-   bottom = 0;
-   lside = 0;
-   rside = 0;
-
-   // Tom: commented out, zeroed version above
-   // top = GIL2VFX_get_y1(view);
-   // bottom = GIL2VFX_get_y2(view);
-   // lside = GIL2VFX_get_x1(view);
-   // rside = GIL2VFX_get_x2(view);
+   top = GIL2VFX_get_y1(view);
+   bottom = GIL2VFX_get_y2(view);
+   lside = GIL2VFX_get_x1(view);
+   rside = GIL2VFX_get_x2(view);
 
    xpos = dotbuffer;
    ypos = dotbuffer + MAXDOTS;
@@ -573,7 +565,7 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
 
             if (Coord_In_Region(px, py, lside, top, rside, bottom))
             {
-               // GIL2VFX_draw_dot(scrn, px, py, color[i]); // Tom: commented out
+               GIL2VFX_draw_dot(scrn, px, py, color[i]);
             }
          }
 
@@ -602,13 +594,8 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
          if (py > floor)
             py = floor;
 
-         // Tom: added zeroed version
-         mask = 0;
-         color[i] = 0;
-
-         // Tom: commented out, zeroed version above
-         // mask = GIL2VFX_read_dot(view, px, py);
-         // color[i] = GIL2VFX_read_dot(scrn, px, py);
+         mask = GIL2VFX_read_dot(view, px, py);
+         color[i] = GIL2VFX_read_dot(scrn, px, py);
 
          pixcol = colors[colidx[i] >> 8];
 
@@ -618,7 +605,7 @@ void do_dots(int32_t argcnt, int32_t view, int32_t scrn, int32_t exp_x, int32_t 
 
             if ((mask == XCOLOR) && Coord_In_Region(px, py, lside, top, rside, bottom))
             {
-               // GIL2VFX_draw_dot(scrn, px, py, pixcol); // Tom: commented out
+               GIL2VFX_draw_dot(scrn, px, py, pixcol);
             }
          }
          else
@@ -655,10 +642,6 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
    int16_t *xpos, *ypos, *xvel, *yvel, *color, *colcnt, *colidx, *delay, *dotbuffer;
    int16_t m, v, grav78, t;
    (void)argcnt;
-   (void)px;   // Tom: not currently used
-   (void)py;   // Tom: not currently used
-   (void)view; // Tom: not currently used
-   (void)scrn; // Tom: not currently used
 
    printf("[STUB] [eye] do_ice\n");
 
@@ -746,7 +729,7 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
          {
             px = (xpos[i] >> ACCUR) + cx;
             py = (ypos[i] >> ACCUR) + cy;
-            // GIL2VFX_draw_dot(scrn, px, py, color[i]); // Tom: commented out
+            GIL2VFX_draw_dot(scrn, px, py, color[i]);
          }
 
       active = 0;
@@ -788,11 +771,9 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
          if (count < (life >> 2))
             mask = 0;
          else
-            mask = 0; // Tom: added zeroed version
-         // mask = GIL2VFX_read_dot(view, px, py); // Tom: commented out
+            mask = GIL2VFX_read_dot(view, px, py);
 
-         color[i] = 0; // Tom: added zeroed version
-         // color[i] = GIL2VFX_read_dot(scrn, px, py); // Tom: commented out
+         color[i] = GIL2VFX_read_dot(scrn, px, py);
          pixcol = colors[colidx[i] >> 8];
 
          if (pixcol)
@@ -801,7 +782,7 @@ void do_ice(int32_t argcnt, int32_t view, int32_t scrn, int32_t dots, int32_t ma
 
             if (mask == XCOLOR && !delay[i])
             {
-               // GIL2VFX_draw_dot(scrn, px, py, pixcol); // Tom: commented out
+               GIL2VFX_draw_dot(scrn, px, py, pixcol);
             }
          }
          else

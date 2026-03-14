@@ -31,6 +31,7 @@
 
 #include "vfx.h"
 #include "mouse.h"
+#include "gil2vfx.h"
 
 extern VFX_DESC *VFX;
 
@@ -420,8 +421,6 @@ void set_mouse_pointer(int32_t argcnt, uint32_t table, uint32_t number, int32_t 
 /*********************************************************/
 void set_wait_pointer(int32_t argcnt, uint32_t number, int32_t hot_X, int32_t hot_Y)
 {
-   (void)argcnt; // Tom: added
-
    printf("[intrface] set_wait_pointer: argcnt=%i number=%u hot_X=%i hot_Y=%i\n", argcnt, number, hot_X, hot_Y);
 
    if (number == UINT32_MAX)
@@ -550,15 +549,12 @@ uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd)
 {
    uint32_t stat;
 
-   printf("[STUB] [intrface] mouse_in_window: argcnt=%i wnd=%u\n", argcnt, wnd);
+   printf("[intrface] mouse_in_window: argcnt=%i wnd=%u\n", argcnt, wnd);
 
-   // Tom: commented out, stubbed version above
-   // stat = ((point_X >= GIL2VFX_get_x1(wnd)) &&
-   //         (point_X <= GIL2VFX_get_x2(wnd)) &&
-   //         (point_Y >= GIL2VFX_get_y1(wnd)) &&
-   //         (point_Y <= GIL2VFX_get_y2(wnd)));
-
-   stat = 0; // Tom: added, stubbed version
+   stat = ((point_X >= GIL2VFX_get_x1(wnd)) &&
+           (point_X <= GIL2VFX_get_x2(wnd)) &&
+           (point_Y >= GIL2VFX_get_y1(wnd)) &&
+           (point_Y <= GIL2VFX_get_y2(wnd)));
 
    return stat;
 }
@@ -573,13 +569,9 @@ uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd)
 
 void refresh_window(int32_t argcnt, uint32_t src, uint32_t target)
 {
-   (void)argcnt; // Tom: added
-   (void)src;    // Tom: added
-   (void)target; // Tom: added
+   printf("[intrface] refresh_window: argcnt=%i src=%u target=%u\n", argcnt, src, target);
 
-   printf("[STUB] [intrface] refresh_window: argcnt=%i src=%u target=%u\n", argcnt, src, target);
-
-   // GIL2VFX_refresh_window(src, target); // Tom: commented out
+   GIL2VFX_refresh_window(src, target);
 }
 
 void intrface_entry()
