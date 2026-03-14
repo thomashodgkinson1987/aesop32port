@@ -937,6 +937,8 @@ void print(int32_t argcnt, uint32_t wndnum, uint32_t format, ...)
       abend(MSG_SRRP);
    }
 
+   printf("[graphics] print: string=%s\n", p);
+
    va_start(argptr, format);
 
    if (strlen(p) < 256)
