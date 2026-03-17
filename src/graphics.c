@@ -297,14 +297,36 @@ uint32_t get_bitmap_height(int32_t argcnt, uint32_t table, uint32_t number)
    return h;
 }
 
-void draw_bitmap(int32_t argcnt, uint32_t page, uint32_t table, uint32_t number, int32_t x, int32_t y, uint32_t scale, uint32_t flip, uint32_t fade_table, uint32_t fade_level)
+void draw_bitmap(
+    int32_t argcnt,
+    uint32_t page,
+    uint32_t table,
+    uint32_t number,
+    int32_t x,
+    int32_t y,
+    uint32_t scale,
+    uint32_t flip,
+    uint32_t fade_table,
+    uint32_t fade_level)
 {
    uint32_t handle;
    static uint32_t last_handle = 0;
    static uint32_t last_table;
    uint16_t *lookaside;
 
-   printf("[graphics] draw_bitmap: argcnt=%i page=%u table=%u number=%u x=%i y=%i scale=%u flip=%u fade_table=%u fade_level=%u\n", argcnt, page, table, number, x, y, scale, flip, fade_table, fade_level);
+   printf("[graphics] draw_bitmap: "
+          "argcnt=%i "
+          "page=%u "
+          "table=%u "
+          "number=%u "
+          "x=%i "
+          "y=%i "
+          "scale=%u "
+          "flip=%u "
+          "fade_table=%u "
+          "fade_level=%u"
+          "\n",
+          argcnt, page, table, number, x, y, scale, flip, fade_table, fade_level);
 
    if (table == last_table)
       handle = last_handle;
