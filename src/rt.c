@@ -412,7 +412,7 @@ __handle_msg:
     {
         uint8_t opcode = *esi++;
 
-        printf("[RT_execute] opcode=%u %s\n", opcode, case_list_strings[opcode]);
+        printf("[rt] RT_execute: opcode=%u %s\n", opcode, case_list_strings[opcode]);
 
         switch (opcode)
         {

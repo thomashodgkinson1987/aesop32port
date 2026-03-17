@@ -111,14 +111,14 @@ uint32_t mem_avail(void)
 
    mem_avail = 16 * 1024 * 1024;
 
-   printf("[rtsystem] mem_avail: %u\n", mem_avail);
+   printf("[rtsystem] mem_avail: return=%u\n", mem_avail);
 
    return mem_avail;
 }
 
 uint32_t mem_headroom(void)
 {
-   printf("[rtsystem] mem_headroom: %u\n", headroom);
+   printf("[rtsystem] mem_headroom: return=%u\n", headroom);
 
    return headroom;
 }
@@ -151,7 +151,7 @@ int8_t *str_alloc(int8_t *str)
    ptr = mem_alloc(strlen((char *)str) + 1);
    strcpy((char *)ptr, (char *)str);
 
-   printf("[rtsystem] str_alloc: str=%s ptr=%p\n", str, (void *)ptr);
+   printf("[rtsystem] str_alloc: str=%s return=%p\n", str, (void *)ptr);
 
    return ptr;
 }
@@ -246,7 +246,7 @@ int32_t ascnum(int8_t *string)
    if (neg)
       total = -total;
 
-   printf("[rtsystem] ascnum: string=%s total=%i\n", string, total);
+   printf("[rtsystem] ascnum: string=%s return=%i\n", string, total);
 
    return total;
 }
@@ -281,7 +281,7 @@ void abend(char *msg, ...)
    int16_t x, y;
    char loErrorBuffer[1000 + 1]; // max length + 1
 
-   printf("[rtsystem] abend(char *msg, ...): msg=%s\n", msg);
+   printf("[rtsystem] abend: msg=%s\n", msg);
 
    curpos(&x, &y);
    if (y > 25)
@@ -415,8 +415,6 @@ int16_t TF_destroy(TF_class *TF)
 
 int16_t TF_wchar(TF_class *TF, int8_t ch)
 {
-   printf("[rtsystem] TF_wchar: TF=%p ch=%i\n", (void *)TF, ch);
-
    TF->buffer[TF->p++] = ch;
 
    if (TF->p == TF_BUFSIZE)
@@ -424,9 +422,12 @@ int16_t TF_wchar(TF_class *TF, int8_t ch)
       TF->p = 0;
       if (write(TF->file, TF->buffer, TF_BUFSIZE) != TF_BUFSIZE)
       {
+         printf("[rtsystem] TF_wchar: TF=%p ch=%i return=0\n", (void *)TF, ch);
          return 0;
       }
    }
+
+   printf("[rtsystem] TF_wchar: TF=%p ch=%i return=1\n", (void *)TF, ch);
 
    return 1;
 }
@@ -443,6 +444,7 @@ int8_t TF_rchar(TF_class *TF)
 {
    if (TF->pos >= TF->len)
    {
+      printf("[rtsystem] TF_rchar: TF=%p return=0\n", (void *)TF);
       return 0;
    }
 
@@ -450,6 +452,7 @@ int8_t TF_rchar(TF_class *TF)
 
    if (TF->p != TF_BUFSIZE)
    {
+      printf("[rtsystem] TF_rchar: TF=%p return=%i\n", (void *)TF, TF->buffer[TF->p]);
       return TF->buffer[TF->p++];
    }
 
@@ -479,8 +482,6 @@ int16_t TF_readln(TF_class *TF, int8_t *buffer, int16_t maxlen)
 {
    int16_t b, c;
 
-   printf("[rtsystem] TF_readln: TF=%p buffer=%p maxlen=%i\n", (void *)TF, (void *)buffer, maxlen);
-
    do
    {
       b = 0;
@@ -506,11 +507,14 @@ int16_t TF_readln(TF_class *TF, int8_t *buffer, int16_t maxlen)
          while ((c = TF_rchar(TF)) != '\n')
             if (!c)
             {
+               printf("[rtsystem] TF_readln: TF=%p buffer=%p maxlen=%i return=0\n", (void *)TF, (void *)buffer, maxlen);
                return 0;
             }
 
       buffer[b] = 0;
    } while (!strlen((char *)buffer));
+
+   printf("[rtsystem] TF_readln: TF=%p buffer=%p maxlen=%i return=1\n", (void *)TF, (void *)buffer, maxlen);
 
    return 1;
 }
@@ -528,19 +532,21 @@ int16_t TF_writeln(TF_class *TF, int8_t *buffer)
 {
    int16_t b, c;
 
-   printf("[rtsystem] TF_writeln: TF=%p buffer=%p\n", (void *)TF, (void *)buffer);
-
    b = 0;
 
    while ((c = buffer[b++]) != 0)
       if (!TF_wchar(TF, c))
       {
+         printf("[rtsystem] TF_writeln: TF=%p buffer=%p\n", (void *)TF, (void *)buffer);
          return 0;
       }
 
    TF_wchar(TF, '\r');
+   int16_t ret = TF_wchar(TF, '\n');
 
-   return TF_wchar(TF, '\n');
+   printf("[rtsystem] TF_writeln: TF=%p buffer=%p return=%i\n", (void *)TF, (void *)buffer, ret);
+
+   return ret;
 }
 
 /***************************************************/
@@ -586,12 +592,13 @@ int16_t copy_file(int8_t *src_filename, int8_t *dest_filename)
    int16_t status;
    int16_t s, d, n;
 
-   printf("[rtsystem] copy_file: src_filename=%s dest_filename=%s\n", src_filename, dest_filename);
-
    s = open((char *)src_filename, O_RDONLY | O_BINARY);
 
    if (s == -1)
+   {
+      printf("[rtsystem] copy_file: src_filename=%s dest_filename=%s return=0\n", src_filename, dest_filename);
       return 0;
+   }
 
    d = open((char *)dest_filename, O_BINARY | O_CREAT | O_TRUNC | O_WRONLY,
             S_IREAD | S_IWRITE);
@@ -599,6 +606,7 @@ int16_t copy_file(int8_t *src_filename, int8_t *dest_filename)
    if (d == -1)
    {
       close(s);
+      printf("[rtsystem] copy_file: src_filename=%s dest_filename=%s return=-1\n", src_filename, dest_filename);
       return -1;
    }
 
@@ -607,6 +615,7 @@ int16_t copy_file(int8_t *src_filename, int8_t *dest_filename)
    {
       close(s);
       close(d);
+      printf("[rtsystem] copy_file: src_filename=%s dest_filename=%s return=-1\n", src_filename, dest_filename);
       return -1;
    }
 
@@ -633,6 +642,8 @@ int16_t copy_file(int8_t *src_filename, int8_t *dest_filename)
 
    RTR_free(RTR, hbuf);
 
+   printf("[rtsystem] copy_file: src_filename=%s dest_filename=%s return=%i\n", src_filename, dest_filename, status);
+
    return status;
 }
 
@@ -653,6 +664,7 @@ int32_t file_size(int8_t *filename)
    if (handle == -1)
    {
       disk_err = FILE_NOT_FOUND;
+      printf("[rtsystem] file_size: filename=%s return=-1\n", filename);
       return -1;
    }
 
@@ -679,14 +691,13 @@ int8_t *read_file(int8_t *filename, void *dest)
    uint32_t len;
    int8_t *buf, *mem;
 
-   printf("[rtsystem] read_file: filename=%s dest=%p\n", filename, dest);
-
    disk_err = 0;
    len = file_size(filename);
 
    if (len == UINT32_MAX)
    {
       disk_err = FILE_NOT_FOUND;
+      printf("[rtsystem] read_file: filename=%s dest=%p return=NULL\n", filename, dest);
       return NULL;
    }
 
@@ -695,6 +706,7 @@ int8_t *read_file(int8_t *filename, void *dest)
    if (buf == NULL)
    {
       disk_err = OUT_OF_MEMORY;
+      printf("[rtsystem] read_file: filename=%s dest=%p return=NULL\n", filename, dest);
       return NULL;
    }
 
@@ -703,6 +715,7 @@ int8_t *read_file(int8_t *filename, void *dest)
    {
       mem_free(mem);
       disk_err = FILE_NOT_FOUND;
+      printf("[rtsystem] read_file: filename=%s dest=%p return=NULL\n", filename, dest);
       return NULL;
    }
 
@@ -713,6 +726,7 @@ int8_t *read_file(int8_t *filename, void *dest)
       {
          mem_free(mem);
          disk_err = CANT_READ_FILE;
+         printf("[rtsystem] read_file: filename=%s dest=%p return=NULL\n", filename, dest);
          return NULL;
       }
       len -= DOS_BUFFSIZE;
@@ -724,10 +738,14 @@ int8_t *read_file(int8_t *filename, void *dest)
    {
       mem_free(mem);
       disk_err = CANT_READ_FILE;
+      printf("[rtsystem] read_file: filename=%s dest=%p return=NULL\n", filename, dest);
       return NULL;
    }
 
    close(handle);
+
+   printf("[rtsystem] read_file: filename=%s dest=%p return=%p\n", filename, dest, mem);
+
    return mem;
 }
 
@@ -741,14 +759,13 @@ int16_t write_file(int8_t *filename, void *buf, uint32_t len)
 {
    int16_t i, handle;
 
-   printf("[rtsystem] write_file: filename=%s buf=%p len=%u\n", filename, buf, len);
-
    disk_err = 0;
 
    handle = open((char *)filename, O_CREAT | O_RDWR | O_TRUNC | O_BINARY, S_IREAD | S_IWRITE);
    if (handle == -1)
    {
       disk_err = CANT_WRITE_FILE;
+      printf("[rtsystem] write_file: filename=%s buf=%p len=%u return=0\n", filename, buf, len);
       return 0;
    }
 
@@ -758,11 +775,13 @@ int16_t write_file(int8_t *filename, void *buf, uint32_t len)
       if (i == -1)
       {
          disk_err = CANT_WRITE_FILE;
+         printf("[rtsystem] write_file: filename=%s buf=%p len=%u return=0\n", filename, buf, len);
          return 0;
       }
       if (i != (int16_t)DOS_BUFFSIZE)
       {
          disk_err = DISK_FULL;
+         printf("[rtsystem] write_file: filename=%s buf=%p len=%u return=0\n", filename, buf, len);
          return 0;
       }
       len -= DOS_BUFFSIZE;
@@ -773,15 +792,19 @@ int16_t write_file(int8_t *filename, void *buf, uint32_t len)
    if (i == -1)
    {
       disk_err = CANT_WRITE_FILE;
+      printf("[rtsystem] write_file: filename=%s buf=%p len=%u return=0\n", filename, buf, len);
       return 0;
    }
    if (i != (uint16_t)len)
    {
       disk_err = DISK_FULL;
+      printf("[rtsystem] write_file: filename=%s buf=%p len=%u return=0\n", filename, buf, len);
       return 0;
    }
 
    close(handle);
+
+   printf("[rtsystem] write_file: filename=%s buf=%p len=%u return=1\n", filename, buf, len);
 
    return 1;
 }
@@ -796,14 +819,13 @@ int16_t append_file(int8_t *filename, void *buf, uint32_t len)
 {
    int16_t i, handle;
 
-   printf("[rtsystem] append_file: filename=%s buff=%p len=%u\n", filename, buf, len);
-
    disk_err = 0;
 
    handle = open((char *)filename, O_APPEND | O_RDWR | O_BINARY);
    if (handle == -1)
    {
       disk_err = FILE_NOT_FOUND;
+      printf("[rtsystem] append_file: filename=%s buff=%p len=%u return=0\n", filename, buf, len);
       return 0;
    }
 
@@ -813,11 +835,13 @@ int16_t append_file(int8_t *filename, void *buf, uint32_t len)
       if (i == -1)
       {
          disk_err = CANT_WRITE_FILE;
+         printf("[rtsystem] append_file: filename=%s buff=%p len=%u return=0\n", filename, buf, len);
          return 0;
       }
       if (i != (int16_t)DOS_BUFFSIZE)
       {
          disk_err = DISK_FULL;
+         printf("[rtsystem] append_file: filename=%s buff=%p len=%u return=0\n", filename, buf, len);
          return 0;
       }
       len -= DOS_BUFFSIZE;
@@ -828,15 +852,19 @@ int16_t append_file(int8_t *filename, void *buf, uint32_t len)
    if (i == -1)
    {
       disk_err = CANT_WRITE_FILE;
+      printf("[rtsystem] append_file: filename=%s buff=%p len=%u return=0\n", filename, buf, len);
       return 0;
    }
    if (i != (uint16_t)len)
    {
       disk_err = DISK_FULL;
+      printf("[rtsystem] append_file: filename=%s buff=%p len=%u return=0\n", filename, buf, len);
       return 0;
    }
 
    close(handle);
+
+   printf("[rtsystem] append_file: filename=%s buff=%p len=%u return=1\n", filename, buf, len);
 
    return 1;
 }
