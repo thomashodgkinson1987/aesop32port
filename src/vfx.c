@@ -120,9 +120,21 @@ int32_t VFX_line_draw(PANE *pane, int32_t x0, int32_t y0, int32_t x1, int32_t y1
     return 0;
 }
 
-void VFX_shape_draw(PANE *pane, void *shape_table, int32_t shape_number, int32_t hotX, int32_t hotY)
+void VFX_shape_draw(
+    PANE *pane,
+    void *shape_table,
+    int32_t shape_number,
+    int32_t hotX,
+    int32_t hotY)
 {
-    printf("[STUB] [vfx] VFX_shape_draw: pane=%p shape_table=%p shape_number=%i hotX=%i hotY=%i\n", (void *)pane, shape_table, shape_number, hotX, hotY);
+    printf("[STUB] [vfx] VFX_shape_draw: "
+           "pane=%p "
+           "shape_table=%p "
+           "shape_number=%i "
+           "hotX=%i "
+           "hotY=%i"
+           "\n",
+           (void *)pane, shape_table, shape_number, hotX, hotY);
 }
 
 void VFX_shape_lookaside(uint8_t *table)
