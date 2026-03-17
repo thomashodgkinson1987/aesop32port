@@ -288,7 +288,15 @@ int32_t GIL2VFX_visible_bitmap_rect(int32_t x1, int32_t y1, int32_t mirror, uint
       return 1;
 }
 
-void GIL2VFX_draw_bitmap(int32_t wnd, int32_t x, int32_t y, int32_t mirror, int32_t scale, uint8_t *fade_table, uint8_t *shapes, int32_t shape_num)
+void GIL2VFX_draw_bitmap(
+    int32_t wnd,
+    int32_t x,
+    int32_t y,
+    int32_t mirror,
+    int32_t scale,
+    uint8_t *fade_table,
+    uint8_t *shapes,
+    int32_t shape_num)
 {
    int32_t xp = x - panes[wnd].x0;
    int32_t yp = y - panes[wnd].y0;
@@ -296,7 +304,17 @@ void GIL2VFX_draw_bitmap(int32_t wnd, int32_t x, int32_t y, int32_t mirror, int3
    int32_t flags;
    int32_t xs, ys;
 
-   printf("[gil2vfx] GIL2VFX_draw_bitmap: wnd=%i x=%i y=%i mirror=%i scale=%i fade_table=%p shapes=%p shape_num=%i\n", wnd, x, y, mirror, scale, (void *)fade_table, (void *)shapes, shape_num);
+   printf("[gil2vfx] GIL2VFX_draw_bitmap: "
+          "wnd=%i "
+          "x=%i "
+          "y=%i "
+          "mirror=%i "
+          "scale=%i "
+          "fade_table=%p "
+          "shapes=%p "
+          "shape_num=%i"
+          "\n",
+          wnd, x, y, mirror, scale, (void *)fade_table, (void *)shapes, shape_num);
 
    if (gil2vfx_active != -1)
       return;
