@@ -165,7 +165,7 @@ static void MOUSE_draw(void)
       excluded = 1;
 
       MOUSE_unlock();
-      return;
+      // return; // Tom: URGENT - commented out so that drawing will be called
    }
 
    if (saved.x0 < 0)
@@ -648,6 +648,9 @@ void MOUSE_force_move(int32_t new_x, int32_t new_y)
    // union REGS inregs, outregs; // Tom: commented out
 
    MOUSE_lock();
+
+   x = new_x;
+   y = new_y;
 
    //
    // Reset mouse position manually
@@ -1325,9 +1328,11 @@ int32_t MOUSE_init(int32_t xsize, int32_t ysize, int32_t background)
    // Multiply limits by 8 to obtain single-pixel resolution
    //
 
+   /*
    // Tom: hardcoded
    scrn_max_x = 320;
    scrn_max_y = 200;
+   */
 
    // inregs.x.eax = 7;
    // inregs.x.ecx = 0;
