@@ -319,7 +319,7 @@ void GIL2VFX_draw_bitmap(
    if (gil2vfx_active != -1)
       return;
 
-   if ((scale == NULL) && (mirror == NO_MIRROR))
+   if ((scale == 0) && (mirror == NO_MIRROR))
    {
       VFX_shape_draw(&panes[wnd], shapes, shape_num, xp, yp);
    }
