@@ -1,6 +1,9 @@
 .vscode/
+
+bin/
+obj/
+
+logs/
+
 eobiii/
 misc-files/
-obj/
-aesop_game
-EYE.RES
