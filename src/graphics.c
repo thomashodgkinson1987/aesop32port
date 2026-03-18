@@ -210,14 +210,31 @@ void release_owned_windows(uint32_t owner) // Tom: new
 
 void draw_dot(int32_t argcnt, uint32_t page, uint32_t x, uint32_t y, uint32_t color)
 {
-   printf("[graphics] draw_dot: argcnt=%i page=%u x=%u y=%u color=%u\n", argcnt, page, x, y, color);
+   printf("[graphics] draw_dot: argcnt=%i page=%u x=%u y=%u color=%u\n",
+          argcnt, page, x, y, color);
 
    GIL2VFX_draw_dot(lastg_p = page, lastg_x = x, lastg_y = y, color);
 }
 
-void draw_line(int32_t argcnt, uint32_t page, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2, uint32_t color)
+void draw_line(
+    int32_t argcnt,
+    uint32_t page,
+    uint32_t x1,
+    uint32_t y1,
+    uint32_t x2,
+    uint32_t y2,
+    uint32_t color)
 {
-   printf("[graphics] draw_line: argcnt=%i page=%u x1=%u y1=%u x2=%u y2=%u color=%u\n", argcnt, page, x1, y1, x2, y2, color);
+   printf("[graphics] draw_line: "
+          "argcnt=%i "
+          "page=%u "
+          "x1=%u "
+          "y1=%u "
+          "x2=%u "
+          "y2=%u "
+          "color=%u"
+          "\n",
+          argcnt, page, x1, y1, x2, y2, color);
 
    GIL2VFX_draw_line(lastg_p = page, x1, y1, lastg_x = x2, lastg_y = y2, color);
 }
@@ -247,23 +264,71 @@ void line_to(int32_t argcnt, uint32_t x, uint32_t y, uint32_t color, ...) // Tom
    va_end(argptr);
 }
 
-void draw_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color)
+void draw_rectangle(
+    int32_t argcnt,
+    uint32_t wndnum,
+    int32_t x1,
+    int32_t y1,
+    int32_t x2,
+    int32_t y2,
+    uint32_t color)
 {
-   printf("[graphics] draw_rectangle: argcnt=%i wndnum=%u x1=%i y1=%i x2=%i y2=%i color=%u\n", argcnt, wndnum, x1, y1, x2, y2, color);
+   printf("[graphics] draw_rectangle: "
+          "argcnt=%i "
+          "wndnum=%u "
+          "x1=%i "
+          "y1=%i "
+          "x2=%i "
+          "y2=%i "
+          "color=%u"
+          "\n",
+          argcnt, wndnum, x1, y1, x2, y2, color);
 
    GIL2VFX_draw_rect(wndnum, x1, y1, x2, y2, color);
 }
 
-void fill_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color)
+void fill_rectangle(
+    int32_t argcnt,
+    uint32_t wndnum,
+    int32_t x1,
+    int32_t y1,
+    int32_t x2,
+    int32_t y2,
+    uint32_t color)
 {
-   printf("[graphics] fill_rectangle: argcnt=%i wndnum=%u x1=%i y1=%i x2=%i y2=%i color=%u\n", argcnt, wndnum, x1, y1, x2, y2, color);
+   printf("[graphics] fill_rectangle: "
+          "argcnt=%i "
+          "wndnum=%u "
+          "x1=%i "
+          "y1=%i "
+          "x2=%i "
+          "y2=%i "
+          "color=%u"
+          "\n",
+          argcnt, wndnum, x1, y1, x2, y2, color);
 
    GIL2VFX_fill_rect(wndnum, x1, y1, x2, y2, color);
 }
 
-void hash_rectangle(int32_t argcnt, uint32_t wndnum, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color)
+void hash_rectangle(
+    int32_t argcnt,
+    uint32_t wndnum,
+    int32_t x1,
+    int32_t y1,
+    int32_t x2,
+    int32_t y2,
+    uint32_t color)
 {
-   printf("[graphics] hash_rectangle: argcnt=%i wndnum=%u x1=%i y1=%i x2=%i y2=%i color=%u\n", argcnt, wndnum, x1, y1, x2, y2, color);
+   printf("[graphics] hash_rectangle: "
+          "argcnt=%i "
+          "wndnum=%u "
+          "x1=%i "
+          "y1=%i "
+          "x2=%i "
+          "y2=%i "
+          "color=%u"
+          "\n",
+          argcnt, wndnum, x1, y1, x2, y2, color);
 
    GIL2VFX_hash_rect(wndnum, x1, y1, x2, y2, color);
 }
@@ -273,7 +338,8 @@ uint32_t get_bitmap_height(int32_t argcnt, uint32_t table, uint32_t number)
    uint32_t handle;
    uint32_t h;
 
-   printf("[graphics] get_bitmap_height: argcnt=%i table=%u number=%u\n", argcnt, table, number);
+   printf("[graphics] get_bitmap_height: argcnt=%i table=%u number=%u\n",
+          argcnt, table, number);
 
    handle = RTR_get_resource_handle(RTR, table, DA_DEFAULT);
 
@@ -340,7 +406,14 @@ void draw_bitmap(
    RTR_unlock(handle);
 }
 
-uint32_t visible_bitmap_rect(int32_t argcnt, int32_t x, int32_t y, uint32_t flip, uint32_t table, uint32_t number, int16_t *array)
+uint32_t visible_bitmap_rect(
+    int32_t argcnt,
+    int32_t x,
+    int32_t y,
+    uint32_t flip,
+    uint32_t table,
+    uint32_t number,
+    int16_t *array)
 {
    uint32_t handle;
    uint32_t array_offset;
@@ -348,7 +421,16 @@ uint32_t visible_bitmap_rect(int32_t argcnt, int32_t x, int32_t y, uint32_t flip
    int16_t bounds[4];
    uint32_t result;
 
-   printf("[graphics] visible_bitmap_rect: argcnt=%i x=%i y=%i flip=%u table=%u number=%u array=%p\n", argcnt, x, y, flip, table, number, (void *)array);
+   printf("[graphics] visible_bitmap_rect: "
+          "argcnt=%i "
+          "x=%i "
+          "y=%i "
+          "flip=%u "
+          "table=%u "
+          "number=%u "
+          "array=%p"
+          "\n",
+          argcnt, x, y, flip, table, number, (void *)array);
 
    array_offset = (uint32_t)array - (uint32_t)RTR_addr(objlist[current_this]);
 
@@ -375,7 +457,8 @@ void set_palette(int32_t argcnt, uint32_t region, uint32_t resource)
    int32_t i, j, k, n, f, m, dm, d;
    uint8_t *fade;
 
-   printf("[graphics] set_palette: argcnt=%i region=%u resource=%u\n", argcnt, region, resource);
+   printf("[graphics] set_palette: argcnt=%i region=%u resource=%u\n",
+          argcnt, region, resource);
 
    handle = RTR_get_resource_handle(RTR, resource, DA_DEFAULT);
    RTR_lock(RTR, handle);
@@ -595,7 +678,9 @@ uint32_t read_palette(int32_t argcnt, uint32_t regnum)
    if (VFX_DAC_read) // Tom: TODO
       VFX_DAC_read(regnum, &triplet);
 
-   val = ((uint32_t)triplet.r << 12) | ((uint32_t)triplet.g << 6) | ((uint32_t)triplet.b);
+   val = ((uint32_t)triplet.r << 12) |
+         ((uint32_t)triplet.g << 6) |
+         ((uint32_t)triplet.b);
 
    return val;
 }
@@ -604,7 +689,8 @@ void write_palette(int32_t argcnt, uint32_t regnum, uint32_t value)
 {
    RGB triplet;
 
-   printf("[STUB] [graphics] write_palette: argcnt=%i regnum=%u value=%u\n", argcnt, regnum, value);
+   printf("[STUB] [graphics] write_palette: argcnt=%i regnum=%u value=%u\n",
+          argcnt, regnum, value);
 
    triplet.r = value >> 12;
    triplet.g = (value >> 6) & 63L;
@@ -614,32 +700,46 @@ void write_palette(int32_t argcnt, uint32_t regnum, uint32_t value)
       VFX_DAC_write(regnum, &triplet);
 }
 
-void pixel_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd, uint32_t intervals)
+void pixel_fade(
+    int32_t argcnt,
+    uint32_t src_wnd,
+    uint32_t dest_wnd,
+    uint32_t intervals)
 {
-   printf("[graphics] pixel_fade: argcnt=%i src_wnd=%u dest_wnd=%u intervals=%u\n", argcnt, src_wnd, dest_wnd, intervals);
+   printf("[graphics] pixel_fade: argcnt=%i src_wnd=%u dest_wnd=%u intervals=%u\n",
+          argcnt, src_wnd, dest_wnd, intervals);
 
    GIL2VFX_pixel_fade(src_wnd, dest_wnd, intervals);
 }
 
 void color_fade(int32_t argcnt, uint32_t src_wnd, uint32_t dest_wnd)
 {
-   printf("[graphics] color_fade: argcnt=%i src_wnd=%u dest_wnd=%u\n", argcnt, src_wnd, dest_wnd);
+   printf("[graphics] color_fade: argcnt=%i src_wnd=%u dest_wnd=%u\n",
+          argcnt, src_wnd, dest_wnd);
 
    GIL2VFX_color_fade(src_wnd, dest_wnd);
 }
 
 void light_fade(int32_t argcnt, uint32_t src_wnd, uint32_t color)
 {
-   printf("[graphics] light_fade: arcnt=%i src_wnd=%u color=%u\n", argcnt, src_wnd, color);
+   printf("[graphics] light_fade: arcnt=%i src_wnd=%u color=%u\n",
+          argcnt, src_wnd, color);
 
    GIL2VFX_light_fade(src_wnd, color);
 }
 
-uint32_t assign_window(int32_t argcnt, uint32_t owner, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+uint32_t assign_window(
+    int32_t argcnt,
+    uint32_t owner,
+    uint32_t x1,
+    uint32_t y1,
+    uint32_t x2,
+    uint32_t y2)
 {
    int32_t window;
 
-   printf("[graphics] assign_window: argcnt=%i owner=%u x1=%u y1=%u x2=%u y2=%u\n", argcnt, owner, x1, y1, x2, y2);
+   printf("[graphics] assign_window: argcnt=%i owner=%u x1=%u y1=%u x2=%u y2=%u\n",
+          argcnt, owner, x1, y1, x2, y2);
 
    window = GIL2VFX_assign_window(x1, y1, x2, y2);
 
@@ -648,11 +748,27 @@ uint32_t assign_window(int32_t argcnt, uint32_t owner, uint32_t x1, uint32_t y1,
    return window;
 }
 
-uint32_t assign_subwindow(int32_t argcnt, uint32_t owner, uint32_t parent, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+uint32_t assign_subwindow(
+    int32_t argcnt,
+    uint32_t owner,
+    uint32_t parent,
+    uint32_t x1,
+    uint32_t y1,
+    uint32_t x2,
+    uint32_t y2)
 {
    int32_t window;
 
-   printf("[graphics] assign_subwindow: argcnt=%i owner=%u parent=%u x1=%u y1=%u x2=%u y2=%u\n", argcnt, owner, parent, x1, y1, x2, y2);
+   printf("[graphics] assign_subwindow: "
+          "argcnt=%i "
+          "owner=%u "
+          "parent=%u "
+          "x1=%u "
+          "y1=%u "
+          "x2=%u "
+          "y2=%u"
+          "\n",
+          argcnt, owner, parent, x1, y1, x2, y2);
 
    window = GIL2VFX_assign_subwindow(parent, x1, y1, x2, y2);
 
@@ -727,14 +843,16 @@ void set_y2(int32_t argcnt, uint32_t window, uint32_t y2)
 
 void wipe_window(int32_t argcnt, uint32_t window, uint32_t color)
 {
-   printf("[graphics] wipe_window: argcnt=%i window=%u color=%u\n", argcnt, window, color);
+   printf("[graphics] wipe_window: argcnt=%i window=%u color=%u\n",
+          argcnt, window, color);
 
    GIL2VFX_wipe_window(window, color);
 }
 
 void text_window(int32_t argcnt, uint32_t wndnum, uint32_t wnd)
 {
-   printf("[graphics] text_window: argcnt=%i wndnum=%u wnd=%u\n", argcnt, wndnum, wnd);
+   printf("[graphics] text_window: argcnt=%i wndnum=%u wnd=%u\n",
+          argcnt, wndnum, wnd);
 
    tw[wndnum].window = wnd;
 }
@@ -744,7 +862,8 @@ void text_style(int32_t argcnt, uint32_t wndnum, uint32_t font, uint32_t justify
    uint32_t hfont;
    FONT *vfont;
 
-   printf("[graphics] text_style: argcnt=%i wndnum=%u font=%u justify=%u\n", argcnt, wndnum, font, justify);
+   printf("[graphics] text_style: argcnt=%i wndnum=%u font=%u justify=%u\n",
+          argcnt, wndnum, font, justify);
 
    tw[wndnum].justify = justify;
 
@@ -766,7 +885,8 @@ void text_style(int32_t argcnt, uint32_t wndnum, uint32_t font, uint32_t justify
 
 void text_xy(int32_t argcnt, uint32_t wndnum, uint32_t htab, uint32_t vtab)
 {
-   printf("[graphics] text_xy: argcnt=%i wndnum=%u htab=%u vtab=%u\n", argcnt, wndnum, htab, vtab);
+   printf("[graphics] text_xy: argcnt=%i wndnum=%u htab=%u vtab=%u\n",
+          argcnt, wndnum, htab, vtab);
 
    tw[wndnum].htab = htab;
    tw[wndnum].vtab = vtab;
@@ -805,7 +925,8 @@ void text_color(int32_t argcnt, uint32_t wndnum, uint32_t current, uint32_t new)
 {
    uint32_t hfont;
 
-   printf("[graphics] text_color: argcnt=%i wndnum=%u current=%u new=%u\n", argcnt, wndnum, current, new);
+   printf("[graphics] text_color: argcnt=%i wndnum=%u current=%u new=%u\n",
+          argcnt, wndnum, current, new);
 
    hfont = (uint32_t)tw[wndnum].font;
    tw[wndnum].font = RTR_addr(hfont);
@@ -818,7 +939,8 @@ void text_color(int32_t argcnt, uint32_t wndnum, uint32_t current, uint32_t new)
 
 void text_refresh_window(int32_t argcnt, uint32_t wndnum, int32_t wnd)
 {
-   printf("[graphics] text_refresh_window: argcnt=%i wndnum=%u wnd=%i\n", argcnt, wndnum, wnd);
+   printf("[graphics] text_refresh_window: argcnt=%i wndnum=%u wnd=%i\n",
+          argcnt, wndnum, wnd);
 
    tw_refresh[wndnum] = wnd;
 }
@@ -829,7 +951,8 @@ void vsprint(int32_t argcnt, uint32_t wndnum, int8_t *format, va_list argptr)
    int8_t c, *p, *s;
    int8_t buff[32];
 
-   printf("[graphics] vsprint: argcnt=%i wndnum=%u format=%p argprt=%p\n", argcnt, wndnum, (void *)format, (void *)argptr);
+   printf("[graphics] vsprint: argcnt=%i wndnum=%u format=%p argprt=%p\n",
+          argcnt, wndnum, (void *)format, (void *)argptr);
 
    hfont = (uint32_t)tw[wndnum].font;
    tw[wndnum].font = RTR_addr(hfont);
@@ -928,7 +1051,8 @@ void print(int32_t argcnt, uint32_t wndnum, uint32_t format, ...)
    int8_t *p;
    uint16_t *w;
 
-   printf("[graphics] print: argcnt=%i wndnum=%u format=%u\n", argcnt, wndnum, format);
+   printf("[graphics] print: argcnt=%i wndnum=%u format=%u\n",
+          argcnt, wndnum, format);
 
    hstring = RTR_get_resource_handle(RTR, format, DA_DEFAULT);
 
@@ -970,7 +1094,8 @@ void sprint(int32_t argcnt, uint32_t wndnum, int8_t *format, ...)
    va_list argptr;
    int8_t *p;
 
-   printf("[graphics] sprint: argcnt=%i wndnum=%u format=%p\n", argcnt, wndnum, (void *)format);
+   printf("[graphics] sprint: argcnt=%i wndnum=%u format=%p\n",
+          argcnt, wndnum, (void *)format);
 
    p = format;
 
@@ -1045,13 +1170,59 @@ uint32_t font_height(int32_t argcnt, uint32_t wndnum)
    return w;
 }
 
-void solid_bar_graph(int32_t argcnt, int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t lb_border, uint32_t tr_border, uint32_t bkgnd, uint32_t grn, uint32_t yel, uint32_t red, int32_t val, int32_t min, int32_t crit, int32_t max)
+void solid_bar_graph(
+    int32_t argcnt,
+    int32_t x0,
+    int32_t y0,
+    int32_t x1,
+    int32_t y1,
+    uint32_t lb_border,
+    uint32_t tr_border,
+    uint32_t bkgnd,
+    uint32_t grn,
+    uint32_t yel,
+    uint32_t red,
+    int32_t val,
+    int32_t min,
+    int32_t crit,
+    int32_t max)
 {
    int32_t btop, bbtm, blft, brgt, grayx;
    int32_t range, point, width;
    int32_t color;
 
-   printf("[graphics] solid_bar_graph: argcnt=%i x0=%i y0=%i x1=%i y1=%i lb_border=%u tr_border=%u bkgnd=%u grn=%u yel=%u red=%u val=%i min=%i crit=%i max=%i\n", argcnt, x0, y0, x1, y1, lb_border, tr_border, bkgnd, grn, yel, red, val, min, crit, max);
+   printf("[graphics] solid_bar_graph: "
+          "argcnt=%i "
+          "x0=%i "
+          "y0=%i "
+          "x1=%i "
+          "y1=%i "
+          "lb_border=%u "
+          "tr_border=%u "
+          "bkgnd=%u "
+          "grn=%u "
+          "yel=%u "
+          "red=%u "
+          "val=%i "
+          "min=%i "
+          "crit=%i "
+          "max=%i"
+          "\n",
+          argcnt,
+          x0,
+          y0,
+          x1,
+          y1,
+          lb_border,
+          tr_border,
+          bkgnd,
+          grn,
+          yel,
+          red,
+          val,
+          min,
+          crit,
+          max);
 
    GIL2VFX_draw_line(PAGE2, x0, y0, x0, y1, lb_border);
    GIL2VFX_draw_line(PAGE2, x0, y1, x1, y1, lb_border);
