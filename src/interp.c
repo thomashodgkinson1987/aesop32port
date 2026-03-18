@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) // Tom: added
 
    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
    {
-      printf("[gil2vfx] GIL2VFX_init: could not initialise! SDL_Error: %s\n", SDL_GetError());
+      printf("[interp] main: could not initialise! SDL_Error: %s\n", SDL_GetError());
       exit(EXIT_FAILURE);
    }
 
@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) // Tom: added
 
    if (sdl_window == NULL)
    {
-      printf("[gil2vfx] GIL2VFX_init: Window could not be created! SDL_Error: %s\n", SDL_GetError());
+      printf("[interp] main: Window could not be created! SDL_Error: %s\n", SDL_GetError());
       SDL_Quit();
       exit(EXIT_FAILURE);
    }
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) // Tom: added
    sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
    if (sdl_renderer == NULL)
    {
-      printf("[gil2vfx] GIL2VFX_init: Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+      printf("[interp] main: Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
       SDL_DestroyWindow(sdl_window);
       SDL_Quit();
       exit(EXIT_FAILURE);
