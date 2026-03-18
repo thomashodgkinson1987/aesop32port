@@ -6,9 +6,7 @@
 #include <stdint.h>
 
 #include "vfx.h"
-// #include "dll.h"
 #include "gil2vfx.h"
-// #include "gil2vfxa.h"
 
 #include "defs.h"
 #include "rtmsg.h"
