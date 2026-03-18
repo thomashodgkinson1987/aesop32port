@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -m32 -g -std=c17 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wformat=2 -rdynamic -I./src
+CFLAGS = -m32 -g -std=c17 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wformat=2 -rdynamic -I./src $(shell sdl2-config --cflags)
+LDFLAGS = -m32 -g $(shell sdl2-config --libs)
 
 SRC_DIR = src
 OBJ_DIR = obj
@@ -21,7 +22,7 @@ all: build
 build: $(TARGET)
 
 $(TARGET): $(OBJS) | $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
