@@ -204,6 +204,8 @@ int main(int argc, char *argv[]) // Tom: added
       printf("%u bytes left\n", mem_headroom());
    }
 
+   printf("[interp] main: exit - return=%i\n", rtn);
+
    exit(rtn);
 
    return 0;
