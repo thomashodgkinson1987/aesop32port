@@ -87,46 +87,11 @@ void GIL2VFX_init()
 
    printf("[gil2vfx] GIL2VFX_init\n");
 
-   //
-   // Load the driver
-   //
-
-   /* Tom: commented out
-   DLL = FILE_read("MCGA.DLL", NULL);
-   if (DLL == NULL)
-   {
-      printf("Missing or invalid 386FX driver\n");
-      exit(1);
-   }
-
-   drvr = DLL_load(DLL, DLLMEM_ALLOC | DLLSRC_MEM, NULL);
-   if (drvr == NULL)
-   {
-      printf("Invalid DLL image\n");
-      exit(1);
-   }
-   free(DLL);
-   */
-
-   //
-   // Register the driver with the API
-   //
-
-   /* Tom: TODO
-   VFX_register_driver(drvr);
-
-   VFX = VFX_describe_driver();
-
-   w = VFX->scrn_width;
-   h = VFX->scrn_height;
-   */
+   // VFX = VFX_describe_driver();
 
    //
    // Turn graphics on; set up window and pane
    //
-
-   if (VFX_init_driver) // Tom: TODO
-      VFX_init_driver();
 
    gil2vfx_active = -1;
 
