@@ -7,14 +7,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <execinfo.h>
+
+// Tom: added (SDL)
+#include <SDL2/SDL.h>
+#include "globals.h"
 
 #include "defs.h"
 #include "rt.h"
 #include "rtres.h"
 #include "rtsystem.h"
 #include "rtcode.h"
-
-#include <execinfo.h>
 
 /*
  * VALUE Union - Represents a generic value on the interpreter stack.
@@ -408,8 +412,31 @@ __handle_msg:
         esi = ds32 + *(uint16_t *)esi; \
     } while (0)
 
-    while (1)
+    static bool quit = false;
+
+    while (1 && !quit)
     {
+        SDL_Event e;
+        while (SDL_PollEvent(&e) != 0)
+        {
+            if (e.type == SDL_QUIT)
+            {
+                quit = true;
+            }
+            else if (e.type == SDL_KEYDOWN)
+            {
+                if (e.key.keysym.sym == SDLK_ESCAPE)
+                {
+                    quit = true;
+                }
+            }
+        }
+
+        SDL_SetRenderDrawColor(sdl_renderer, 0, 255, 0, 255);
+        SDL_RenderClear(sdl_renderer);
+
+        SDL_RenderPresent(sdl_renderer);
+
         uint8_t opcode = *esi++;
 
         printf("[rt] RT_execute: opcode=%u %s\n", opcode, case_list_strings[opcode]);

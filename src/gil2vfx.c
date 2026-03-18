@@ -4,6 +4,11 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdint.h>
+#include <stdbool.h>
+
+// Tom: added (SDL)
+#include <SDL2/SDL.h>
+#include "globals.h"
 
 #include "vfx.h"
 #include "gil2vfx.h"
@@ -420,6 +425,9 @@ void GIL2VFX_wipe_window(int32_t wnd, int32_t color)
       return;
 
    VFX_pane_wipe(&panes[wnd], color);
+
+   SDL_SetRenderDrawColor(sdl_renderer, 0, 0, 255, 255);
+   SDL_RenderClear(sdl_renderer);
 }
 
 void GIL2VFX_draw_dot(int32_t wnd, int32_t x, int32_t y, int32_t color)
@@ -725,4 +733,6 @@ void GIL2VFX_refresh_window(uint32_t source, uint32_t target)
    printf("[gil2vfx] GIL2VFX_refresh_window: source=%u target=%u\n", source, target);
 
    MOUSE_pane_refresh(&panes[source], loTargetPane->x0, loTargetPane->y0, loTargetPane->x1, loTargetPane->y1);
+
+   SDL_RenderPresent(sdl_renderer);
 }

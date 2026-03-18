@@ -29,6 +29,10 @@
 #include <ctype.h>
 #include <string.h>
 
+// Tom: added (SDL)
+#include <SDL2/SDL.h>
+#include "globals.h"
+
 #include "defs.h"
 #include "shared.h"
 #include "rtmsg.h"
@@ -39,6 +43,14 @@
 #include "rtobject.h"
 #include "rtcode.h"
 #include "event.h"
+
+// Tom: added (SDL)
+const int32_t SCREEN_WIDTH = 320;
+const int32_t SCREEN_HEIGHT = 200;
+
+// Tom: added (SDL)
+SDL_Window *sdl_window = NULL;
+SDL_Renderer *sdl_renderer = NULL;
 
 //
 // Amount of memory to reserve for scaling buffer (64K) + PAGE2 (64K) + misc.
@@ -171,8 +183,56 @@ int main(int argc, char *argv[]) // Tom: added
 
    printf("[interp] main: running create_program with code=%u\n", code);
 
+   //////
+
+   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+   {
+      printf("[gil2vfx] GIL2VFX_init: could not initialise! SDL_Error: %s\n", SDL_GetError());
+      exit(EXIT_FAILURE);
+   }
+
+   sdl_window = SDL_CreateWindow("AESOP/32 Port",
+                                 SDL_WINDOWPOS_CENTERED,
+                                 SDL_WINDOWPOS_CENTERED,
+                                 SCREEN_WIDTH,
+                                 SCREEN_HEIGHT,
+                                 SDL_WINDOW_SHOWN);
+
+   if (sdl_window == NULL)
+   {
+      printf("[gil2vfx] GIL2VFX_init: Window could not be created! SDL_Error: %s\n", SDL_GetError());
+      SDL_Quit();
+      exit(EXIT_FAILURE);
+   }
+
+   sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+   if (sdl_renderer == NULL)
+   {
+      printf("[gil2vfx] GIL2VFX_init: Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+      SDL_DestroyWindow(sdl_window);
+      SDL_Quit();
+      exit(EXIT_FAILURE);
+   }
+
+   SDL_RenderSetLogicalSize(sdl_renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+   SDL_SetRenderDrawColor(sdl_renderer, 0, 255, 0, 255);
+   SDL_RenderClear(sdl_renderer);
+
+   SDL_RenderPresent(sdl_renderer);
+
+   //////
+
    rtn = create_program(1, bootstrap, code);
    rtn = destroy_object(1, rtn);
+
+   //////
+
+   SDL_DestroyRenderer(sdl_renderer);
+   SDL_DestroyWindow(sdl_window);
+   SDL_Quit();
+
+   //////
 
    for (i = 0; i < RTR->nentries; i++)
    {

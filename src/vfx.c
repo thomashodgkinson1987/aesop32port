@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Tom: added (SDL)
+#include <SDL2/SDL.h>
+#include "globals.h"
+
 #include "vfx.h"
 
 typedef struct
