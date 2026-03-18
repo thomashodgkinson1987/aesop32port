@@ -1,27 +1,27 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  INTERP.C                                                              ��
-// ��                                                                        ��
-// ��  AESOP runtime host interpreter                                        ��
-// ��                                                                        ��
-// ��  Version: 1.00 of 6-May-92 -- Initial version                          ��
-// ��                                                                        ��
-// ��  Project: Extensible State-Object Processor (AESOP/16)                 ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with IBM PC ANSI C/C++ implementations            ��
-// ��  Large memory model (16-bit DOS)                                       ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  10926 Jollyville #308                                                 ��
-// ��  Austin, TX 78759                                                      ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  INTERP.C                                                              ##
+// ##                                                                        ##
+// ##  AESOP runtime host interpreter                                        ##
+// ##                                                                        ##
+// ##  Version: 1.00 of 6-May-92 -- Initial version                          ##
+// ##                                                                        ##
+// ##  Project: Extensible State-Object Processor (AESOP/16)                 ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with IBM PC ANSI C/C++ implementations            ##
+// ##  Large memory model (16-bit DOS)                                       ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  10926 Jollyville #308                                                 ##
+// ##  Austin, TX 78759                                                      ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
 #include <stdint.h>
 #include <stdio.h>
