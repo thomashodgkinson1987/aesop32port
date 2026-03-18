@@ -136,17 +136,7 @@ uint8_t gry_inten[GRY_NUM];
 uint8_t red_inten[RED_NUM];
 uint8_t brn_inten[BRN_NUM];
 
-uint8_t text_colors[9] =
-    {
-        DK_GRN,
-        LT_GRN,
-        YEL,
-        LT_RED,
-        DK_RED,
-        BLK,
-        WHT,
-        WHT,
-        WHT};
+uint8_t text_colors[9] = {DK_GRN, LT_GRN, YEL, LT_RED, DK_RED, BLK, WHT, WHT, WHT};
 
 void init_graphics(void)
 {
@@ -196,13 +186,12 @@ void release_owned_windows(uint32_t owner) // Tom: new
 {
    uint32_t i;
 
-   printf("[STUB] [graphics] release_owned_windows: owner=%u\n", owner);
+   printf("[graphics] release_owned_windows: owner=%u\n", owner);
 
    if (owner == -1)
    {
       for (i = PAGE2 + 1; i < 256; i++)
-         if ((window_owner[i] != -1) &&
-             (window_owner[i] < NUM_ENTITIES))
+         if ((window_owner[i] != -1) && (window_owner[i] < NUM_ENTITIES))
          {
             window_owner[i] = -1;
             GIL2VFX_release_window(i);
