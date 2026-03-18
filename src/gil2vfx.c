@@ -80,9 +80,6 @@ void GIL2VFX_init()
 {
    int32_t dummy;
 
-   void *DLL, *drvr;
-   int32_t w, h;
-
    printf("[gil2vfx] GIL2VFX_init\n");
 
    // VFX = VFX_describe_driver();
