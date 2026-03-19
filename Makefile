@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -m32 -g -std=c17 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wformat=2 -rdynamic -I./src $(shell sdl2-config --cflags)
-LDFLAGS = -m32 -g $(shell sdl2-config --libs)
+CFLAGS = -fsanitize=address -g -m32 -std=c17 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wformat=2 -rdynamic -I./src $(shell sdl2-config --cflags)
+LDFLAGS = -m32 $(shell sdl2-config --libs)
 
 SRC_DIR = src
 OBJ_DIR = obj
