@@ -2,33 +2,9 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#include <stdlib.h>
-#include <string.h>
-
-// Tom: added (SDL)
-#include <SDL2/SDL.h>
-#include "globals.h"
-
 #include "vfx.h"
 
-typedef struct
-{
-    int8_t version_byte_1;
-    int8_t version_byte_2;
-    int8_t version_byte_3;
-    int8_t version_byte_4;
-    int32_t shape_count;
-} SHAPETABLEHEADER;
-
-typedef struct
-{
-    int32_t bounds; // Encoded bounding box info
-    int32_t origin; // Encoded hotspot info
-    int32_t xmin;   // Sprite bounding box min X
-    int32_t ymin;   // Sprite bounding box min Y
-    int32_t xmax;   // Sprite bounding box max X
-    int32_t ymax;   // Sprite bounding box max Y
-} SHAPEHEADER;
+#include "utils.h"
 
 //
 // Hardware-specific VFX DLL function pointers (instantiations)
@@ -47,155 +23,6 @@ void (*VFX_DAC_read)(int32_t color_number, RGB *triplet) = NULL;
 void (*VFX_DAC_write)(int32_t color_number, RGB *triplet) = NULL;
 void (*VFX_bank_reset)(void) = NULL;
 void (*VFX_line_address)(int32_t x, int32_t y, uint8_t **addr, uint32_t *nbytes) = NULL;
-
-void draw_shape_unclipped(void *buffer, void *shape, int hotX, int hotY, int CP_W);
-void save_buffer_to_pgm(const uint8_t *buffer, int width, int height, const char *filename);
-void save_shape_to_pgm(void *table, int32_t shape_number, const char *filename);
-
-/**
- * Saves a raw 8-bit image buffer to a PGM file.
- *
- * @param buffer   Pointer to the array containing pixel data
- * @param width    Width of the image in pixels (bytes per line)
- * @param height   Height of the image in lines
- * @param filename Output filename (e.g., "output.pgm")
- */
-void save_buffer_to_pgm(
-    const uint8_t *buffer,
-    int width,
-    int height,
-    const char *filename)
-{
-    // Open the output file for binary writing ("wb")
-    FILE *out = fopen(filename, "wb");
-    if (!out)
-    {
-        printf("Error: Could not open %s for writing!\n", filename);
-        return;
-    }
-
-    // Write the PGM Header
-    // P5 means "Raw binary grayscale"
-    // %d %d are the Width and Height
-    // 255 is the maximum pixel value
-    fprintf(out, "P5\n%d %d\n255\n", width, height);
-
-    // Write the entire buffer to the file at once
-    size_t total_pixels = width * height;
-    size_t written = fwrite(buffer, sizeof(uint8_t), total_pixels, out);
-
-    if (written != total_pixels)
-    {
-        printf("Warning: Expected to write %zu bytes, but wrote %zu\n",
-               total_pixels, written);
-    }
-    else
-    {
-        printf("Image successfully saved as %s\n", filename);
-    }
-
-    fclose(out);
-}
-
-void save_shape_to_pgm(void *table, int32_t shape_number, const char *filename)
-{
-}
-
-void draw_shape_unclipped(void *buffer, void *shape, int hotX, int hotY, int CP_W)
-{
-    // Recalculate the clipped pane width (CP_W) from the window data.
-    // (Note: The assembly receives CP_W as an argument but immediately overwrites
-    // it with wnd_x1 + 1, so we do the same here).
-    // CP_W = 16;
-
-    // 2. Resolve Sprite Dimensions
-    SHAPEHEADER *header = (SHAPEHEADER *)shape;
-
-    CP_W = header->xmax;
-
-    // Calculate the number of scanlines (rows) to draw
-    int linecount = header->ymax + 1 - header->ymin;
-    if (linecount <= 0)
-        return;
-
-    // Calculate the exact starting memory address in the video buffer.
-    // Address = Buffer_Base + (Y * ScreenWidth) + X
-    int startX = header->xmin + hotX;
-    int startY = header->ymin + hotY;
-    uint8_t *dest_line_ptr = buffer + (startY * CP_W) + startX;
-
-    // Set our data pointer just past the header to the start of the RLE tokens
-    uint8_t *shape_data = (uint8_t *)shape + sizeof(SHAPEHEADER);
-
-    // 3. The Main Scanline Loop
-    while (linecount > 0)
-    {
-
-        // Set the active drawing pointer to the start of the current row
-        uint8_t *dest_ptr = dest_line_ptr;
-
-        // 4. The Token Decoding Loop
-        while (1)
-        {
-
-            // Read the next instruction token from the sprite data
-            uint8_t token = *shape_data++;
-
-            // In the Assembly, `shr al, 1` divides the token by 2 and puts the
-            // remainder (bit 0) into the Carry Flag (CF).
-            int type = token & 1;   // The operation type (The Carry Flag)
-            int count = token >> 1; // The number of pixels to process (AL)
-
-            // Evaluate the token based on the 4 possible states:
-
-            if (count > 0 && type == 0)
-            {
-                // RUN PACKET (Assembly: ja RunPacket)
-                // Action: Draw 'count' pixels of a single repeating color.
-                // The next byte in the file is the color to draw.
-                uint8_t color = *shape_data++;
-
-                // (Assembly uses RSTOSB32 here to blast 32-bits at a time)
-                memset(dest_ptr, color, count);
-                dest_ptr += count;
-            }
-
-            else if (count > 0 && type == 1)
-            {
-                // STRING PACKET (Assembly: jnz StringPacket)
-                // Action: Copy a sequence of 'count' unique pixels.
-                // The next 'count' bytes in the file are the pixel colors.
-
-                // (Assembly uses RMOVSB32 here to copy 32-bits at a time)
-                memcpy(dest_ptr, shape_data, count);
-                dest_ptr += count;
-                shape_data += count;
-            }
-
-            else if (count == 0 && type == 1)
-            {
-                // SKIP PACKET (Assembly: jc SkipPacket or fallthrough)
-                // Action: Skip over transparent background pixels.
-                // The next byte tells us exactly how many pixels to skip.
-                int skip_count = *shape_data++;
-                dest_ptr += skip_count;
-            }
-
-            else if (count == 0 && type == 0)
-            {
-                // END PACKET (Assembly: jnc EndPacket)
-                // Action: Stop drawing the current scanline.
-                break;
-            }
-        }
-
-        // Advance the base destination pointer exactly one horizontal line down.
-        dest_line_ptr += CP_W;
-
-        // Decrement our row counter and loop
-        linecount--;
-    }
-}
 
 //
 // Device-independent VFX API functions (VFXC.C)
@@ -355,8 +182,6 @@ int32_t VFX_line_draw(
     return 0;
 }
 
-static uint32_t output_count = 0;
-
 void VFX_shape_draw(
     PANE *pane,
     void *shape_table,
@@ -373,55 +198,7 @@ void VFX_shape_draw(
            "\n",
            (void *)pane, shape_table, shape_number, hotX, hotY);
 
-    ////////
-
-    SHAPETABLEHEADER *shape_table_header = (SHAPETABLEHEADER *)shape_table;
-
-    printf("---- SHAPETABLEHEADER ----\n");
-    printf("shape_table_header=%p\n", (void *)shape_table_header);
-    printf("version=%x %x %x %x\n", shape_table_header->version_byte_1, shape_table_header->version_byte_2, shape_table_header->version_byte_3, shape_table_header->version_byte_4);
-    printf("shape_count=%i\n", shape_table_header->shape_count);
-    printf("--------------------------\n");
-
-    if (shape_table_header->shape_count == 0)
-        return;
-
-    uint32_t *shape_offsets = (uint32_t *)malloc(sizeof(*shape_offsets) * shape_table_header->shape_count);
-
-    printf("---- SHAPEOFFSETS ----\n");
-    for (uint32_t i = 0; i < shape_table_header->shape_count; ++i)
-    {
-        shape_offsets[i] = *(uint32_t *)((uint32_t)shape_table + sizeof(SHAPETABLEHEADER) + (i * 8));
-        printf("shape_offsets[%i]=%x\n", i, shape_offsets[i]);
-    }
-    printf("----------------------\n");
-
-    for (uint32_t i = 0; i < shape_table_header->shape_count; ++i)
-    {
-        SHAPEHEADER *shape_header = (SHAPEHEADER *)((uint32_t)shape_table + shape_offsets[i]);
-
-        printf("---- SHAPEHEADER ----\n");
-        printf("#%i addr=%p off=%x\n", i, (void *)shape_header, shape_offsets[i]);
-        printf("bounds: %x\n", shape_header->bounds);
-        printf("origin: %x\n", shape_header->origin);
-        printf("xmin: %x\n", shape_header->xmin);
-        printf("ymin: %x\n", shape_header->ymin);
-        printf("xmax: %x\n", shape_header->xmax);
-        printf("ymax: %x\n", shape_header->ymax);
-        printf("---------------------\n");
-
-        uint8_t *buffer = (uint8_t *)calloc(320 * 200, 1);
-
-        draw_shape_unclipped(buffer, shape_header, 0, 0, 320);
-
-        char filename[64];
-        snprintf(filename, sizeof(filename), "../misc-files/extracted/image_%04u.pgm", output_count++);
-        save_buffer_to_pgm(buffer, shape_header->xmax, shape_header->ymax, filename);
-
-        free(buffer);
-    }
-
-    free(shape_offsets);
+    debug_shape_table(shape_table);
 }
 
 void VFX_shape_lookaside(uint8_t *table)
@@ -889,55 +666,7 @@ void VFX_shape_transform(
            "\n",
            (void *)pane, shape_table, shape_number, hotX, hotY, buffer, rot, x_scale, y_scale, flags);
 
-    ////////
-
-    SHAPETABLEHEADER *shape_table_header = (SHAPETABLEHEADER *)shape_table;
-
-    printf("---- SHAPETABLEHEADER ----\n");
-    printf("shape_table_header=%p\n", (void *)shape_table_header);
-    printf("version=%x %x %x %x\n", shape_table_header->version_byte_1, shape_table_header->version_byte_2, shape_table_header->version_byte_3, shape_table_header->version_byte_4);
-    printf("shape_count=%i\n", shape_table_header->shape_count);
-    printf("--------------------------\n");
-
-    if (shape_table_header->shape_count == 0)
-        return;
-
-    uint32_t *shape_offsets = (uint32_t *)malloc(sizeof(*shape_offsets) * shape_table_header->shape_count);
-
-    printf("---- SHAPEOFFSETS ----\n");
-    for (uint32_t i = 0; i < shape_table_header->shape_count; ++i)
-    {
-        shape_offsets[i] = *(uint32_t *)((uint32_t)shape_table + sizeof(SHAPETABLEHEADER) + (i * 8));
-        printf("shape_offsets[%i]=%x\n", i, shape_offsets[i]);
-    }
-    printf("----------------------\n");
-
-    for (uint32_t i = 0; i < shape_table_header->shape_count; ++i)
-    {
-        SHAPEHEADER *shape_header = (SHAPEHEADER *)((uint32_t)shape_table + shape_offsets[i]);
-
-        printf("---- SHAPEHEADER ----\n");
-        printf("#%i addr=%p off=%x\n", i, (void *)shape_header, shape_offsets[i]);
-        printf("bounds: %x\n", shape_header->bounds);
-        printf("origin: %x\n", shape_header->origin);
-        printf("xmin: %x\n", shape_header->xmin);
-        printf("ymin: %x\n", shape_header->ymin);
-        printf("xmax: %x\n", shape_header->xmax);
-        printf("ymax: %x\n", shape_header->ymax);
-        printf("---------------------\n");
-
-        uint8_t *buffer = (uint8_t *)calloc(320 * 200, 1);
-
-        draw_shape_unclipped(buffer, shape_header, 0, 0, 320);
-
-        char filename[64];
-        snprintf(filename, sizeof(filename), "../misc-files/extracted/image_%04u.pgm", output_count++);
-        save_buffer_to_pgm(buffer, shape_header->xmax, shape_header->ymax, filename);
-
-        free(buffer);
-    }
-
-    free(shape_offsets);
+    //debug_shape_table(shape_table);
 }
 
 //
