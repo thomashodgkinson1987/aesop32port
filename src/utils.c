@@ -266,12 +266,6 @@ uint32_t *get_shape_offsets(void *shape_table)
 {
    SHAPETABLEHEADER *shape_table_header = (SHAPETABLEHEADER *)shape_table;
 
-   printf("\n");
-   printf("get_shape_offsets: shape_table_header->shape_count=%i\n", shape_table_header->shape_count);
-   printf("get_shape_offsets: sizeof(uint32_t)=%i\n", sizeof(uint32_t));
-   printf("get_shape_offsets: total=%i\n", shape_table_header->shape_count * sizeof(uint32_t));
-   printf("\n");
-
    uint32_t *shape_offsets = (uint32_t *)calloc(
        shape_table_header->shape_count,
        sizeof(uint32_t));
