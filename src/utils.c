@@ -60,7 +60,6 @@ void save_buffer_to_ppm(
     const uint8_t *buffer,
     int32_t width,
     int32_t height,
-    // const AESOP_Palette *pal,
     const char *filename)
 {
    FILE *out = fopen(filename, "wb");
