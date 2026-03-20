@@ -315,15 +315,13 @@ uint32_t *get_shape_offsets(void *shape_table)
 
    uint64_t *shape_offsets_start = (uint64_t *)((uint8_t *)shape_table + sizeof(SHAPETABLEHEADER));
 
-   /*
-   printf("---- SHAPEOFFSETS ----\n");
+   // printf("---- SHAPEOFFSETS ----\n");
    for (int32_t i = 0; i < shape_table_header->shape_count; ++i)
    {
       shape_offsets[i] = shape_offsets_start[i];
-      printf("shape_offsets[%i]=%x\n", i, shape_offsets[i]);
+      // printf("shape_offsets[%i]=%x\n", i, shape_offsets[i]);
    }
-   printf("----------------------\n");
-   */
+   // printf("----------------------\n");
 
    return shape_offsets;
 }
