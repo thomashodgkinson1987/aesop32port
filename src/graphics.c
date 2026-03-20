@@ -43,7 +43,9 @@
 #include "intrface.h"
 #include "rtobject.h"
 #include "graphics.h"
+
 #include "utils.h"
+#include "globals.h"
 
 VFX_DESC *VFX;
 
@@ -464,6 +466,12 @@ void set_palette(int32_t argcnt, uint32_t region, uint32_t resource)
    RTR_lock(RTR, handle);
 
    PHDR = RTR_addr(handle);
+
+   //////
+
+   update_palette(PHDR, &test_palette);
+
+   //////
 
    if ((region == PAL_FIXED) ||
        (region == PAL_WALLS) ||

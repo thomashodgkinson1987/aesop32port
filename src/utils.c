@@ -3,6 +3,12 @@
 #include <string.h>
 
 #include "utils.h"
+#include "globals.h"
+
+#include "defs.h"
+#include "vfx.h"
+
+AESOP_Palette test_palette;
 
 // Tom: drop-in replacement for DOS ltoa()
 char *ltoa(long val, char *buffer, int radix)
@@ -48,6 +54,29 @@ char *ultoa(unsigned long val, char *buffer, int radix)
       sprintf(buffer, "%ld", val);
    }
    return buffer;
+}
+
+void save_buffer_to_ppm(
+    const uint8_t *buffer,
+    int32_t width,
+    int32_t height,
+    // const AESOP_Palette *pal,
+    const char *filename)
+{
+   FILE *out = fopen(filename, "wb");
+   if (!out)
+      return;
+
+   // P6 is binary PPM
+   fprintf(out, "P6\n%d %d\n255\n", width, height);
+
+   for (int32_t i = 0; i < width * height; i++)
+   {
+      uint8_t idx = buffer[i];
+      fwrite(&test_palette.colors[idx], 1, 3, out);
+   }
+
+   fclose(out);
 }
 
 void save_buffer_to_pgm(
@@ -103,6 +132,18 @@ void save_shape_to_pgm_from_shape(void *shape, const char *filename)
    uint8_t *buffer = decode_shape_data(shape);
 
    save_buffer_to_pgm(buffer, width, height, filename);
+
+   free(buffer);
+}
+
+void save_shape_to_ppm_from_shape(void *shape, const char *filename)
+{
+   SHAPEHEADER *shape_header = (SHAPEHEADER *)shape;
+   int32_t width = shape_header->xmax;
+   int32_t height = shape_header->ymax;
+   uint8_t *buffer = decode_shape_data(shape);
+
+   save_buffer_to_ppm(buffer, width, height, filename);
 
    free(buffer);
 }
@@ -306,7 +347,7 @@ void debug_shape_table(void *shape_table)
       static uint32_t output_count = 1;
       char filename[256];
       snprintf(filename, sizeof(filename), "../misc-files/extracted/image_%04u.pgm", output_count++);
-      save_shape_to_pgm_from_shape(shape, filename);
+      save_shape_to_ppm_from_shape(shape, filename);
    }
 
    free(shape_offsets);
@@ -335,4 +376,19 @@ void print_shape_header(void *shape)
    printf("xmax: %i\n", shape_header->xmax);
    printf("ymax: %i\n", shape_header->ymax);
    printf("---------------------\n");
+}
+
+void update_palette(const PAL_HDR *PHDR, AESOP_Palette *palette)
+{
+   palette->ncolors = PHDR->ncolors;
+
+   uint8_t *rgb_data = (uint8_t *)PHDR + sizeof(PAL_HDR);
+
+   for (int i = 0; i < palette->ncolors; i++)
+   {
+      // Convert 6-bit VGA to 8-bit RGB                                                                      █
+      palette->colors[i].r = (rgb_data[i * 3 + 0] << 2) | (rgb_data[i * 3 + 0] >> 4);
+      palette->colors[i].g = (rgb_data[i * 3 + 1] << 2) | (rgb_data[i * 3 + 1] >> 4);
+      palette->colors[i].b = (rgb_data[i * 3 + 2] << 2) | (rgb_data[i * 3 + 2] >> 4);
+   }
 }

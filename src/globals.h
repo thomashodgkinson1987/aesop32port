@@ -3,7 +3,12 @@
 
 #include <SDL2/SDL.h>
 
+#include "defs.h"
+#include "utils.h"
+
 extern SDL_Window *sdl_window;
 extern SDL_Renderer *sdl_renderer;
+
+extern AESOP_Palette test_palette;
 
 #endif
