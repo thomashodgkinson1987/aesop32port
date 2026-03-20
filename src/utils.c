@@ -332,7 +332,7 @@ void debug_shape_table(void *shape_table)
 {
    SHAPETABLEHEADER *shape_table_header = (SHAPETABLEHEADER *)shape_table;
 
-   //print_shape_table_header(shape_table_header);
+   // print_shape_table_header(shape_table_header);
 
    if (shape_table_header->shape_count == 0)
       return;
@@ -343,7 +343,7 @@ void debug_shape_table(void *shape_table)
    {
       void *shape = (uint8_t *)shape_table + shape_offsets[i];
 
-      //print_shape_header(shape);
+      // print_shape_header(shape);
 
       static uint32_t output_count = 1;
       char filename[256];
@@ -387,7 +387,7 @@ void update_palette(const PAL_HDR *PHDR, AESOP_Palette *palette)
 
    for (int i = 0; i < palette->ncolors; i++)
    {
-      // Convert 6-bit VGA to 8-bit RGB                                                                      █
+      // Convert 6-bit VGA to 8-bit RGB
       palette->colors[i].r = (rgb_data[i * 3 + 0] << 2) | (rgb_data[i * 3 + 0] >> 4);
       palette->colors[i].g = (rgb_data[i * 3 + 1] << 2) | (rgb_data[i * 3 + 1] >> 4);
       palette->colors[i].b = (rgb_data[i * 3 + 2] << 2) | (rgb_data[i * 3 + 2] >> 4);
