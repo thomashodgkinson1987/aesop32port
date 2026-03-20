@@ -315,6 +315,7 @@ uint32_t *get_shape_offsets(void *shape_table)
 
    uint64_t *shape_offsets_start = (uint64_t *)((uint8_t *)shape_table + sizeof(SHAPETABLEHEADER));
 
+   /*
    printf("---- SHAPEOFFSETS ----\n");
    for (int32_t i = 0; i < shape_table_header->shape_count; ++i)
    {
@@ -322,6 +323,7 @@ uint32_t *get_shape_offsets(void *shape_table)
       printf("shape_offsets[%i]=%x\n", i, shape_offsets[i]);
    }
    printf("----------------------\n");
+   */
 
    return shape_offsets;
 }
@@ -330,7 +332,7 @@ void debug_shape_table(void *shape_table)
 {
    SHAPETABLEHEADER *shape_table_header = (SHAPETABLEHEADER *)shape_table;
 
-   print_shape_table_header(shape_table_header);
+   //print_shape_table_header(shape_table_header);
 
    if (shape_table_header->shape_count == 0)
       return;
@@ -341,7 +343,7 @@ void debug_shape_table(void *shape_table)
    {
       void *shape = (uint8_t *)shape_table + shape_offsets[i];
 
-      print_shape_header(shape);
+      //print_shape_header(shape);
 
       static uint32_t output_count = 1;
       char filename[256];
