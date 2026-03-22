@@ -8,6 +8,7 @@
 
 extern SDL_Window *sdl_window;
 extern SDL_Renderer *sdl_renderer;
+extern SDL_Texture *sdl_texture;
 
 extern AESOP_Palette test_palette;
 
