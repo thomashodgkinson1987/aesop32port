@@ -343,7 +343,7 @@ void debug_shape_table(void *shape_table)
 
       // print_shape_header(shape);
 
-      static uint32_t output_count = 1;
+      static uint32_t output_count = 0;
       char filename[256];
       snprintf(filename, sizeof(filename), "../misc-files/extracted/image_%04u.pgm", output_count++);
       save_shape_to_ppm_from_shape(shape, filename);
