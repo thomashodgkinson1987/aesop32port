@@ -198,7 +198,7 @@ void VFX_shape_draw(
            "\n",
            (void *)pane, shape_table, shape_number, hotX, hotY);
 
-    // debug_shape_table(shape_table);
+    debug_shape_table(shape_table);
     debug_draw_shape(shape_table, shape_number, hotX, hotY);
 }
 
