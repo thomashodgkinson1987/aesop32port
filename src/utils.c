@@ -156,6 +156,9 @@ uint8_t *decode_shape_data(void *shape)
    if (!buffer)
       exit(EXIT_FAILURE);
 
+   // clear to white to save black pixels
+   memset(buffer, 255, 320 * 200);
+
    int32_t CP_W = shape_header->xmax;
 
    int linecount = shape_header->ymax + 1 - shape_header->ymin;
