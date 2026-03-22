@@ -354,8 +354,6 @@ void debug_shape_table(void *shape_table)
 
 void debug_draw_shape(void *shape_table, int32_t shape_number, int32_t hotX, int32_t hotY)
 {
-   printf("[utils] debug_draw_shape\n");
-
    SHAPETABLEHEADER *shape_table_header = (SHAPETABLEHEADER *)shape_table;
 
    if (shape_table_header->shape_count == 0)
