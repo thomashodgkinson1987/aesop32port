@@ -52,5 +52,6 @@ void debug_draw_shape(void *shape_table, int32_t shape_number, int32_t hotX, int
 
 void print_shape_table_header(void *shape_table);
 void print_shape_header(void *shape);
+void print_shape_data(void *shape);
 
 #endif

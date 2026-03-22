@@ -435,3 +435,29 @@ void update_palette(const PAL_HDR *PHDR, AESOP_Palette *palette)
       palette->colors[i].b = (rgb_data[i * 3 + 2] << 2) | (rgb_data[i * 3 + 2] >> 4);
    }
 }
+
+void print_shape_data(void *shape)
+{
+   printf("[utils] print_shape_data\n");
+   print_shape_header(shape);
+
+   SHAPEHEADER *shape_header = (SHAPEHEADER *)shape;
+   uint8_t *shape_data = decode_shape_data(shape);
+
+   int32_t width = shape_header->xmax;
+   int32_t height = shape_header->ymax;
+
+   for (int32_t y = 0; y < height; ++y)
+   {
+      for (int32_t x = 0; x < width; ++x)
+      {
+         if (x < width - 1)
+            printf("%02x ", shape_data[y * width + x]);
+         else
+            printf("%02x", shape_data[y * width + x]);
+      }
+      printf("\n");
+   }
+
+   free(shape_data);
+}
