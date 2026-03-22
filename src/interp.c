@@ -44,9 +44,8 @@
 #include "rtcode.h"
 #include "event.h"
 
-// Tom: added (SDL)
-const int32_t SCREEN_WIDTH = 320;
-const int32_t SCREEN_HEIGHT = 200;
+int32_t SCREEN_WIDTH = 0;
+int32_t SCREEN_HEIGHT = 0;
 
 // Tom: added (SDL)
 SDL_Window *sdl_window = NULL;
@@ -185,6 +184,9 @@ int main(int argc, char *argv[]) // Tom: added
    printf("[interp] main: running create_program with code=%u\n", code);
 
    //////
+
+   SCREEN_WIDTH = 320;
+   SCREEN_HEIGHT = 200;
 
    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
    {
