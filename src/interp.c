@@ -51,6 +51,7 @@ const int32_t SCREEN_HEIGHT = 200;
 // Tom: added (SDL)
 SDL_Window *sdl_window = NULL;
 SDL_Renderer *sdl_renderer = NULL;
+SDL_Texture *sdl_texture = NULL;
 
 //
 // Amount of memory to reserve for scaling buffer (64K) + PAGE2 (64K) + misc.
@@ -216,10 +217,20 @@ int main(int argc, char *argv[]) // Tom: added
 
    SDL_RenderSetLogicalSize(sdl_renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+   sdl_texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+   if (sdl_texture == NULL)
+   {
+      printf("[interp] main: Texture could not be created! SDL_Error: %s\n", SDL_GetError());
+      SDL_DestroyRenderer(sdl_renderer);
+      SDL_DestroyWindow(sdl_window);
+      SDL_Quit();
+      exit(EXIT_FAILURE);
+   }
+
    SDL_SetRenderDrawColor(sdl_renderer, 0, 255, 0, 255);
    SDL_RenderClear(sdl_renderer);
 
-   SDL_RenderPresent(sdl_renderer);
+   // SDL_RenderPresent(sdl_renderer);
 
    //////
 
@@ -228,6 +239,7 @@ int main(int argc, char *argv[]) // Tom: added
 
    //////
 
+   SDL_DestroyTexture(sdl_texture);
    SDL_DestroyRenderer(sdl_renderer);
    SDL_DestroyWindow(sdl_window);
    SDL_Quit();
