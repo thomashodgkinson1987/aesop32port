@@ -405,8 +405,11 @@ void print_shape_header(void *shape)
 {
    SHAPEHEADER *shape_header = (SHAPEHEADER *)shape;
 
+   int32_t bounds = shape_header->bounds;
+   int16_t *bounds_ptr = (int16_t *)&bounds;
+
    printf("---- SHAPEHEADER ----\n");
-   printf("bounds: %x\n", shape_header->bounds);
+   printf("bounds: %ix%i\n", bounds_ptr[1], bounds_ptr[0]);
    printf("origin: %x\n", shape_header->origin);
    printf("xmin: %i\n", shape_header->xmin);
    printf("ymin: %i\n", shape_header->ymin);
