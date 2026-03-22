@@ -374,9 +374,16 @@ void debug_draw_shape(void *shape_table, int32_t shape_number, int32_t hotX, int
          for (int32_t x = 0; x < shape_header->xmax; ++x)
          {
             uint8_t decoded_pixel = shape_data[y * shape_header->xmax + x];
+            if (decoded_pixel == 0)
+            {
+               pixels_ptr[y * (pitch / 4) + x] = 0;
+            }
+            else
+            {
             RGB rgb = test_palette.colors[decoded_pixel];
             pixels_ptr[y * (pitch / 4) + x] = (255 << 24) | (rgb.r << 16) | (rgb.g << 8) | rgb.b;
          }
+      }
       }
       SDL_UnlockTexture(sdl_texture);
    }
