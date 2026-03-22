@@ -341,8 +341,6 @@ void debug_shape_table(void *shape_table)
    {
       void *shape = (uint8_t *)shape_table + shape_offsets[i];
 
-      // print_shape_header(shape);
-
       static uint32_t output_count = 0;
       char filename[256];
       snprintf(filename, sizeof(filename), "../misc-files/extracted/image_%04u.pgm", output_count++);
