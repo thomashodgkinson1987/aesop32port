@@ -198,7 +198,7 @@ void VFX_shape_draw(
            "\n",
            (void *)pane, shape_table, shape_number, hotX, hotY);
 
-    // debug_shape_table(shape_table, hotX, hotY);
+    // debug_shape_table(shape_table);
     debug_draw_shape(shape_table, shape_number, hotX, hotY);
 }
 
@@ -667,7 +667,7 @@ void VFX_shape_transform(
            "\n",
            (void *)pane, shape_table, shape_number, hotX, hotY, buffer, rot, x_scale, y_scale, flags);
 
-    // debug_shape_table(shape_table, hotX, hotY);
+    // debug_shape_table(shape_table);
 }
 
 //
