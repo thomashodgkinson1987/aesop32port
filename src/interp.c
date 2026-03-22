@@ -227,10 +227,19 @@ int main(int argc, char *argv[]) // Tom: added
       exit(EXIT_FAILURE);
    }
 
-   SDL_SetRenderDrawColor(sdl_renderer, 0, 255, 0, 255);
-   SDL_RenderClear(sdl_renderer);
+   {
+      void *pixels;
+      int pitch;
+      if (SDL_LockTexture(sdl_texture, NULL, &pixels, &pitch) == 0)
+      {
+         memset(pixels, 0, (size_t)(pitch * SCREEN_HEIGHT));
+         SDL_UnlockTexture(sdl_texture);
+      }
+      SDL_RenderCopy(sdl_renderer, sdl_texture, NULL, NULL);
+   }
 
-   // SDL_RenderPresent(sdl_renderer);
+   // SDL_SetRenderDrawColor(sdl_renderer, 0, 255, 0, 255);
+   // SDL_RenderClear(sdl_renderer);
 
    //////
 
