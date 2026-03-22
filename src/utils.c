@@ -152,7 +152,7 @@ uint8_t *decode_shape_data(void *shape)
    SHAPEHEADER *shape_header = (SHAPEHEADER *)shape;
    uint8_t *shape_data = (uint8_t *)shape + sizeof(SHAPEHEADER);
 
-   uint8_t *buffer = (uint8_t *)calloc(320 * 200, sizeof(uint8_t));
+   uint8_t *buffer = (uint8_t *)calloc(320 * 200, 1);
    if (!buffer)
       exit(EXIT_FAILURE);
 
