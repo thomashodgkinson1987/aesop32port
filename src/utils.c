@@ -352,6 +352,41 @@ void debug_shape_table(void *shape_table)
    free(shape_offsets);
 }
 
+void debug_draw_shape(void *shape_table, int32_t shape_number, int32_t hotX, int32_t hotY)
+{
+   printf("[utils] debug_draw_shape\n");
+
+   SHAPETABLEHEADER *shape_table_header = (SHAPETABLEHEADER *)shape_table;
+
+   if (shape_table_header->shape_count == 0)
+      return;
+
+   uint32_t *shape_offsets = get_shape_offsets(shape_table);
+   void *shape = (uint8_t *)shape_table + shape_offsets[shape_number];
+   SHAPEHEADER *shape_header = (SHAPEHEADER *)shape;
+   uint8_t *shape_data = decode_shape_data(shape);
+
+   void *pixels;
+   int pitch;
+   if (SDL_LockTexture(sdl_texture, NULL, &pixels, &pitch) == 0)
+   {
+      uint32_t *pixels_ptr = (uint32_t *)pixels;
+      for (int32_t y = 0; y < shape_header->ymax; ++y)
+      {
+         for (int32_t x = 0; x < shape_header->xmax; ++x)
+         {
+            uint8_t decoded_pixel = shape_data[y * shape_header->xmax + x];
+            RGB rgb = test_palette.colors[decoded_pixel];
+            pixels_ptr[y * (pitch / 4) + x] = (255 << 24) | (rgb.r << 16) | (rgb.g << 8) | rgb.b;
+         }
+      }
+      SDL_UnlockTexture(sdl_texture);
+   }
+
+   free(shape_data);
+   free(shape_offsets);
+}
+
 void print_shape_table_header(void *shape_table)
 {
    SHAPETABLEHEADER *shape_table_header = (SHAPETABLEHEADER *)shape_table;

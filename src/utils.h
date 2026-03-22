@@ -48,6 +48,8 @@ uint32_t *get_shape_offsets(void *shape_table);
 uint8_t *decode_shape_data(void *shape);
 
 void debug_shape_table(void *shape_table);
+void debug_draw_shape(void *shape_table, int32_t shape_number, int32_t hotX, int32_t hotY);
+
 void print_shape_table_header(void *shape_table);
 void print_shape_header(void *shape);
 

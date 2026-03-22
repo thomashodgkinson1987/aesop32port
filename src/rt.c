@@ -435,7 +435,9 @@ __handle_msg:
         SDL_SetRenderDrawColor(sdl_renderer, 0, 255, 0, 255);
         SDL_RenderClear(sdl_renderer);
 
-        //SDL_RenderPresent(sdl_renderer);
+        SDL_RenderCopy(sdl_renderer, sdl_texture, NULL, NULL);
+
+        SDL_RenderPresent(sdl_renderer);
 
         uint8_t opcode = *esi++;
 
