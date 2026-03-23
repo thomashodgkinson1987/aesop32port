@@ -1,27 +1,27 @@
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  EVENT.C                                                               ��
-// ��                                                                        ��
-// ��  AESOP event dispatcher and code resource handlers for Eye III engine  ��
-// ��                                                                        ��
-// ��  Version: 1.00 of 5-Oct-92 -- Initial version                          ��
-// ��                                                                        ��
-// ��  Project: Eye III                                                      ��
-// ��   Author: John Miles                                                   ��
-// ��                                                                        ��
-// ��  C source compatible with Borland C++ v3.0 or later                    ��
-// ��  Large memory model (16-bit DOS)                                       ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
-// ��                                                                        ��
-// ��  Copyright (C) 1992 Miles Design, Inc.                                 ��
-// ��                                                                        ��
-// ��  Miles Design, Inc.                                                    ��
-// ��  10926 Jollyville #308                                                 ��
-// ��  Austin, TX 78759                                                      ��
-// ��  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ��
-// ��                                                                        ��
-// ����������������������������������������������������������������������������
+// ############################################################################
+// ##                                                                        ##
+// ##  EVENT.C                                                               ##
+// ##                                                                        ##
+// ##  AESOP event dispatcher and code resource handlers for Eye III engine  ##
+// ##                                                                        ##
+// ##  Version: 1.00 of 5-Oct-92 -- Initial version                          ##
+// ##                                                                        ##
+// ##  Project: Eye III                                                      ##
+// ##   Author: John Miles                                                   ##
+// ##                                                                        ##
+// ##  C source compatible with Borland C++ v3.0 or later                    ##
+// ##  Large memory model (16-bit DOS)                                       ##
+// ##                                                                        ##
+// ############################################################################
+// ##                                                                        ##
+// ##  Copyright (C) 1992 Miles Design, Inc.                                 ##
+// ##                                                                        ##
+// ##  Miles Design, Inc.                                                    ##
+// ##  10926 Jollyville #308                                                 ##
+// ##  Austin, TX 78759                                                      ##
+// ##  (512) 345-2642 / BBS (512) 454-9990 / FAX (512) 338-9630              ##
+// ##                                                                        ##
+// ############################################################################
 
 #include <stdio.h>
 #include <stdlib.h>
