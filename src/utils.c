@@ -338,15 +338,16 @@ void debug_shape_table(void *shape_table)
 
    uint32_t *shape_offsets = get_shape_offsets(shape_table);
 
+   static uint32_t output_count = 0;
    for (uint32_t i = 0; i < shape_table_header->shape_count; ++i)
    {
       void *shape = (uint8_t *)shape_table + shape_offsets[i];
 
-      static uint32_t output_count = 0;
       char filename[256];
-      snprintf(filename, sizeof(filename), "../misc-files/extracted/image_%04u.pgm", output_count++);
+      snprintf(filename, sizeof(filename), "../misc-files/extracted/image_%02u_%04u.pgm", output_count, i);
       save_shape_to_ppm_from_shape(shape, filename);
    }
+   output_count++;
 
    free(shape_offsets);
 }
