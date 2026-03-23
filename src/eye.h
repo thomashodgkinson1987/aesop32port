@@ -23,13 +23,6 @@
 
 #include <stdint.h> // Tom: added
 
-#ifdef __AESOP__
-
-// Tom: TODO what is this for
-#define PROCDEF
-
-#else
-
 void load_string(int32_t argcnt, int8_t *array, uint32_t string);
 void load_resource(int32_t argcnt, int8_t *array, uint32_t resource);
 void copy_string(int32_t argcnt, int8_t *src, int8_t *dest);
@@ -189,34 +182,11 @@ int32_t arrow_count(int32_t argcnt, uint32_t plrnum);
 #define code_resources FARPROC code_resources[] =
 #define PROCDEF (FARPROC)
 
-#endif
-
-// Tom: TODO what is all of this below
-
-#ifdef __AESOP__
-
-//##########################################�
-//##                                       ##
-//## AESOP resource attribute declarations ##
-//##                                       ##
-//##########################################�
-
-attrib sequence fixed,precious
-attrib sample fixed,precious
-attrib string moveable,discardable
-attrib source moveable,discardable
-attrib document temporary
-attrib map temporary
-attrib palette moveable,discardable
-attrib file moveable,discardable
-
-#endif
-
-//########################################
-//##                                    ##
-//## AESOP/C code resource declarations ##
-//##                                    ##
-//########################################
+// ########################################
+// ##                                    ##
+// ## AESOP/C code resource declarations ##
+// ##                                    ##
+// ########################################
 
 code_resources
 {
