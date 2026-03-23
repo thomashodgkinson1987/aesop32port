@@ -333,8 +333,6 @@ void debug_shape_table(void *shape_table)
 {
    SHAPETABLEHEADER *shape_table_header = (SHAPETABLEHEADER *)shape_table;
 
-   // print_shape_table_header(shape_table_header);
-
    if (shape_table_header->shape_count == 0)
       return;
 
