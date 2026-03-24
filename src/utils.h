@@ -2,8 +2,9 @@
 #define TOM_UTILS
 
 #include <stdint.h>
+
 #include "defs.h" // for PAL_HDR
-#include "vfx.h" // for RGB
+#include "vfx.h"  // for RGB
 
 typedef struct
 {
