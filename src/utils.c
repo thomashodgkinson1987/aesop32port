@@ -7,7 +7,7 @@
 #include "globals.h"
 
 #include "defs.h" // for PAL_HDR
-#include "vfx.h" // for RGB
+#include "vfx.h"  // for RGB
 
 AESOP_Palette test_palette;
 
