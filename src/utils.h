@@ -7,10 +7,7 @@
 
 typedef struct
 {
-    int8_t version_byte_1;
-    int8_t version_byte_2;
-    int8_t version_byte_3;
-    int8_t version_byte_4;
+    int32_t version;
     int32_t shape_count;
 } SHAPETABLEHEADER;
 
@@ -33,25 +30,36 @@ typedef struct
 char *ltoa(long val, char *buffer, int radix);
 char *ultoa(unsigned long val, char *buffer, int radix);
 
-void draw_shape_unclipped(void *buffer, void *shape, int hotX, int hotY, int CP_W);
-
-void save_buffer_to_pgm(const uint8_t *buffer, int32_t width, int32_t height, const char *filename);
-void save_shape_to_pgm_from_table_and_number(void *table, int32_t shape_number, const char *filename);
-void save_shape_to_pgm_from_shape(void *shape, const char *filename);
-
 void save_buffer_to_ppm(const uint8_t *buffer, int32_t width, int32_t height, const char *filename);
-void save_shape_to_ppm_from_shape(void *shape, const char *filename);
+void save_shape_to_ppm_from_shape(const void *shape, const char *filename);
+
+uint8_t *decode_shape_data(const void *shape);
+
+void debug_shape_table(const void *shape_table);
+void debug_draw_shape(const void *shape_table, int32_t shape_number, int32_t hotX, int32_t hotY);
+
+void print_shape_table_header(const void *shape_table);
+void print_shape_header(const void *shape);
+void print_decoded_shape_data(const void *shape);
+
+int32_t shape_table_get_shape_count(const void *shape_table);
+int32_t shape_table_get_version(const void *shape_table);
+uint64_t *shape_table_get_offsets(const void *shape_table);
+uint32_t *shape_table_get_offsets_as_uint32(const void *shape_table);
+void *shape_table_get_shape(const void *shape_table, int32_t index);
+
+int16_t shape_get_bounds_x(const void *shape);
+int16_t shape_get_bounds_y(const void *shape);
+int16_t shape_get_origin_x(const void *shape);
+int16_t shape_get_origin_y(const void *shape);
+int32_t shape_get_xmin(const void *shape);
+int32_t shape_get_ymin(const void *shape);
+int32_t shape_get_xmax(const void *shape);
+int32_t shape_get_ymax(const void *shape);
+uint8_t *shape_get_data(const void *shape);
 
 void update_palette(const PAL_HDR *PHDR, AESOP_Palette *palette);
 
-uint32_t *get_shape_offsets(void *shape_table);
-uint8_t *decode_shape_data(void *shape);
-
-void debug_shape_table(void *shape_table);
-void debug_draw_shape(void *shape_table, int32_t shape_number, int32_t hotX, int32_t hotY);
-
-void print_shape_table_header(void *shape_table);
-void print_shape_header(void *shape);
-void print_shape_data(void *shape);
+void draw_shape_unclipped(void *buffer, void *shape, int hotX, int hotY, int CP_W);
 
 #endif
