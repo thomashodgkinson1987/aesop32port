@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <SDL2/SDL.h>
 
-#include "defs.h"
 #include "utils.h"
 
 extern int32_t SCREEN_WIDTH;
