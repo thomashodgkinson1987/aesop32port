@@ -1,8 +1,8 @@
 CC = gcc
 
 # 32-bit SDL2 location. Defaults to the vendored build in the parent
-# directory (see ../reference/build-32bit-sdl2.sh). Override on the
-# command line to use another build, e.g.:
+# directory (rebuild it with tools/build-32bit-sdl2.sh if needed).
+# Override on the command line to use another build, e.g.:
 #   make build SDL2_DIR=/usr   (if you have 32-bit SDL2 dev files there)
 # Paths are quoted so workspaces containing spaces are supported.
 SDL2_DIR ?= $(abspath ../SDL2_32)

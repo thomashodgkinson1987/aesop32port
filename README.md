@@ -40,30 +40,33 @@ Requirements:
 
 - gcc with 32-bit support (`multilib-devel` on Arch/CachyOS,
   `gcc-multilib` on Debian/Ubuntu)
-- 32-bit SDL2 development libraries:
+- a 32-bit SDL2 build:
   - Preferred: the distro's multilib package (`lib32-sdl2` /
     `lib32-sdl2-compat` on Arch, `libsdl2-dev:i386` on Debian)
-  - Fallback: the vendored copy in `../SDL2_32` (built with X11 + OpenGL +
-    ALSA-dynamic backends; see `../reference/build-32bit-sdl2.sh` to
-    reproduce it). The Makefile uses it by default via `SDL2_DIR`.
+  - Fallback: a vendored build installed to a `SDL2_32/` directory next
+    to the repo — `tools/build-32bit-sdl2.sh` fetches SDL2 2.30.0 and
+    builds it with working X11 + OpenGL + ALSA-dynamic backends
 - GNU make
 
 ```sh
 make build          # produces bin/aesop
 ```
 
-To use a different 32-bit SDL2:
+The Makefile finds 32-bit SDL2 via `SDL2_DIR` (default: `../SDL2_32`,
+i.e. a sibling directory kept out of the repo). Point it elsewhere if
+your 32-bit SDL2 lives somewhere else:
 
 ```sh
-make build SDL2_DIR=/path/to/32bit-sdl2
+make build SDL2_DIR=/usr          # distro multilib install
 ```
 
 ## Running
 
-The engine needs the EOB3 game data (an `eobiii/` directory containing
-`EYE.RES` et al.) next to the repo — this workspace keeps it at
-`../game-data/eobiii` with a symlink `eobiii -> ../game-data/eobiii`
-(gitignored).
+The engine needs the EOB3 game data — an `eobiii/` directory containing
+`EYE.RES` and the rest of the game install — at the repo root. The game
+data is **not** part of this repo (copyright); supply your own Eye of
+the Beholder III files. `make run` copies the binary into `eobiii/` and
+launches it there:
 
 ```sh
 make run                    # build, copy bin/aesop into eobiii/, run interactively
@@ -90,10 +93,14 @@ Decoupling rendering from opcode execution is the obvious next fix.
 
 `VFX_shape_draw` debug-dumps every shape of a drawn shape table to
 `../misc-files/extracted/image_XX_XXXX.pgm`, **relative to the run
-directory**. In this workspace the run directory is `eobiii/` (symlink to
-`../game-data/eobiii`), so the dumps land in `game-data/misc-files/extracted/`
-— that directory must exist or the dumps are silently skipped. This is
-temporary debug code (the hard-coded path will want re-visiting).
+directory** — i.e. a `misc-files/extracted/` directory next to
+`eobiii/`. Create it before running; if it is missing the dumps are
+silently skipped. This is temporary debug code (the hard-coded path
+will want re-visiting).
+
+> In the author's workspace `eobiii/` is a gitignored symlink to
+> `../game-data/eobiii`, so the dumps land in
+> `../game-data/misc-files/extracted/` instead.
 
 ### Troubleshooting
 
@@ -102,9 +109,9 @@ temporary debug code (the hard-coded path will want re-visiting).
   ever fails (`dsp: No such audio device`), run with
   `SDL_AUDIODRIVER=dummy`.
 - **No window appears**: means the SDL2 in use was built without a real
-  video driver (X11/Wayland) — fake windows succeed silently. Check with
-  a probe or rebuild per `../reference/build-32bit-sdl2.sh`. The old
-  offscreen-only build was replaced for exactly this reason.
+  video driver (X11/Wayland) — fake windows succeed silently. Rebuild
+  SDL2 with `tools/build-32bit-sdl2.sh`; an offscreen-only build caused
+  exactly this symptom once.
 
 ## Layout
 
@@ -115,7 +122,8 @@ temporary debug code (the hard-coded path will want re-visiting).
   (C-function table), `gil2vfx.c` (game-to-VFX glue), `vfx.c` (VFX video
   API), `utils.c` (shape decoding, PPM dumps, debug drawing),
   `globals.h` (shared SDL objects)
-- `eobiii/` — (gitignored symlink) game data; see `../game-data/`
+- `tools/` — `build-32bit-sdl2.sh`, reproduces the vendored 32-bit SDL2
+- `eobiii/` — EOB3 game data (not in git; supply your own)
 - `docs/` — architecture notes
 
 ## Status
@@ -134,8 +142,9 @@ Still stubbed (grep for `[STUB]`), by file:
 
 ## Related repositories
 
-- `daesop` — AESOP resource decompiler/disassembler (same author);
-  used to inspect `EYE.RES` and generate the dumps in
-  `../reference/decompiler-dumps/`
-- `../reference/watcom-original/` — the original Watcom/DOS source tree
-  this port derives from
+- [`daesop`](https://github.com/thomashodgkinson1987/daesop) — AESOP
+  resource decompiler/disassembler (same author); used to inspect
+  `EYE.RES` and generate reference dumps
+- The original 1993 Watcom/DOS source tree this port derives from is
+  archived out-of-repo; `docs/architecture.md` maps its components to
+  this port
