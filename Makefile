@@ -1,7 +1,14 @@
 CC = gcc
-# CFLAGS = -fsanitize=address -g -m32 -std=c17 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wformat=2 -rdynamic -I./src $(shell sdl2-config --cflags)
-CFLAGS = -g -m32 -std=c17 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wformat=2 -rdynamic -I./src $(shell sdl2-config --cflags)
-LDFLAGS = -m32 $(shell sdl2-config --libs)
+
+# 32-bit SDL2 location. Defaults to the vendored build in the parent
+# directory (see ../reference/build-32bit-sdl2.sh). Override on the
+# command line to use another build, e.g.:
+#   make build SDL2_DIR=/usr   (if you have 32-bit SDL2 dev files there)
+# Paths are quoted so workspaces containing spaces are supported.
+SDL2_DIR ?= $(abspath ../SDL2_32)
+
+CFLAGS = -g -m32 -std=c17 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wformat=2 -rdynamic -I./src -I"$(SDL2_DIR)/include/SDL2" -D_REENTRANT
+LDFLAGS = -m32 -L"$(SDL2_DIR)/lib" -Wl,-rpath,"$(SDL2_DIR)/lib" -lSDL2
 
 SRC_DIR = src
 OBJ_DIR = obj

@@ -43,18 +43,19 @@ Requirements:
 - 32-bit SDL2 development libraries:
   - Preferred: the distro's multilib package (`lib32-sdl2` /
     `lib32-sdl2-compat` on Arch, `libsdl2-dev:i386` on Debian)
-  - Fallback: build the vendored copy — see
-    `../reference/build-32bit-sdl2.sh`, which installs to `../SDL2_32`
+  - Fallback: the vendored copy in `../SDL2_32` (built with X11 + OpenGL +
+    ALSA-dynamic backends; see `../reference/build-32bit-sdl2.sh` to
+    reproduce it). The Makefile uses it by default via `SDL2_DIR`.
 - GNU make
 
 ```sh
 make build          # produces bin/aesop
 ```
 
-If using the vendored SDL2, put its `sdl2-config` first on the PATH:
+To use a different 32-bit SDL2:
 
 ```sh
-PATH="../SDL2_32/bin:$PATH" make build
+make build SDL2_DIR=/path/to/32bit-sdl2
 ```
 
 ## Running
@@ -72,12 +73,14 @@ make run 15 out.txt         # run for 15 seconds, capture output to out.txt
 The binary takes the resource file and start object as arguments
 (`./aesop EYE.RES start`).
 
-What you should see: the engine boots the resource system, links the
-`start` bootstrap and the `main menu` program, dumps decoded sprites (see
-below), then enters the interpreter render loop. Press **ESC** or close
-the window for a clean shutdown. As of this writing the screen shows a
-green-cleared window with blitted shapes — VFX shape drawing is still
-stubbed, so the real menu graphics don't render yet.
+### What you should see
+
+The engine boots the resource system, links the `start` bootstrap and the
+`main menu` program, dumps decoded sprites (see below), then enters the
+interpreter render loop. Press **ESC** or close the window for a clean
+shutdown. As of this writing the screen shows a black window with a
+single blitted sprite (from the debug shape-drawing in the stubbed
+`VFX_shape_draw`) — the real menu graphics don't render yet.
 
 ### Sprite dumps
 
@@ -90,14 +93,14 @@ temporary debug code (the hard-coded path will want re-visiting).
 
 ### Troubleshooting
 
-- **Audio**: `SDL_Init` fails with `dsp: No such audio device` if the
-  SDL2 in use has no pulse/alsa backend (the vendored `SDL2_32` build
-  doesn't). Workaround: run with `SDL_AUDIODRIVER=dummy`.
-- **Paths with spaces**: `$(shell sdl2-config --cflags)` breaks when the
-  workspace path contains spaces (the `-I`/`-L` flags get word-split).
-  Either build from a space-free path, or override with a copy of
-  `SDL2_32` at a space-free location:
-  `cp -a ../SDL2_32 /tmp/SDL2_32 && PATH=/tmp/SDL2_32/bin:$PATH make build`
+- **Audio**: the vendored SDL2 loads ALSA dynamically at runtime
+  (`libasound.so.2`), so sound init normally just works. If audio init
+  ever fails (`dsp: No such audio device`), run with
+  `SDL_AUDIODRIVER=dummy`.
+- **No window appears**: means the SDL2 in use was built without a real
+  video driver (X11/Wayland) — fake windows succeed silently. Check with
+  a probe or rebuild per `../reference/build-32bit-sdl2.sh`. The old
+  offscreen-only build was replaced for exactly this reason.
 
 ## Layout
 
