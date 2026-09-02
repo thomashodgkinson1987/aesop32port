@@ -62,6 +62,27 @@ Supporting code in the port that has no Watcom counterpart: `utils.c/h`
 - The kernel's C-function inventory and bytecode opcode table live in
   `../reference/decompiler-dumps/`.
 
+## Ecosystem & credits
+
+The AESOP engine (AESOP/16 and AESOP/32) was created by **John Miles**
+(Miles Design, 1992), who released the engine's compiler and
+documentation into the public domain in 2009; **John Ratcliff**
+co-developed the `MOD32SND` sound mixer. The game data of interest
+ships with *Eye of the Beholder III* (`EYE.RES`) and *Dungeon Hack*
+(`HACK.RES`, `OPEN.RES`).
+
+Community context this project builds on:
+
+- The **AESOP/32 modernisation project** led by **mirekluza**
+  ([VOGONS thread](https://www.vogons.org/viewtopic.php?t=20601)),
+  which produced the original `daesop` decompiler.
+- **Bret Curtis (psi29a)'s
+  [thirdeye](https://github.com/psi29a/thirdeye/)** — a from-scratch
+  C++ AESOP engine reimplementation running these titles natively on
+  modern systems, and a valuable reference.
+- [AESOP engine discussion on the ScummVM
+  forums](https://forums.scummvm.org/viewtopic.php?t=2397).
+
 ## Porting conventions
 
 - C17, `-Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wformat=2`; fixed

@@ -7,8 +7,10 @@ original `EYE.RES` game data unmodified on a modern Linux system, with the
 VGA-mode VFX video layer replaced by SDL2.
 
 This is a continuation of the historical AESOP/32 modernisation effort
-(mirekluza's VOGONS project, psi29a's thirdeye); see also the companion
-`daesop` repository for `.RES` container tooling.
+(mirekluza's [VOGONS project](https://www.vogons.org/viewtopic.php?t=20601),
+psi29a's [thirdeye](https://github.com/psi29a/thirdeye)); see also the
+companion `daesop` repository for `.RES` container tooling. Credits and
+ecosystem links: [docs/architecture.md](docs/architecture.md).
 
 > **Status: work in progress.** The interpreter core, resource manager,
 > linker and SDL2 video path are in place; gameplay brings-up to the
