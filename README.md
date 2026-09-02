@@ -78,9 +78,13 @@ The binary takes the resource file and start object as arguments
 The engine boots the resource system, links the `start` bootstrap and the
 `main menu` program, dumps decoded sprites (see below), then enters the
 interpreter render loop. Press **ESC** or close the window for a clean
-shutdown. As of this writing the screen shows a black window with a
-single blitted sprite (from the debug shape-drawing in the stubbed
-`VFX_shape_draw`) — the real menu graphics don't render yet.
+shutdown. The screen first shows a black window with a single 16x16
+sprite (draw call 1), then — **after roughly 25-30 seconds** — the main
+menu background (319x199) paints itself (draw call 2). The wait is
+because the renderer was created with `SDL_RENDERER_PRESENTVSYNC` while
+the render loop runs once per *opcode*, throttling the interpreter to
+~60 opcodes/sec; the background draw sits a few thousand opcodes in.
+Decoupling rendering from opcode execution is the obvious next fix.
 
 ### Sprite dumps
 
