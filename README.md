@@ -13,8 +13,8 @@ companion `daesop` repository for `.RES` container tooling. Credits and
 ecosystem links: [docs/architecture.md](docs/architecture.md).
 
 > **Status: work in progress.** The interpreter core, resource manager,
-> linker and SDL2 video path are in place; gameplay brings-up to the
-> point of loading the bootstrap object. Large parts of the VFX, sound
+> linker and SDL2 video path are in place; gameplay brings-up through
+> to rendering the main menu. Large parts of the VFX, sound
 > and game-side layers are still stubs (see [Status](#status) below).
 
 ## Why 32-bit?
@@ -75,6 +75,10 @@ make run                    # build, copy bin/aesop into eobiii/, run interactiv
 make run 15 out.txt         # run for 15 seconds, capture output to out.txt
 ```
 
+Set `AESOP_TRACE=1` to additionally log every executed opcode (very
+verbose — the interpreter runs hundreds of thousands of opcodes per
+second).
+
 The binary takes the resource file and start object as arguments
 (`./aesop EYE.RES start`).
 
@@ -82,14 +86,14 @@ The binary takes the resource file and start object as arguments
 
 The engine boots the resource system, links the `start` bootstrap and the
 `main menu` program, dumps decoded sprites (see below), then enters the
-interpreter render loop. Press **ESC** or close the window for a clean
-shutdown. The screen first shows a black window with a single 16x16
-sprite (draw call 1), then — **after roughly 25-30 seconds** — the main
-menu background (319x199) paints itself (draw call 2). The wait is
-because the renderer was created with `SDL_RENDERER_PRESENTVSYNC` while
-the render loop runs once per *opcode*, throttling the interpreter to
-~60 opcodes/sec; the background draw sits a few thousand opcodes in.
-Decoupling rendering from opcode execution is the obvious next fix.
+interpreter loop. Press **ESC** or close the window for a clean shutdown.
+Rendering is decoupled from opcode execution: the interpreter runs at
+full speed, and a frame is presented when the game refreshes a window
+(`refresh_window`) or hits the vblank stand-in
+(`VFX_wait_vblank_leading`, paced to 60 Hz by `src/video.c`) — the same
+point the DOS build throttled itself at. The screen shows a black window
+with a single 16x16 sprite (draw call 1), and the main menu background
+(319x199) paints itself (draw call 2) moments later.
 
 ### Sprite dumps
 
@@ -140,7 +144,6 @@ Still stubbed (grep for `[STUB]`), by file:
 - `eye.c` — 11 (game math/effects)
 - `sound32.c` — 10 (AIL/MOD sound)
 - `graphics.c` — 3, `mouse.c` — 3, `rtsystem.c` — 2, `rtcode.c` — 1
-- `intrface.c` — 1
 
 ## Related repositories
 

@@ -25,8 +25,8 @@ Two eras:
 
 | Original (watcom-original/) | Port (src/) | Notes |
 |---|---|---|
-| `INTERP.C` | `interp.c` | entry point, arg parsing, program create/destroy, main loop; now also owns SDL2 window/renderer/texture lifecycle |
-| `asm/RT.ASM` | `rt.c` | the bytecode interpreter, rewritten in C. Stack values are the `VALUE` union: 4-byte value overlaid with 16:32 seg:off halves and 8-bit `STKVAL` type tag — LP32 layout, hence `-m32` |
+| `INTERP.C` | `interp.c` | entry point, arg parsing, program create/destroy, main loop |
+| `asm/RT.ASM` | `rt.c` | the bytecode interpreter, rewritten in C. Stack values are the `VALUE` union: 4-byte value overlaid with 16:32 seg:off halves and 8-bit `STKVAL` type tag — LP32 layout, hence `-m32`. Video-agnostic like the original; yields to the host via the `RT_yield` hook |
 | `RTRES.C` | `rtres.c` | resource manager / cache (`RTR_class`), directory blocks, resource lookup |
 | `RTLINK.C` | `rtlink.c` | dynamic linker: binds import lists to C functions / other bytecode objects |
 | `RTCODE.C` | `rtcode.c` | maps kernel C functions to bytecode IDs |
@@ -37,10 +37,11 @@ Two eras:
 | `GRAPHICS.C` | `graphics.c` | core graphics routines |
 | `SOUND32.C`, `MODSND32.C`, `ail/` | `sound32.c` | AIL 2.0 audio; stubbed in the port |
 | `GIL2VFX.C` | `gil2vfx.c` | glue between the game's GIL layer and the VFX video library |
-| `vfx/` (VFX 1.19 library, DLL-based) | `vfx.c`, `mouse.c` | video API; the port replaces the VFX DLL system with SDL2 (window/renderer/texture declared in `globals.h`) |
+| `vfx/` (VFX 1.19 library, DLL-based) | `vfx.c`, `mouse.c` | video API; the port replaces the VFX DLL system with SDL2, implemented in `video.c` (the "driver": window/renderer/texture lifecycle, event pump, present, 60 Hz frame pacing at `VFX_wait_vblank*`) |
 | `xfer/` | — | file-transfer library, not ported |
 
-Supporting code in the port that has no Watcom counterpart: `utils.c/h`
+Supporting code in the port that has no Watcom counterpart: `video.c/h`
+(SDL2 video driver stand-in), `utils.c/h`
 (EOB3 shape/RLE decoding, PPM dumps, debug shape drawing), `globals.h`.
 
 ## Resource format essentials

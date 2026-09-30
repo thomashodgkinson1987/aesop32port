@@ -60,4 +60,15 @@ void RT_shutdown(void);
 void RT_arguments(void *base, uint32_t size);
 int32_t RT_execute(uint32_t index, uint32_t msg_num, uint32_t vector);
 
+//
+// Host-provided yield hook, called periodically from the interpreter
+// loop so the host can pump events etc. (the original RT.ASM was
+// video-agnostic; this keeps it that way). Returns nonzero to abort
+// execution (ESC / window close).
+//
+extern int32_t (*RT_yield)(void);
+
+// The interpreter loop calls the yield hook every this-many opcodes
+#define RT_YIELD_INTERVAL 1024
+
 #endif

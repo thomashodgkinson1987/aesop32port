@@ -30,7 +30,6 @@
 #include <string.h>
 
 // Tom: added (SDL)
-#include <SDL2/SDL.h>
 #include "globals.h"
 
 #include "defs.h"
@@ -44,13 +43,8 @@
 #include "rtcode.h"
 #include "event.h"
 
-int32_t SCREEN_WIDTH = 0;
-int32_t SCREEN_HEIGHT = 0;
-
-// Tom: added (SDL)
-SDL_Window *sdl_window = NULL;
-SDL_Renderer *sdl_renderer = NULL;
-SDL_Texture *sdl_texture = NULL;
+#include "video.h"
+#include "vfx.h"
 
 //
 // Amount of memory to reserve for scaling buffer (64K) + PAGE2 (64K) + misc.
@@ -185,63 +179,17 @@ int main(int argc, char *argv[]) // Tom: added
 
    //////
 
-   SCREEN_WIDTH = 320;
-   SCREEN_HEIGHT = 200;
-
-   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+   if (video_init("AESOP/32 Port", 320, 200) < 0)
    {
-      printf("[interp] main: could not initialise! SDL_Error: %s\n", SDL_GetError());
       exit(EXIT_FAILURE);
    }
 
-   sdl_window = SDL_CreateWindow("AESOP/32 Port",
-                                 SDL_WINDOWPOS_CENTERED,
-                                 SDL_WINDOWPOS_CENTERED,
-                                 SCREEN_WIDTH,
-                                 SCREEN_HEIGHT,
-                                 SDL_WINDOW_SHOWN);
-
-   if (sdl_window == NULL)
-   {
-      printf("[interp] main: Window could not be created! SDL_Error: %s\n", SDL_GetError());
-      SDL_Quit();
-      exit(EXIT_FAILURE);
-   }
-
-   sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-   if (sdl_renderer == NULL)
-   {
-      printf("[interp] main: Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
-      SDL_DestroyWindow(sdl_window);
-      SDL_Quit();
-      exit(EXIT_FAILURE);
-   }
-
-   SDL_RenderSetLogicalSize(sdl_renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-   sdl_texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
-   if (sdl_texture == NULL)
-   {
-      printf("[interp] main: Texture could not be created! SDL_Error: %s\n", SDL_GetError());
-      SDL_DestroyRenderer(sdl_renderer);
-      SDL_DestroyWindow(sdl_window);
-      SDL_Quit();
-      exit(EXIT_FAILURE);
-   }
-
-   {
-      void *pixels;
-      int pitch;
-      if (SDL_LockTexture(sdl_texture, NULL, &pixels, &pitch) == 0)
-      {
-         memset(pixels, 0, (size_t)(pitch * SCREEN_HEIGHT));
-         SDL_UnlockTexture(sdl_texture);
-      }
-      SDL_RenderCopy(sdl_renderer, sdl_texture, NULL, NULL);
-   }
-
-   // SDL_SetRenderDrawColor(sdl_renderer, 0, 255, 0, 255);
-   // SDL_RenderClear(sdl_renderer);
+   // Register the SDL video layer as the VFX "device driver" (the
+   // original assigned these pointers when loading the VFX DLL), and
+   // hook the interpreter yield so ESC / window-close stay responsive.
+   VFX_wait_vblank = video_wait_vblank;
+   VFX_wait_vblank_leading = video_wait_vblank_leading;
+   RT_yield = video_yield;
 
    //////
 
@@ -250,10 +198,7 @@ int main(int argc, char *argv[]) // Tom: added
 
    //////
 
-   SDL_DestroyTexture(sdl_texture);
-   SDL_DestroyRenderer(sdl_renderer);
-   SDL_DestroyWindow(sdl_window);
-   SDL_Quit();
+   video_shutdown();
 
    //////
 

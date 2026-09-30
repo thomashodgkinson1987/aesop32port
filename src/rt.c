@@ -10,10 +10,6 @@
 #include <stdbool.h>
 #include <execinfo.h>
 
-// Tom: added (SDL)
-#include <SDL2/SDL.h>
-#include "globals.h"
-
 #include "defs.h"
 #include "rt.h"
 #include "rtres.h"
@@ -50,6 +46,9 @@ static RTR_class *RTR_ptr;
 static uint8_t *stk_base;
 static uint8_t *stk_off;
 static uint32_t *objlist_ptr;
+
+/* Host yield hook (see rt.h) */
+int32_t (*RT_yield)(void) = NULL;
 
 const char *case_list_strings[] = {
     "do_BRT",
@@ -413,33 +412,35 @@ __handle_msg:
     } while (0)
 
     static bool quit = false;
+    uint32_t yield_count = RT_YIELD_INTERVAL;
 
     while (1 && !quit)
     {
-        SDL_Event e;
-        while (SDL_PollEvent(&e) != 0)
+        // Hand control to the host periodically so it can pump events;
+        // nonzero return aborts execution (ESC / window close).
+        if (--yield_count == 0)
         {
-            if (e.type == SDL_QUIT)
+            yield_count = RT_YIELD_INTERVAL;
+
+            if (RT_yield != NULL && RT_yield() != 0)
             {
                 quit = true;
             }
-            else if (e.type == SDL_KEYDOWN)
-            {
-                if (e.key.keysym.sym == SDLK_ESCAPE)
-                {
-                    quit = true;
-                }
-            }
         }
-
-        SDL_SetRenderDrawColor(sdl_renderer, 0, 255, 0, 255);
-        SDL_RenderClear(sdl_renderer);
-        SDL_RenderCopy(sdl_renderer, sdl_texture, NULL, NULL);
-        SDL_RenderPresent(sdl_renderer);
 
         uint8_t opcode = *esi++;
 
-        printf("[rt] RT_execute: opcode=%u %s\n", opcode, case_list_strings[opcode]);
+        static int trace_opcodes = -1;
+
+        if (trace_opcodes < 0)
+        {
+            trace_opcodes = (getenv("AESOP_TRACE") != NULL);
+        }
+
+        if (trace_opcodes)
+        {
+            printf("[rt] RT_execute: opcode=%u %s\n", opcode, case_list_strings[opcode]);
+        }
 
         switch (opcode)
         {
@@ -1246,4 +1247,9 @@ __handle_msg:
             break;
         }
     }
+
+    // Host requested shutdown (window close or ESC): unlock the code
+    // resource, as do_END would, and report failure up the call chain.
+    RTR_unlock(h_prg);
+    return -1;
 }
