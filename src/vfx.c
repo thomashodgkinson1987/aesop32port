@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "vfx.h"
 
@@ -235,9 +236,19 @@ static void shape_blit(PANE *pane, const uint8_t *decoded, SHAPEHEADER *h,
     int32_t x_end = h->xmax;
     int32_t y_end = h->ymax;
 
+    //
+    // pos_x/pos_y are pane-local (draw_bitmap subtracts the pane
+    // origin); the destination lands at the pane offset + position in
+    // the window's buffer. For the mouse merge path the caller passes
+    // pane coords that already encode the buffer position.
+    //
+
+    int32_t base_x = pane->x0 + pos_x;
+    int32_t base_y = pane->y0 + pos_y;
+
     for (int32_t y = h->ymin; y < y_end; y++)
     {
-        int32_t dy = pos_y + y;
+        int32_t dy = base_y + y;
 
         if (dy < 0 || dy > w->y_max)
             continue;
@@ -247,7 +258,7 @@ static void shape_blit(PANE *pane, const uint8_t *decoded, SHAPEHEADER *h,
 
         for (int32_t x = h->xmin; x < x_end; x++)
         {
-            int32_t dx = pos_x + x;
+            int32_t dx = base_x + x;
 
             if (dx < 0 || dx > w->x_max)
                 continue;
@@ -486,8 +497,34 @@ int32_t VFX_rectangle_hash(
 
 int32_t VFX_pane_wipe(PANE *pane, int32_t color)
 {
-    printf("[STUB] [vfx] VFX_pane_wipe: pane=%p color=%i return=0\n",
-           (void *)pane, color);
+    //
+    // Fill the pane's rect with a solid color. Pane coords are buffer
+    // coords (screen-aligned owner buffers for subwindow panes; whole
+    // buffer for assign_window panes) — the same convention as the
+    // refresh source rule in video.c.
+    //
+
+    printf("[vfx] VFX_pane_wipe: pane=%p color=%i\n", (void *)pane, color);
+
+    WINDOW *w = (pane != NULL) ? pane->window : NULL;
+
+    if (w == NULL || w->buffer == NULL)
+        return 0;
+
+    for (int32_t y = pane->y0; y <= pane->y1; y++)
+    {
+        if (y < 0 || y > w->y_max)
+            continue;
+
+        uint8_t *row = w->buffer + (y * (w->x_max + 1));
+
+        int32_t x0 = (pane->x0 < 0) ? 0 : pane->x0;
+        int32_t x1 = (pane->x1 > w->x_max) ? w->x_max : pane->x1;
+
+        if (x0 <= x1)
+            memset(row + x0, (uint8_t)color, (size_t)(x1 - x0 + 1));
+    }
+
     return 0;
 }
 int32_t VFX_pane_copy(
@@ -499,17 +536,62 @@ int32_t VFX_pane_copy(
     int32_t ty,
     int32_t fill)
 {
-    printf("[STUB] [vfx] VFX_pane_copy: "
-           "source=%p "
-           "sx=%i "
-           "sy=%i "
-           "target=%p "
-           "tx=%i "
-           "ty=%i "
-           "fill=%i "
-           "return=0"
-           "\n",
+    //
+    // Copy the overlap of the two pane rects (each in its own window's
+    // buffer coords, offset by (sx,sy)/(tx,ty)). Pixels with no source
+    // behind them (outside the source window) are filled with 'fill',
+    // or skipped when fill is NO_COLOR (-1). Per-pixel, so overlapping
+    // buffers are safe. Used by the mouse cursor merge path.
+    //
+
+    printf("[vfx] VFX_pane_copy: source=%p sx=%i sy=%i target=%p tx=%i ty=%i fill=%i\n",
            (void *)source, sx, sy, (void *)target, tx, ty, fill);
+
+    WINDOW *sw = (source != NULL) ? source->window : NULL;
+    WINDOW *tw = (target != NULL) ? target->window : NULL;
+
+    if (sw == NULL || sw->buffer == NULL || tw == NULL || tw->buffer == NULL)
+        return 0;
+
+    int32_t copy_w = source->x1 - source->x0 + 1;
+    int32_t copy_h = source->y1 - source->y0 + 1;
+
+    if (target->x1 - target->x0 + 1 < copy_w)
+        copy_w = target->x1 - target->x0 + 1;
+    if (target->y1 - target->y0 + 1 < copy_h)
+        copy_h = target->y1 - target->y0 + 1;
+
+    for (int32_t row = 0; row < copy_h; row++)
+    {
+        int32_t syy = source->y0 + sy + row;
+        int32_t tyy = target->y0 + ty + row;
+
+        for (int32_t col = 0; col < copy_w; col++)
+        {
+            int32_t sxx = source->x0 + sx + col;
+            int32_t txx = target->x0 + tx + col;
+
+            uint8_t px = 0;
+            int have_pixel = 0;
+
+            if (sxx >= 0 && sxx <= sw->x_max && syy >= 0 && syy <= sw->y_max)
+            {
+                px = sw->buffer[(syy * (sw->x_max + 1)) + sxx];
+                have_pixel = 1;
+            }
+
+            if (!have_pixel)
+            {
+                if (fill == NO_COLOR)
+                    continue;
+                px = (uint8_t)fill;
+            }
+
+            if (txx >= 0 && txx <= tw->x_max && tyy >= 0 && tyy <= tw->y_max)
+                tw->buffer[(tyy * (tw->x_max + 1)) + txx] = px;
+        }
+    }
+
     return 0;
 }
 
@@ -802,11 +884,18 @@ void VFX_shape_transform(
         int32_t dst_width = (int32_t)(((int64_t)width * x_scale) >> 16);
         int32_t dst_height = (int32_t)(((int64_t)height * y_scale) >> 16);
 
+        //
+        // pos_x/pos_y are pane-local (see shape_blit)
+        //
+
+        int32_t base_x = pane->x0 + hotX;
+        int32_t base_y = pane->y0 + hotY;
+
         for (int32_t row = 0; row < dst_height; row++)
         {
             int32_t src_y = h->ymin + (int32_t)(((int64_t)row * 0x10000) / y_scale);
 
-            int32_t dy = hotY + h->ymin + row;
+            int32_t dy = base_y + h->ymin + row;
 
             if (dy < 0 || dy > w->y_max)
                 continue;
@@ -816,7 +905,7 @@ void VFX_shape_transform(
 
             for (int32_t col = 0; col < dst_width; col++)
             {
-                int32_t dx = hotX + h->xmin + col;
+                int32_t dx = base_x + h->xmin + col;
 
                 if (dx < 0 || dx > w->x_max)
                     continue;

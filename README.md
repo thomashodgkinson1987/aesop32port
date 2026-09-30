@@ -102,9 +102,10 @@ so the game receives `SYS_MOUSEMOVE`/`SYS_CLICK`/`SYS_KEYDOWN`/
 `SYS_TIMER` events and hit-tests the menu. The main menu renders
 through the real drawing path (`VFX_shape_draw`/`VFX_shape_transform`
 → window buffers → `VFX_pane_refresh` → DAC palette → texture),
-including the zoom-in intro animation. Known issue: the menu program
-tears itself down after ~6s (see git history; likely related to the
-0x4F0 BDA magic the bytecode dispatches on).
+including the zoom-in intro animation. The in-game cursor follows the
+mouse across the whole screen (the display scans out of video RAM at
+60 Hz from the yield hook, VGA-style) and merges correctly with menu
+refreshes; clicking "Abandon Quest" quits cleanly.
 
 ### Sprite dumps
 
@@ -151,7 +152,7 @@ lifecycle, palette handling, EOB3 shape (RLE) decoding.
 
 Still stubbed (grep for `[STUB]`), by file:
 
-- `vfx.c` — 58 (stencils, panes: wipe/copy/scroll, fonts, fades)
+- `vfx.c` — 56 (stencils, pane scroll, fonts, fades)
 - `eye.c` — 11 (game math/effects)
 - `sound32.c` — 10 (AIL/MOD sound)
 - `graphics.c` — 3, `rtsystem.c` — 2

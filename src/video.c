@@ -62,6 +62,7 @@ static uint32_t key_tail = 0;
 
 static uint32_t next_frame_tick = 0;
 static uint32_t last_poll_tick = 0;
+static uint32_t next_scan_tick = 0;
 static uint32_t present_count = 0;
 
 //
@@ -338,7 +339,7 @@ void video_poll_events(void)
       float fx, fy;
       uint32_t state = SDL_GetMouseState(&mx, &my);
 
-      SDL_RenderWindowToLogical(sdl_renderer, (float)mx, (float)my, &fx, &fy);
+      SDL_RenderWindowToLogical(sdl_renderer, mx, my, &fx, &fy);
 
       if (fx < 0.0f)
          fx = 0.0f;
@@ -446,15 +447,35 @@ void video_window_refresh(WINDOW *src, int32_t x0, int32_t y0, int32_t x1, int32
 
    video_clip_to_screen(&x0, &y0, &x1, &y1);
 
+   //
+   // Source offset rule: when the rect fits inside the window bounds,
+   // the buffer is screen-aligned and the rect coords are buffer
+   // coords; otherwise the window is rect-sized (the mouse work/save
+   // windows) and its content starts at local (0,0)
+   //
+
+   int32_t sx, sy;
+
+   if (x1 <= src->x_max && y1 <= src->y_max)
+   {
+      sx = x0;
+      sy = y0;
+   }
+   else
+   {
+      sx = 0;
+      sy = 0;
+   }
+
    int32_t w_width = src->x_max + 1;
    int32_t w_height = src->y_max + 1;
    int32_t copy_w = x1 - x0 + 1;
    int32_t copy_h = y1 - y0 + 1;
 
-   if (copy_w > w_width)
-      copy_w = w_width;
-   if (copy_h > w_height)
-      copy_h = w_height;
+   if (sx + copy_w > w_width)
+      copy_w = w_width - sx;
+   if (sy + copy_h > w_height)
+      copy_h = w_height - sy;
 
    if (copy_w <= 0 || copy_h <= 0)
       return;
@@ -462,7 +483,7 @@ void video_window_refresh(WINDOW *src, int32_t x0, int32_t y0, int32_t x1, int32
    for (int32_t row = 0; row < copy_h; row++)
    {
       memcpy(video_screen_buffer + ((y0 + row) * SCREEN_WIDTH) + x0,
-             src->buffer + (row * w_width),
+             src->buffer + ((sy + row) * w_width) + sx,
              (size_t)copy_w);
    }
 }
@@ -483,11 +504,30 @@ void video_window_read(WINDOW *dest, int32_t x0, int32_t y0, int32_t x1, int32_t
    if (copy_w <= 0 || copy_h <= 0)
       return;
 
+   //
+   // Same source rule as video_window_refresh: a rect that fits the
+   // destination window reads at the rect coords (screen-aligned
+   // buffer); a rect-sized window (mouse save/work) stores at (0,0)
+   //
+
+   int32_t dx, dy;
+
+   if (x1 <= dest->x_max && y1 <= dest->y_max)
+   {
+      dx = x0;
+      dy = y0;
+   }
+   else
+   {
+      dx = 0;
+      dy = 0;
+   }
+
    int32_t d_width = dest->x_max + 1;
 
    for (int32_t row = 0; row < copy_h; row++)
    {
-      memcpy(dest->buffer + (row * d_width),
+      memcpy(dest->buffer + ((dy + row) * d_width) + dx,
              video_screen_buffer + ((y0 + row) * SCREEN_WIDTH) + x0,
              (size_t)copy_w);
    }
@@ -512,7 +552,7 @@ void video_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_
 
    //
    // The pane rect is the window's placement on screen: clip the
-   // refresh region to it, then convert to pane-local coordinates
+   // refresh region to it
    //
 
    if (x0 < target->x0)
@@ -526,17 +566,36 @@ void video_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_
 
    video_clip_to_screen(&x0, &y0, &x1, &y1);
 
+   //
+   // Source offset rule (see video_window_refresh): subwindow panes
+   // share their owner's screen-aligned buffer, so a rect that fits
+   // the window bounds reads at the rect coords; a pane-sized buffer
+   // (assign_window windows) reads pane-locally. For the assign_window
+   // case the rect is the whole window, so both give (0,0).
+   //
+
+   int32_t sx, sy;
+
+   if (x1 <= w->x_max && y1 <= w->y_max)
+   {
+      sx = x0;
+      sy = y0;
+   }
+   else
+   {
+      sx = x0 - target->x0;
+      sy = y0 - target->y0;
+   }
+
    int32_t w_width = w->x_max + 1;
    int32_t w_height = w->y_max + 1;
-   int32_t lx = x0 - target->x0;
-   int32_t ly = y0 - target->y0;
    int32_t copy_w = x1 - x0 + 1;
    int32_t copy_h = y1 - y0 + 1;
 
-   if (lx + copy_w > w_width)
-      copy_w = w_width - lx;
-   if (ly + copy_h > w_height)
-      copy_h = w_height - ly;
+   if (sx + copy_w > w_width)
+      copy_w = w_width - sx;
+   if (sy + copy_h > w_height)
+      copy_h = w_height - sy;
 
    if (copy_w <= 0 || copy_h <= 0)
       return;
@@ -544,7 +603,7 @@ void video_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_
    for (int32_t row = 0; row < copy_h; row++)
    {
       memcpy(video_screen_buffer + ((y0 + row) * SCREEN_WIDTH) + x0,
-             w->buffer + ((ly + row) * w_width) + lx,
+             w->buffer + ((sy + row) * w_width) + sx,
              (size_t)copy_w);
    }
 }
@@ -620,6 +679,26 @@ int32_t video_yield(void)
       video_poll_events();
    }
 
+   //
+   // Continuous scan-out: the DOS VGA signal displayed video RAM at
+   // 60Hz regardless of what the game did; the display must too, or
+   // direct-to-video-RAM drawing (the mouse cursor) is invisible
+   // until the next game-driven present.
+   //
+
+   if (next_scan_tick == 0 || (int32_t)(now - next_scan_tick) >= 0)
+   {
+      if (next_scan_tick == 0)
+         next_scan_tick = now + VIDEO_FRAME_MS;
+      else
+         next_scan_tick += VIDEO_FRAME_MS;
+
+      if ((int32_t)(now - next_scan_tick) >= 0)
+         next_scan_tick = now + VIDEO_FRAME_MS; // fell behind: re-anchor
+
+      video_present();
+   }
+
    return video_quit;
 }
 
@@ -628,7 +707,7 @@ void video_warp_mouse(int32_t x, int32_t y)
    if (sdl_window == NULL)
       return;
 
-   SDL_WarpMouseInWindow(sdl_window, (float)x, (float)y);
+   SDL_WarpMouseInWindow(sdl_window, x, y);
 
    // Update the recorded state immediately so MOUSE_serve() sees the
    // new position before the next event pump

@@ -147,7 +147,16 @@ void GIL2VFX_release_window(uint32_t wnd)
    {
       if (windows[wnd].buffer != NULL)
       {
-         mem_free(windows[wnd].buffer);
+         //
+         // Window 0 is the screen: its buffer belongs to the video
+         // layer (video.c), not the AESOP heap. The original mem_free'd
+         // 0x0A0000 here, which DOS's unprotected allocator silently
+         // tolerated; glibc aborts on the later double free.
+         //
+
+         if (wnd != 0)
+            mem_free(windows[wnd].buffer);
+
          windows[wnd].buffer = NULL;
       }
    }
