@@ -13,12 +13,28 @@
 #include <stdint.h>
 #include <SDL2/SDL.h>
 
+#include "vfx.h" // RGB / WINDOW / PANE types + driver pointer signatures
+
 extern int32_t SCREEN_WIDTH;
 extern int32_t SCREEN_HEIGHT;
 
 extern SDL_Window *sdl_window;
 extern SDL_Renderer *sdl_renderer;
 extern SDL_Texture *sdl_texture;
+
+//
+// The "video RAM": a 320x200 8-bit palettized framebuffer. All VFX
+// drawing targets ultimately refresh into this buffer, and
+// video_present() converts it through the DAC palette to the display
+// texture. GIL2VFX_init() points windows[0].buffer (the original VGA
+// segment 0xA0000) at it.
+//
+extern uint8_t *video_screen_buffer;
+
+//
+// The current DAC palette, as 8-bit RGB components
+//
+extern RGB video_dac[256];
 
 // Set by video_poll_events() when the user requests shutdown
 // (window close or ESC).
@@ -49,6 +65,31 @@ int32_t video_yield(void);
 // cadence, exactly where the DOS build throttled itself.
 void video_wait_vblank(void);
 void video_wait_vblank_leading(void);
+
+//
+// Driver implementations for the remaining VFX function pointers
+// (assigned in video_init). Contracts derived from the original
+// MOUSE.C call sites:
+//
+//   VFX_window_refresh(src, x0,y0,x1,y1) — blit src->buffer from local
+//     (0,0) (stride src->x_max+1) to the screen at (x0,y0), sized by
+//     the rect. A window whose buffer IS the screen buffer refreshes
+//     as a no-op.
+//   VFX_window_read(dest, x0,y0,x1,y1) — copy the screen rect into
+//     dest->buffer at local (0,0), rows packed at dest->x_max+1.
+//   VFX_pane_refresh(target, x0,y0,x1,y1) — blit target's window
+//     buffer, pane-local coords (rect minus the pane origin), to the
+//     screen at (x0,y0).
+//   VFX_area_wipe(x0,y0,x1,y1,color) — fill the screen rect.
+//   VFX_DAC_write/read — palette; write takes raw 6-bit VGA components
+//     (see set_palette()) and scales to 8-bit, as the hardware did.
+//
+void video_window_refresh(WINDOW *src, int32_t x0, int32_t y0, int32_t x1, int32_t y1);
+void video_window_read(WINDOW *dest, int32_t x0, int32_t y0, int32_t x1, int32_t y1);
+void video_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1);
+void video_area_wipe(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color);
+void video_DAC_write(int32_t color_number, RGB *triplet);
+void video_DAC_read(int32_t color_number, RGB *triplet);
 
 //
 // Pointer state, recorded by the event pump. This is the SDL stand-in

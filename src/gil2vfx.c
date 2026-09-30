@@ -97,8 +97,9 @@ void GIL2VFX_init()
 
    bitmap_buffer = mem_alloc(320 * 200);
 
-   // Tom: segfault?
-   windows[0].buffer = (void *)0x0a0000; // Page 1 = 0
+   // The screen window's buffer is the video layer's "video RAM"
+   // (the original pointed it at the VGA segment, 0x0A0000)
+   windows[0].buffer = video_screen_buffer;
    // LUM WINDOW structure changes
    // windows[0].x0 = 0;
    // windows[0].y0 = 0;

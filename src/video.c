@@ -9,10 +9,12 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <SDL2/SDL.h>
 
 #include "video.h"
+#include "globals.h" // test_palette (initial DAC contents)
 
 int32_t SCREEN_WIDTH = 0;
 int32_t SCREEN_HEIGHT = 0;
@@ -20,6 +22,10 @@ int32_t SCREEN_HEIGHT = 0;
 SDL_Window *sdl_window = NULL;
 SDL_Renderer *sdl_renderer = NULL;
 SDL_Texture *sdl_texture = NULL;
+
+uint8_t *video_screen_buffer = NULL;
+
+RGB video_dac[256];
 
 volatile int video_quit = 0;
 
@@ -56,6 +62,28 @@ static uint32_t key_tail = 0;
 
 static uint32_t next_frame_tick = 0;
 static uint32_t last_poll_tick = 0;
+static uint32_t present_count = 0;
+
+//
+// 8-bit ARGB palette lookup, kept in sync with video_dac by
+// video_DAC_write(); video_present() converts the screen buffer
+// through this table
+//
+
+static uint32_t dac_argb[256];
+
+static void video_dac_init_from_test_palette(void)
+{
+   for (int32_t i = 0; i < 256; i++)
+   {
+      video_dac[i] = test_palette.colors[i];
+
+      dac_argb[i] = (255u << 24) |
+                    ((uint32_t)video_dac[i].r << 16) |
+                    ((uint32_t)video_dac[i].g << 8) |
+                    (uint32_t)video_dac[i].b;
+   }
+}
 
 //
 // Map an SDL keycode to a DOS-style key word (ASCII in the low byte,
@@ -178,6 +206,24 @@ int32_t video_init(const char *title, int32_t width, int32_t height)
       return -1;
    }
 
+   //
+   // Allocate the "video RAM" and seed the DAC palette with the
+   // test palette (the game's set_palette() calls overwrite it via
+   // VFX_DAC_write as soon as it runs)
+   //
+
+   video_screen_buffer = malloc((size_t)(SCREEN_WIDTH * SCREEN_HEIGHT));
+   if (video_screen_buffer == NULL)
+   {
+      printf("[video] video_init: could not allocate screen buffer\n");
+      video_shutdown();
+      return -1;
+   }
+
+   memset(video_screen_buffer, 0, (size_t)(SCREEN_WIDTH * SCREEN_HEIGHT));
+
+   video_dac_init_from_test_palette();
+
    // Start with a black screen
    {
       void *pixels;
@@ -199,6 +245,41 @@ int32_t video_init(const char *title, int32_t width, int32_t height)
 
 void video_shutdown(void)
 {
+   // TEMP DEBUG: dump final screen buffer state
+   if (video_screen_buffer != NULL)
+   {
+      FILE *f = fopen("../misc-files/extracted/final_screen.ppm", "wb");
+
+      if (f != NULL)
+      {
+         int32_t nonzero = 0;
+
+         for (int32_t i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++)
+            if (video_screen_buffer[i])
+               nonzero++;
+
+         fprintf(f, "P6\n%d %d\n255\n", SCREEN_WIDTH, SCREEN_HEIGHT);
+
+         for (int32_t i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++)
+         {
+            RGB *c = &video_dac[video_screen_buffer[i]];
+            fputc(c->r, f);
+            fputc(c->g, f);
+            fputc(c->b, f);
+         }
+
+         fclose(f);
+
+         printf("[video] shutdown: final buffer nonzero=%i presents=%u\n", nonzero, present_count);
+      }
+   }
+
+   if (video_screen_buffer != NULL)
+   {
+      free(video_screen_buffer);
+      video_screen_buffer = NULL;
+   }
+
    if (sdl_texture != NULL)
    {
       SDL_DestroyTexture(sdl_texture);
@@ -278,11 +359,252 @@ void video_poll_events(void)
 
 void video_present(void)
 {
-   if (sdl_renderer == NULL || sdl_texture == NULL)
+   if (sdl_renderer == NULL || sdl_texture == NULL || video_screen_buffer == NULL)
       return;
+
+   //
+   // Convert the 8-bit palettized screen buffer to the display texture
+   // through the current DAC palette
+   //
+
+   void *pixels;
+   int pitch;
+
+   if (SDL_LockTexture(sdl_texture, NULL, &pixels, &pitch) == 0)
+   {
+      uint32_t *dst = (uint32_t *)pixels;
+      int32_t dst_stride = pitch / 4;
+
+      for (int32_t y = 0; y < SCREEN_HEIGHT; y++)
+      {
+         const uint8_t *src_row = video_screen_buffer + (y * SCREEN_WIDTH);
+         uint32_t *dst_row = dst + (y * dst_stride);
+
+         for (int32_t x = 0; x < SCREEN_WIDTH; x++)
+            dst_row[x] = dac_argb[src_row[x]];
+      }
+
+      SDL_UnlockTexture(sdl_texture);
+   }
+
+   present_count++;
+
+   // TEMP DEBUG: report first non-empty present
+   {
+      static int reported = 0;
+
+      if (!reported)
+      {
+         int32_t nonzero = 0;
+
+         for (int32_t i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++)
+            if (video_screen_buffer[i])
+               nonzero++;
+
+         if (nonzero > 0)
+         {
+            printf("[video] present: first non-empty frame, nonzero=%i\n", nonzero);
+            reported = 1;
+         }
+      }
+   }
 
    SDL_RenderCopy(sdl_renderer, sdl_texture, NULL, NULL);
    SDL_RenderPresent(sdl_renderer);
+}
+
+//
+// VFX driver implementations (see video.h for the contracts)
+//
+
+static void video_clip_to_screen(int32_t *x0, int32_t *y0, int32_t *x1, int32_t *y1)
+{
+   if (*x0 < 0)
+      *x0 = 0;
+   if (*y0 < 0)
+      *y0 = 0;
+   if (*x1 > SCREEN_WIDTH - 1)
+      *x1 = SCREEN_WIDTH - 1;
+   if (*y1 > SCREEN_HEIGHT - 1)
+      *y1 = SCREEN_HEIGHT - 1;
+}
+
+void video_window_refresh(WINDOW *src, int32_t x0, int32_t y0, int32_t x1, int32_t y1)
+{
+   printf("[video] video_window_refresh: src=%p x0=%i y0=%i x1=%i y1=%i\n",
+          (void *)src, x0, y0, x1, y1);
+
+   if (video_screen_buffer == NULL || src == NULL || src->buffer == NULL)
+      return;
+
+   //
+   // A window whose buffer IS the screen buffer is already on screen
+   //
+
+   if (src->buffer == video_screen_buffer)
+      return;
+
+   video_clip_to_screen(&x0, &y0, &x1, &y1);
+
+   int32_t w_width = src->x_max + 1;
+   int32_t w_height = src->y_max + 1;
+   int32_t copy_w = x1 - x0 + 1;
+   int32_t copy_h = y1 - y0 + 1;
+
+   if (copy_w > w_width)
+      copy_w = w_width;
+   if (copy_h > w_height)
+      copy_h = w_height;
+
+   if (copy_w <= 0 || copy_h <= 0)
+      return;
+
+   for (int32_t row = 0; row < copy_h; row++)
+   {
+      memcpy(video_screen_buffer + ((y0 + row) * SCREEN_WIDTH) + x0,
+             src->buffer + (row * w_width),
+             (size_t)copy_w);
+   }
+}
+
+void video_window_read(WINDOW *dest, int32_t x0, int32_t y0, int32_t x1, int32_t y1)
+{
+   printf("[video] video_window_read: dest=%p x0=%i y0=%i x1=%i y1=%i\n",
+          (void *)dest, x0, y0, x1, y1);
+
+   if (video_screen_buffer == NULL || dest == NULL || dest->buffer == NULL)
+      return;
+
+   video_clip_to_screen(&x0, &y0, &x1, &y1);
+
+   int32_t copy_w = x1 - x0 + 1;
+   int32_t copy_h = y1 - y0 + 1;
+
+   if (copy_w <= 0 || copy_h <= 0)
+      return;
+
+   int32_t d_width = dest->x_max + 1;
+
+   for (int32_t row = 0; row < copy_h; row++)
+   {
+      memcpy(dest->buffer + (row * d_width),
+             video_screen_buffer + ((y0 + row) * SCREEN_WIDTH) + x0,
+             (size_t)copy_w);
+   }
+}
+
+void video_pane_refresh(PANE *target, int32_t x0, int32_t y0, int32_t x1, int32_t y1)
+{
+   printf("[video] video_pane_refresh: target=%p x0=%i y0=%i x1=%i y1=%i\n",
+          (void *)target, x0, y0, x1, y1);
+
+   if (video_screen_buffer == NULL || target == NULL || target->window == NULL)
+      return;
+
+   WINDOW *w = target->window;
+
+   //
+   // The screen window's buffer IS the screen buffer
+   //
+
+   if (w->buffer == video_screen_buffer)
+      return;
+
+   //
+   // The pane rect is the window's placement on screen: clip the
+   // refresh region to it, then convert to pane-local coordinates
+   //
+
+   if (x0 < target->x0)
+      x0 = target->x0;
+   if (y0 < target->y0)
+      y0 = target->y0;
+   if (x1 > target->x1)
+      x1 = target->x1;
+   if (y1 > target->y1)
+      y1 = target->y1;
+
+   video_clip_to_screen(&x0, &y0, &x1, &y1);
+
+   int32_t w_width = w->x_max + 1;
+   int32_t w_height = w->y_max + 1;
+   int32_t lx = x0 - target->x0;
+   int32_t ly = y0 - target->y0;
+   int32_t copy_w = x1 - x0 + 1;
+   int32_t copy_h = y1 - y0 + 1;
+
+   if (lx + copy_w > w_width)
+      copy_w = w_width - lx;
+   if (ly + copy_h > w_height)
+      copy_h = w_height - ly;
+
+   if (copy_w <= 0 || copy_h <= 0)
+      return;
+
+   for (int32_t row = 0; row < copy_h; row++)
+   {
+      memcpy(video_screen_buffer + ((y0 + row) * SCREEN_WIDTH) + x0,
+             w->buffer + ((ly + row) * w_width) + lx,
+             (size_t)copy_w);
+   }
+}
+
+void video_area_wipe(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color)
+{
+   printf("[video] video_area_wipe: x0=%i y0=%i x1=%i y1=%i color=%i\n",
+          x0, y0, x1, y1, color);
+
+   if (video_screen_buffer == NULL)
+      return;
+
+   video_clip_to_screen(&x0, &y0, &x1, &y1);
+
+   int32_t copy_w = x1 - x0 + 1;
+   int32_t copy_h = y1 - y0 + 1;
+
+   if (copy_w <= 0 || copy_h <= 0)
+      return;
+
+   for (int32_t row = 0; row < copy_h; row++)
+   {
+      memset(video_screen_buffer + ((y0 + row) * SCREEN_WIDTH) + x0,
+             (uint8_t)color,
+             (size_t)copy_w);
+   }
+}
+
+void video_DAC_write(int32_t color_number, RGB *triplet)
+{
+   if (color_number < 0 || color_number > 255 || triplet == NULL)
+      return;
+
+   //
+   // The game sends raw 6-bit VGA DAC components (see set_palette());
+   // scale to 8-bit for the display palette, as the VGA hardware did
+   //
+
+   video_dac[color_number].r = (uint8_t)((triplet->r << 2) | (triplet->r >> 4));
+   video_dac[color_number].g = (uint8_t)((triplet->g << 2) | (triplet->g >> 4));
+   video_dac[color_number].b = (uint8_t)((triplet->b << 2) | (triplet->b >> 4));
+
+   dac_argb[color_number] = (255u << 24) |
+                            ((uint32_t)video_dac[color_number].r << 16) |
+                            ((uint32_t)video_dac[color_number].g << 8) |
+                            (uint32_t)video_dac[color_number].b;
+}
+
+void video_DAC_read(int32_t color_number, RGB *triplet)
+{
+   if (color_number < 0 || color_number > 255 || triplet == NULL)
+      return;
+
+   //
+   // Deviation from the original: the VGA hardware read back 6-bit
+   // components, this returns the 8-bit display palette. Only matters
+   // for the (dormant) fade round-trips; revisit with those.
+   //
+
+   *triplet = video_dac[color_number];
 }
 
 int32_t video_yield(void)

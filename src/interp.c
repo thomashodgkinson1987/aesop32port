@@ -207,6 +207,12 @@ int main(int argc, char *argv[]) // Tom: added
    // window-close stay responsive.
    VFX_wait_vblank = video_wait_vblank;
    VFX_wait_vblank_leading = video_wait_vblank_leading;
+   VFX_window_refresh = video_window_refresh;
+   VFX_window_read = video_window_read;
+   VFX_pane_refresh = video_pane_refresh;
+   VFX_area_wipe = video_area_wipe;
+   VFX_DAC_write = video_DAC_write;
+   VFX_DAC_read = video_DAC_read;
    RT_yield = host_yield;
 
    //////

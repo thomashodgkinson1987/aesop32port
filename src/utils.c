@@ -172,37 +172,39 @@ void debug_shape_table(const void *shape_table)
 
 void debug_draw_shape(const void *shape_table, int32_t shape_number, int32_t hotX, int32_t hotY)
 {
-   (void)hotX;
-   (void)hotY;
-
    if (shape_table_get_shape_count(shape_table) == 0)
       return;
 
    const void *shape = shape_table_get_shape(shape_table, shape_number);
    uint8_t *decoded_shape_data = decode_shape_data(shape);
 
-   void *pixels;
-   int pitch;
-   if (SDL_LockTexture(sdl_texture, NULL, &pixels, &pitch) == 0)
+   //
+   // Temporary test path (until VFX_shape_draw is real): blit the
+   // decoded shape's palette indices into the screen buffer at the
+   // requested position; video_present() converts through the DAC
+   // palette
+   //
+
+   if (video_screen_buffer != NULL)
    {
-      uint32_t *pixels_ptr = (uint32_t *)pixels;
+      static int32_t dbg_count = 0;
+
+      if (dbg_count < 6)
+      {
+         printf("[utils] debug_draw_shape: num=%i xmax=%i ymax=%i hotX=%i hotY=%i first_px=%i\n",
+                shape_number, shape_get_xmax(shape), shape_get_ymax(shape),
+                hotX, hotY, decoded_shape_data[0]);
+         dbg_count++;
+      }
+
       for (int32_t y = 0; y < shape_get_ymax(shape); ++y)
       {
          for (int32_t x = 0; x < shape_get_xmax(shape); ++x)
          {
             uint8_t decoded_pixel = decoded_shape_data[y * shape_get_xmax(shape) + x];
-            if (decoded_pixel == 0)
-            {
-               pixels_ptr[y * (pitch / 4) + x] = 0;
-            }
-            else
-            {
-               RGB rgb = test_palette.colors[decoded_pixel];
-               pixels_ptr[y * (pitch / 4) + x] = (255 << 24) | (rgb.r << 16) | (rgb.g << 8) | rgb.b;
-            }
+            video_screen_buffer[(hotY + y) * SCREEN_WIDTH + (hotX + x)] = decoded_pixel;
          }
       }
-      SDL_UnlockTexture(sdl_texture);
    }
 
    free(decoded_shape_data);
