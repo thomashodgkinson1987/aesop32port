@@ -309,7 +309,7 @@ extern void VFX_ellipse_fill(PANE *pane, int32_t xc, int32_t yc, int32_t width, 
 extern void VFX_point_transform(POINT *in, POINT *out, POINT *origin, int32_t rot, int32_t x_scale, int32_t y_scale);
 
 extern void VFX_Cos_Sin(int32_t Angle, int16_t *Cos, int16_t *Sin);
-extern void VFX_fixed_mul(int16_t M1, int16_t M2, int16_t *result);
+extern void VFX_fixed_mul(int32_t M1, int32_t M2, int32_t *result); // FIXED16 16:16
 
 extern int32_t VFX_font_height(void *font);
 extern int32_t VFX_character_width(void *font, int32_t character);

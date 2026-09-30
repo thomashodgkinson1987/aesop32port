@@ -99,8 +99,12 @@ Input flows too: `video.c` records pointer/keyboard state, and the
 interpreter's yield hook drives `MOUSE_serve()` and the 60 Hz interface
 timer (the stand-ins for the DOS INT 33h callback and the AIL timer),
 so the game receives `SYS_MOUSEMOVE`/`SYS_CLICK`/`SYS_KEYDOWN`/
-`SYS_TIMER` events and hit-tests the menu. Visible feedback (cursor
-sprite, highlights) still awaits the VFX shape-draw stubs.
+`SYS_TIMER` events and hit-tests the menu. The main menu renders
+through the real drawing path (`VFX_shape_draw`/`VFX_shape_transform`
+→ window buffers → `VFX_pane_refresh` → DAC palette → texture),
+including the zoom-in intro animation. Known issue: the menu program
+tears itself down after ~6s (see git history; likely related to the
+0x4F0 BDA magic the bytecode dispatches on).
 
 ### Sprite dumps
 
@@ -147,7 +151,7 @@ lifecycle, palette handling, EOB3 shape (RLE) decoding.
 
 Still stubbed (grep for `[STUB]`), by file:
 
-- `vfx.c` — 68 (bulk of the VFX video API: stencils, panes, refreshes)
+- `vfx.c` — 58 (stencils, panes: wipe/copy/scroll, fonts, fades)
 - `eye.c` — 11 (game math/effects)
 - `sound32.c` — 10 (AIL/MOD sound)
 - `graphics.c` — 3, `rtsystem.c` — 2

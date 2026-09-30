@@ -296,11 +296,8 @@ void GIL2VFX_draw_bitmap(
 
       if (x_scale != 0x10000 || y_scale != 0x10000)
       {
-         // VFX_fixed_mul(VFX_shape_bounds(shapes, shape_num) & 0xffff0000, 0x10000 - x_scale, &xs); // Tom: commented out
-         VFX_fixed_mul(VFX_shape_bounds(shapes, shape_num) & 0xffff0000, 0x10000 - x_scale, (int16_t *)&xs); // Tom: new version
-
-         // VFX_fixed_mul(VFX_shape_bounds(shapes, shape_num) << 16, 0x10000 - y_scale, &ys); // Tom: commented out
-         VFX_fixed_mul(VFX_shape_bounds(shapes, shape_num) << 16, 0x10000 - y_scale, (int16_t *)&ys); // Tom: new version
+         VFX_fixed_mul(VFX_shape_bounds(shapes, shape_num) & 0xffff0000, 0x10000 - x_scale, &xs);
+         VFX_fixed_mul(VFX_shape_bounds(shapes, shape_num) << 16, 0x10000 - y_scale, &ys);
 
          if (mirror & X_MIRROR)
             xs = -xs;
