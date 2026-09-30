@@ -50,4 +50,28 @@ int32_t video_yield(void);
 void video_wait_vblank(void);
 void video_wait_vblank_leading(void);
 
+//
+// Pointer state, recorded by the event pump. This is the SDL stand-in
+// for the DOS real-mode mouse callback stashing button/X/Y words in
+// the BIOS Data Area at 0x4F0: MOUSE_serve() polls it and fires the
+// game's event callbacks. Coordinates are logical pixels
+// (0..SCREEN_WIDTH-1 etc.); buttons: bit0 = left, bit1 = right,
+// bit2 = center.
+//
+extern volatile int32_t video_mouse_x;
+extern volatile int32_t video_mouse_y;
+extern volatile int32_t video_mouse_buttons;
+
+// Warp the pointer and update the recorded state (MOUSE_force_move).
+void video_warp_mouse(int32_t x, int32_t y);
+
+//
+// Keyboard ring buffer — the stand-in for the BIOS keyboard buffer
+// (0x41A/0x41C/0x41E). Keys are DOS-style words: ASCII in the low
+// byte, or set-1 scan code in the high byte (low byte 0) for extended
+// keys.
+//
+int32_t video_key_pending(void);
+uint16_t video_key_read(void);
+
 #endif

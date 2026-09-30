@@ -52,6 +52,8 @@
 
 #include "eye.h" // Application code resource header
 
+#include "video.h"
+
 // Tom: added
 #ifndef max
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -372,9 +374,18 @@ uint32_t dice(int32_t argcnt, uint32_t ndice, uint32_t nsides, uint32_t bonus)
 
 uint32_t inkey(void)
 {
-   printf("[STUB] [rtcode] inkey: return=0\n");
+   //
+   // Original: return (ULONG) kbhit(); — nonzero if a key is waiting
+   // in the BIOS keyboard buffer, now the SDL video layer's key queue.
+   // The key itself is consumed by the SYS_KEYDOWN event path in
+   // intrface.c.
+   //
 
-   return 0;
+   uint32_t ret = (video_key_pending() != 0);
+
+   printf("[rtcode] inkey: return=%u\n", ret);
+
+   return ret;
 }
 
 uint32_t absv(int32_t argcnt, int32_t val)

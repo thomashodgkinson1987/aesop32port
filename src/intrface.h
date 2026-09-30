@@ -20,5 +20,6 @@ void hide_mouse(void);
 // void copy_mouse(int window); // Tom: commented out, not used?
 uint32_t mouse_in_window(int32_t argcnt, uint32_t wnd);
 void refresh_window(int32_t argcnt, uint32_t src, uint32_t target);
+void interface_timer_serve(void);
 
 #endif

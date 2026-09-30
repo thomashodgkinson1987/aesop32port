@@ -52,16 +52,17 @@
 #define NO_OLD_SYS_FUNCTIONS
 
 #include "mouse.h"
+#include "video.h"
 
 //
 // Mouse system variables
 //
 
-static int32_t volatile x;
-static int32_t volatile y;
-static int32_t volatile left;
-static int32_t volatile right;
-static int32_t volatile center;
+static int32_t volatile x = -1;
+static int32_t volatile y = -1;
+static int32_t volatile left = -1;
+static int32_t volatile right = -1;
+static int32_t volatile center = -1;
 
 static int32_t volatile last_x;
 static int32_t volatile last_y;
@@ -89,7 +90,7 @@ static int32_t hot_x;
 static int32_t hot_y;
 static int32_t scrn_max_x;
 static int32_t scrn_max_y;
-static int32_t hidecnt;
+static int32_t hidecnt = -1;
 static int32_t excluded;
 static RECT exclude_region;
 // LUM added
@@ -315,7 +316,15 @@ static void MOUSE_exclude_area(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 
 static int32_t MOUSE_install_handler(void)
 {
-   printf("[STUB] [mouse] MOUSE_install_handler: return=1\n");
+   //
+   // The original installed a real-mode INT 33h event callback that
+   // stashed the button/X/Y words into the BIOS Data Area at 0x4F0
+   // whenever the pointer state changed. The SDL video layer records
+   // that state continuously (video.c), so there is nothing to
+   // install — kept for API parity.
+   //
+
+   printf("[mouse] MOUSE_install_handler: SDL driver records pointer state\n");
 
    // static unsigned char real_stub[] =
    //     {
@@ -377,7 +386,12 @@ static int32_t MOUSE_install_handler(void)
 
 static void MOUSE_remove_handler(void)
 {
-   printf("[STUB] [mouse] MOUSE_remove_handler\n");
+   //
+   // Nothing to remove — the SDL video layer has no uninstallable
+   // event stub (see MOUSE_install_handler). Kept for API parity.
+   //
+
+   printf("[mouse] MOUSE_remove_handler\n");
 
    // //
    // // Rational Systems DOS/4GW version
@@ -643,7 +657,7 @@ void MOUSE_status(int32_t *mx, int32_t *my, int32_t *ml, int32_t *mr, int32_t *m
 
 void MOUSE_force_move(int32_t new_x, int32_t new_y)
 {
-   printf("[STUB] [mouse] MOUSE_force_move: new_x=%i new_y=%i\n", new_x, new_y);
+   printf("[mouse] MOUSE_force_move: new_x=%i new_y=%i\n", new_x, new_y);
 
    // union REGS inregs, outregs; // Tom: commented out
 
@@ -655,16 +669,17 @@ void MOUSE_force_move(int32_t new_x, int32_t new_y)
    //
    // Reset mouse position manually
    //
+   // DOS did INT 33h AX=4 with the coords << 3 (the driver counted in
+   // 1/8-pixel units); SDL reports pixel coords directly, so warp
+   //
 
-   /* Tom: commented out
-   inregs.x.eax = 4;
-   inregs.x.ecx = new_x << 3;
-   inregs.x.edx = new_y << 3;
-   int386(0x33, &inregs, &outregs);
-   */
+   video_warp_mouse(new_x, new_y);
 
    //
    // Initialize shared status variables for new location
+   //
+   // DOS re-read the driver state into the BDA words (INT 33h AX=3);
+   // video_warp_mouse() already updated the recorded state.
    //
 
    /* Tom: commented out
@@ -781,8 +796,6 @@ void MOUSE_timer_serve()
 
 void MOUSE_serve()
 {
-   printf("[mouse] MOUSE_serve\n");
-
    if (locked > 0)
       return;
 
@@ -792,10 +805,15 @@ void MOUSE_serve()
    last_right = right;
    last_center = center;
 
-   // Tom: TODO zeroed for now
-   left = 0;
-   right = 0;
-   center = 0;
+   //
+   // The SDL video layer records the pointer state continuously — the
+   // stand-in for the DOS mouse callback writing the button word to
+   // the BIOS Data Area at 0x4F0
+   //
+
+   left = ((video_mouse_buttons & 0x01) != 0);
+   right = ((video_mouse_buttons & 0x02) != 0);
+   center = ((video_mouse_buttons & 0x04) != 0);
 
    /* Tom: commented out
    left = ((*(int16_t *)0x4f0) & 0x01) != 0;
@@ -816,9 +834,14 @@ void MOUSE_serve()
    last_x = x;
    last_y = y;
 
-   // Tom: TODO zeroed for now
-   x = 0;
-   y = 0;
+   //
+   // The original divided the driver's coords by 8 to get pixels (the
+   // DOS driver counted in 1/8-pixel units — see the << 3 in
+   // MOUSE_force_move); the SDL driver reports pixels directly
+   //
+
+   x = video_mouse_x;
+   y = video_mouse_y;
 
    /* Tom: commented out
    x = (int32_t)(*(int16_t *)0x4f2) >> 3;

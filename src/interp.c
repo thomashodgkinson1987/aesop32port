@@ -45,6 +45,8 @@
 
 #include "video.h"
 #include "vfx.h"
+#include "mouse.h"
+#include "intrface.h"
 
 //
 // Amount of memory to reserve for scaling buffer (64K) + PAGE2 (64K) + misc.
@@ -91,6 +93,21 @@ RTR_class *RTR;
 
 uint32_t HROED;
 uint32_t heap_size;
+
+//
+// Host yield hook: pump SDL events, then serve the mouse and the 60Hz
+// interface timer — the stand-ins for the DOS INT 33h callback and the
+// AIL timer that fed the GIL event queue asynchronously.
+//
+static int32_t host_yield(void)
+{
+   int32_t quit = video_yield();
+
+   MOUSE_serve();
+   interface_timer_serve();
+
+   return quit;
+}
 
 /*************************************************************/
 // void main(int argc, char *argv[]) // Tom: commented out, new version below
@@ -186,10 +203,11 @@ int main(int argc, char *argv[]) // Tom: added
 
    // Register the SDL video layer as the VFX "device driver" (the
    // original assigned these pointers when loading the VFX DLL), and
-   // hook the interpreter yield so ESC / window-close stay responsive.
+   // hook the interpreter yield so input events flow and ESC /
+   // window-close stay responsive.
    VFX_wait_vblank = video_wait_vblank;
    VFX_wait_vblank_leading = video_wait_vblank_leading;
-   RT_yield = video_yield;
+   RT_yield = host_yield;
 
    //////
 

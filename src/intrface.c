@@ -32,6 +32,7 @@
 #include "vfx.h"
 #include "mouse.h"
 #include "gil2vfx.h"
+#include "video.h"
 
 extern VFX_DESC *VFX;
 
@@ -166,9 +167,6 @@ static void timer_callback(void) // Warning: called during IRQ 0
 {
    EVENT *EV;
    unsigned key, scan, ascii;
-   static uint16_t *head = (uint16_t *)0x41aL;
-   static uint16_t *tail = (uint16_t *)0x41cL;
-   static uint16_t *buffer = (uint16_t *)0x41eL;
    (void)scan; // Tom: added, not used?
 
    printf("[intrface] timer_callback\n");
@@ -189,10 +187,15 @@ static void timer_callback(void) // Warning: called during IRQ 0
       }
    }
 
-   if ((*head != *tail) && (!in_BIOS))
+   //
+   // The BIOS keyboard buffer has been replaced by the SDL video
+   // layer's key queue (video.c): a non-empty queue means at least
+   // one key is waiting, exactly as a head/tail mismatch did
+   //
+
+   if ((!in_BIOS) && video_key_pending())
    {
-      key = buffer[((*head) - 0x1e) / 2];
-      *head = *tail;
+      key = video_key_read();
 
       ascii = key & 0xff;
       scan = key >> 8;
@@ -202,6 +205,28 @@ static void timer_callback(void) // Warning: called during IRQ 0
       else
          add_event(SYS_KEYDOWN, ascii, -1);
    }
+}
+
+/*********************************************************/
+//
+// AIL timer stand-in: the original registered timer_callback with the
+// AIL sound system at 60Hz (AIL_register_timer / AIL_set_timer_frequency
+// in init_interface). The host yield hook calls this instead, gated to
+// the same 60Hz cadence.
+//
+/*********************************************************/
+
+void interface_timer_serve(void)
+{
+   static uint32_t last_tick = 0;
+   uint32_t now = SDL_GetTicks();
+
+   if ((int32_t)(now - last_tick) < (1000 / 60))
+      return;
+
+   last_tick = now;
+
+   timer_callback();
 }
 
 /*********************************************************/

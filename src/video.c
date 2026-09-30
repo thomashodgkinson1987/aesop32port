@@ -24,6 +24,24 @@ SDL_Texture *sdl_texture = NULL;
 volatile int video_quit = 0;
 
 //
+// Pointer state (see video.h)
+//
+
+volatile int32_t video_mouse_x = 0;
+volatile int32_t video_mouse_y = 0;
+volatile int32_t video_mouse_buttons = 0;
+
+//
+// Keyboard ring buffer (see video.h)
+//
+
+#define VIDEO_KEY_QUEUE_SIZE 16
+
+static uint16_t key_queue[VIDEO_KEY_QUEUE_SIZE];
+static uint32_t key_head = 0;
+static uint32_t key_tail = 0;
+
+//
 // Frame cadence, matching the 60Hz VGA refresh the DOS build synced to
 //
 
@@ -38,6 +56,70 @@ volatile int video_quit = 0;
 
 static uint32_t next_frame_tick = 0;
 static uint32_t last_poll_tick = 0;
+
+//
+// Map an SDL keycode to a DOS-style key word (ASCII in the low byte,
+// or set-1 scan code in the high byte for extended keys). Returns 0
+// for keys the game never sees (modifiers etc.).
+//
+// The original posted whatever the BIOS keyboard buffer contained,
+// with extended keys (arrows, F-keys) identified by a zero ASCII byte.
+// Only a minimal subset is mapped so far — enough for menus.
+//
+
+static uint16_t keysym_to_key(SDL_Keycode sym)
+{
+   switch (sym)
+   {
+   case SDLK_UP:       return 0x4800;
+   case SDLK_DOWN:     return 0x5000;
+   case SDLK_LEFT:     return 0x4B00;
+   case SDLK_RIGHT:    return 0x4D00;
+   case SDLK_HOME:     return 0x4700;
+   case SDLK_END:      return 0x4F00;
+   case SDLK_PAGEUP:   return 0x4900;
+   case SDLK_PAGEDOWN: return 0x5100;
+   case SDLK_INSERT:   return 0x5200;
+   case SDLK_DELETE:   return 0x5300;
+   case SDLK_F1:       return 0x3B00;
+   case SDLK_F2:       return 0x3C00;
+   case SDLK_F3:       return 0x3D00;
+   case SDLK_F4:       return 0x3E00;
+   case SDLK_F5:       return 0x3F00;
+   case SDLK_F6:       return 0x4000;
+   case SDLK_F7:       return 0x4100;
+   case SDLK_F8:       return 0x4200;
+   case SDLK_F9:       return 0x4300;
+   case SDLK_F10:      return 0x4400;
+   default:
+      break;
+   }
+
+   if (sym >= 32 && sym <= 126)
+   {
+      if (sym >= 'a' && sym <= 'z' && (SDL_GetModState() & KMOD_SHIFT))
+         sym -= 32;
+
+      return (uint16_t)sym;
+   }
+
+   return 0;
+}
+
+static void video_key_push(const SDL_KeyboardEvent *key)
+{
+   uint16_t key_word = keysym_to_key(key->keysym.sym);
+
+   if (key_word == 0)
+      return;
+
+   // Buffer full: drop the key (the BIOS beeped instead)
+   if ((key_tail + 1) % VIDEO_KEY_QUEUE_SIZE == key_head)
+      return;
+
+   key_queue[key_tail] = key_word;
+   key_tail = (key_tail + 1) % VIDEO_KEY_QUEUE_SIZE;
+}
 
 int32_t video_init(const char *title, int32_t width, int32_t height)
 {
@@ -148,10 +230,49 @@ void video_poll_events(void)
       {
          video_quit = 1;
       }
-      else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
+      else if (e.type == SDL_KEYDOWN)
       {
-         video_quit = 1;
+         if (e.key.keysym.sym == SDLK_ESCAPE)
+         {
+            video_quit = 1;
+         }
+         else
+         {
+            video_key_push(&e.key);
+         }
       }
+   }
+
+   //
+   // Record pointer state — the SDL stand-in for the DOS mouse callback
+   // writing the button/X/Y words to the BIOS Data Area at 0x4F0, 0x4F2
+   // and 0x4F4. Coordinates are converted through the renderer so a
+   // future resizable window stays correct, and clamped to the screen
+   // (the DOS driver clamped at the screen edges too).
+   //
+
+   if (sdl_renderer != NULL)
+   {
+      int mx, my;
+      float fx, fy;
+      uint32_t state = SDL_GetMouseState(&mx, &my);
+
+      SDL_RenderWindowToLogical(sdl_renderer, (float)mx, (float)my, &fx, &fy);
+
+      if (fx < 0.0f)
+         fx = 0.0f;
+      if (fy < 0.0f)
+         fy = 0.0f;
+      if (fx > (float)(SCREEN_WIDTH - 1))
+         fx = (float)(SCREEN_WIDTH - 1);
+      if (fy > (float)(SCREEN_HEIGHT - 1))
+         fy = (float)(SCREEN_HEIGHT - 1);
+
+      video_mouse_x = (int32_t)fx;
+      video_mouse_y = (int32_t)fy;
+      video_mouse_buttons = ((state & SDL_BUTTON_LMASK) ? 0x01 : 0) |
+                            ((state & SDL_BUTTON_RMASK) ? 0x02 : 0) |
+                            ((state & SDL_BUTTON_MMASK) ? 0x04 : 0);
    }
 }
 
@@ -178,6 +299,37 @@ int32_t video_yield(void)
    }
 
    return video_quit;
+}
+
+void video_warp_mouse(int32_t x, int32_t y)
+{
+   if (sdl_window == NULL)
+      return;
+
+   SDL_WarpMouseInWindow(sdl_window, (float)x, (float)y);
+
+   // Update the recorded state immediately so MOUSE_serve() sees the
+   // new position before the next event pump
+   video_mouse_x = x;
+   video_mouse_y = y;
+}
+
+int32_t video_key_pending(void)
+{
+   return (key_head != key_tail);
+}
+
+uint16_t video_key_read(void)
+{
+   uint16_t key = 0;
+
+   if (key_head != key_tail)
+   {
+      key = key_queue[key_head];
+      key_head = (key_head + 1) % VIDEO_KEY_QUEUE_SIZE;
+   }
+
+   return key;
 }
 
 //
