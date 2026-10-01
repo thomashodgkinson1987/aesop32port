@@ -32,6 +32,7 @@
 // Tom: added (SDL)
 #include "globals.h"
 
+#include "trace.h"
 #include "defs.h"
 #include "shared.h"
 #include "rtmsg.h"
@@ -119,8 +120,19 @@ int main(int argc, char *argv[]) // Tom: added
    uint32_t code;
    int32_t rtn;
 
-   printf("[interp] main: set stdout to unbuffered\n");
-   setbuf(stdout, NULL);
+   printf("[interp] main: stdout buffering + trace flag\n");
+   aesop_trace_init();
+
+   //
+   // Line-buffered by default so a bounded `make run N` capture still
+   // has its complete tail; under AESOP_TRACE keep stdout unbuffered so
+   // a crash loses no trace lines.
+   //
+
+   if (aesop_trace)
+      setbuf(stdout, NULL);
+   else
+      setvbuf(stdout, NULL, _IOLBF, 0);
 
    printf("[interp] main: set ENABLED to 1\n");
    ENABLED = 1;

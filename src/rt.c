@@ -11,6 +11,7 @@
 #include <execinfo.h>
 
 #include "defs.h"
+#include "trace.h"
 #include "rt.h"
 #include "rtres.h"
 #include "rtsystem.h"
@@ -434,7 +435,7 @@ __handle_msg:
 
         if (trace_opcodes < 0)
         {
-            trace_opcodes = (getenv("AESOP_TRACE") != NULL);
+            trace_opcodes = (aesop_trace != 0);
         }
 
         if (trace_opcodes)
@@ -619,8 +620,17 @@ __handle_msg:
             void *code_addr = *(void **)(ptr_thunk + ebx);
             edi->addr_flat = code_addr;
 
-            printf("  RCRS index=%u function: ", index);
-            backtrace_symbols_fd(&code_addr, 1, 1);
+            //
+            // Hot path: this opcode resolves on every method/message
+            // dispatch.  Symbol backtraces here flooded stdout
+            // (audit item 3.1) — only log under AESOP_TRACE.
+            //
+
+            if (aesop_trace)
+            {
+                printf("  RCRS index=%u function: ", index);
+                backtrace_symbols_fd(&code_addr, 1, 1);
+            }
 
             break;
         }

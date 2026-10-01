@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #include "defs.h"
+#include "trace.h"
 #include "shared.h"
 #include "event.h"
 #include "rtres.h"
@@ -75,14 +76,16 @@ static char *strs[] = {"SYS_FREE",
 
 void ENABLE(void)
 {
-   printf("[event] ENABLE\n");
+   if (aesop_trace)
+      printf("[event] ENABLE\n");
 
    ++ENABLED;
 }
 
 void DISABLE(void)
 {
-   printf("[event] DISABLE\n");
+   if (aesop_trace)
+      printf("[event] DISABLE\n");
 
    --ENABLED;
 }
@@ -105,7 +108,8 @@ int32_t match_parameter(int32_t event_type, int32_t event_parameter, int32_t tes
 {
    int32_t match;
 
-   printf("[event] match_parameter\n");
+   if (aesop_trace)
+      printf("[event] match_parameter\n");
 
    if (event_type == SYS_FREE)
       return 0;
@@ -239,7 +243,8 @@ void delete_notify_request(int32_t client, int32_t message, int32_t event, int32
    NREQ *NR;
    int32_t all_events;
 
-   printf("[event] delete_notify_request\n");
+   if (aesop_trace)
+      printf("[event] delete_notify_request\n");
 
    DISABLE();
 
@@ -490,7 +495,8 @@ EVENT *fetch_event(void)
 {
    EVENT *EV;
 
-   printf("[event] fetch_event\n");
+   if (aesop_trace)
+      printf("[event] fetch_event\n");
 
    DISABLE();
 
@@ -632,7 +638,8 @@ void dispatch_event(void)
       int32_t owner;
    } event_message_descriptor;
 
-   printf("[event] dispatch_event\n");
+   if (aesop_trace)
+      printf("[event] dispatch_event\n");
 
    if ((EV = fetch_event()) == NULL)
       return;
