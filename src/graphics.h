@@ -15,10 +15,13 @@ extern uint16_t in_GIL;
 
 #define NTW 32 // # of text windows available
 
+#define TXTBUF_SIZE 2402 // shared text window buffer (graphics.c)
+extern int8_t txtbuf[TXTBUF_SIZE];
+
 // void dprint(uint32_t argcnt, int8_t *format, ...); // Tom: TODO check argcnt int32_t and uint32_t
 // void sprint(uint32_t argcnt, uint32_t wndnum, int8_t *format, ...); // Tom: TODO check argcnt int32_t and uint32_t
 // void text_color(uint32_t argcnt, uint32_t wndnum, uint32_t current, uint32_t new); // Tom: TODO check argcnt int32_t and uint32_t
-void release_owned_windows(uint32_t owner); // Tom: TODO check argcnt int32_t and uint32_t
+void release_owned_windows(int32_t owner);
 
 void dprint(int32_t argcnt, int8_t *format, ...); // Tom: TODO check argcnt int32_t and uint32_t
 void sprint(int32_t argcnt, uint32_t wndnum, int8_t *format, ...); // Tom: TODO check argcnt int32_t and uint32_t

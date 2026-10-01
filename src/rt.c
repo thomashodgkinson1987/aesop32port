@@ -520,13 +520,20 @@ __handle_msg:
             edi++;
             break;
         case 12: // do_DIV
-            if (edi[0].val != 0)
+            // Guard 0 and INT32_MIN/-1: the latter traps SIGFPE on x86
+            if (edi[0].val != 0 &&
+                !(edi[1].val == INT32_MIN && edi[0].val == -1))
                 edi[1].val /= edi[0].val;
+            else if (edi[0].val == 0)
+                edi[1].val = 0;
             edi++;
             break;
         case 13: // do_MOD
-            if (edi[0].val != 0)
+            if (edi[0].val != 0 &&
+                !(edi[1].val == INT32_MIN && edi[0].val == -1))
                 edi[1].val %= edi[0].val;
+            else if (edi[0].val == 0)
+                edi[1].val = 0;
             edi++;
             break;
         case 14: // do_EXP

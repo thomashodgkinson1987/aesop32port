@@ -12,6 +12,7 @@
 
 #include "vfx.h"
 #include "gil2vfx.h"
+#include "graphics.h"
 
 #include "defs.h"
 #include "rtmsg.h"
@@ -650,15 +651,35 @@ void GIL2VFX_print(int32_t operation, const char *format, ...)
 
    va_start(arglist, format);
 
+   //
+   // Bound every write to the shared txtbuf (TXTBUF_SIZE).  A runaway
+   // string may still clobber the integrity canary bytes at the end of
+   // the buffer (checked by graphics.c), matching the original's
+   // overflow detection, but can no longer write past the array.
+   //
+
    if (operation == BUF)
    {
-      cw = vsprintf(twptr->txtbuf, format, arglist);
+      cw = vsnprintf((char *)twptr->txtbuf, TXTBUF_SIZE, format, arglist);
+      if (cw < 0)
+         cw = 0;
+      if (cw > TXTBUF_SIZE - 1)
+         cw = TXTBUF_SIZE - 1;
       twptr->txtpnt = twptr->txtbuf + cw;
    }
    else if (operation == APP)
    {
-      cw = vsprintf(twptr->txtpnt, format, arglist);
-      twptr->txtpnt += cw;
+      int32_t room = (int32_t)(TXTBUF_SIZE - (twptr->txtpnt - twptr->txtbuf));
+
+      if (room > 0)
+      {
+         cw = vsnprintf((char *)twptr->txtpnt, (size_t)room, format, arglist);
+         if (cw < 0)
+            cw = 0;
+         if (cw > room - 1)
+            cw = room - 1;
+         twptr->txtpnt += cw;
+      }
    }
 }
 

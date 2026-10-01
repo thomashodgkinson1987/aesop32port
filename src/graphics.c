@@ -60,7 +60,7 @@ TEXTWINDOW tw[NTW];
 int32_t tw_refresh[NTW];
 
 int8_t strbuf[256];  // used for string resource buffering
-int8_t txtbuf[2402]; // used for word-wrapped text (also used as
+int8_t txtbuf[TXTBUF_SIZE]; // used for word-wrapped text (also used as
                      // buffer for dot pattern effects in EYE.C!)
                      // Final 2 bytes used for overflow checking
 #define FBEG 0
@@ -184,7 +184,7 @@ void shutdown_graphics(void)
 }
 
 // void release_owned_windows(int32_t owner) // Tom: original
-void release_owned_windows(uint32_t owner) // Tom: new
+void release_owned_windows(int32_t owner) // restored to signed (original was LONG; callers pass -1)
 {
    uint32_t i;
 
@@ -1015,15 +1015,16 @@ void vsprint(int32_t argcnt, uint32_t wndnum, int8_t *format, va_list argptr)
 
          s = RTR_addr(str);
 
-         switch (*(uint16_t *)s)
-         {
-         case ':S':
-            GIL2VFX_print(APP, "%s", &s[2]);
-            break;
+         //
+         // String resources start with the signature 'S', ':' (the
+         // original used the multicharacter constant ':S', which is
+         // implementation-defined).
+         //
 
-         default:
+         if (s[0] == 'S' && s[1] == ':')
+            GIL2VFX_print(APP, "%s", &s[2]);
+         else
             abend(MSG_SRRV);
-         }
 
          RTR_unlock(str);
 
@@ -1057,8 +1058,6 @@ void print(int32_t argcnt, uint32_t wndnum, uint32_t format, ...)
    va_list argptr;
    uint32_t hstring;
    int8_t *p;
-   uint16_t *w;
-
    printf("[graphics] print: argcnt=%i wndnum=%u format=%u\n",
           argcnt, wndnum, format);
 
@@ -1068,17 +1067,14 @@ void print(int32_t argcnt, uint32_t wndnum, uint32_t format, ...)
 
    p = RTR_addr(hstring);
 
-   w = (uint16_t *)p;
-
-   switch (*w)
-   {
-   case ':S':
-      p += 2;
-      break;
-
-   default:
-      abend(MSG_SRRP);
-   }
+   if (p[0] == 'S' && p[1] == ':')
+    {
+       p += 2;
+    }
+    else
+    {
+       abend(MSG_SRRP);
+    }
 
    printf("[graphics] print: string=%s\n", p);
 

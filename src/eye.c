@@ -74,7 +74,7 @@ int8_t DY_offset[6][4] = {{0, 0, 0, 0},
                           {1, 0, -1, 0},
                           {0, 1, 0, -1}};
 
-extern int8_t txtbuf[2400]; // used as dot buffer -- needs 8 * MAXDOTS words
+// txtbuf (shared text/dot buffer) is declared in graphics.h
 
 /*********************************************************/
 int32_t step_X(int32_t argcnt, uint32_t x, uint32_t fdir, uint32_t mtype, uint32_t distance)
@@ -1331,7 +1331,17 @@ void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int
 
    printf("[STUB] [eye] launch: argcnt=%i dirname=%s prgname=%s argn1=%s argn2=%s\n", argcnt, dirname, prgname, argn1, argn2);
 
-   s = *(stag **)0x4fa;
+   //
+   // The original read the handoff-structure pointer from BIOS Data
+   // Area address 0x04FA (inter-application communication area), placed
+   // there by the DOS launcher shell (see EYE.C:1184).  Dereferencing
+   // it under Linux is an instant SIGSEGV, so the structure is
+   // virtualised here; its contents are inert on this platform until
+   // module handoff is actually implemented.
+   //
+
+   static stag virtual_launch_state;
+   s = &virtual_launch_state;
 
    strcpy((char *)dir, (char *)dirname);
    strcpy(s->prg, (char *)prgname);
@@ -1341,7 +1351,9 @@ void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int
    else
       s->arg1[0] = 0;
 
-   if (argn1 != NULL)
+   // The 1993 original (EYE.C:1194) checked argn1 != NULL here as well,
+   // dropping arg2 or copying from NULL; fixed to argn2 deliberately.
+   if (argn2 != NULL)
       strcpy(s->arg2, (char *)argn2);
    else
       s->arg2[0] = 0;

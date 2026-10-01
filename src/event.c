@@ -243,8 +243,10 @@ void delete_notify_request(int32_t client, int32_t message, int32_t event, int32
 
    DISABLE();
 
-   // if (event == -1U) // Tom: commented out, new version below
-   if (event == INT32_MAX) // Tom: added
+   // -1 (0xFFFFFFFF) is the universal wildcard, as in the original
+   // EVENT.C:230 ("if (event==-1U)"). An earlier refactor replaced it
+   // with INT32_MAX, which broke wildcard cancel requests.
+   if (event == -1)
    {
       event = 1;
       all_events = 1;
@@ -266,8 +268,8 @@ void delete_notify_request(int32_t client, int32_t message, int32_t event, int32
          if (NR->client != client)
             continue; // match specified parms
 
-         // if ((message != -1U) && (message != NR->message)) // Tom: commented out, new version below
-         if ((message != INT32_MAX) && (message != (int32_t)NR->message)) // Tom: added
+         // if ((message != -1U) && (message != NR->message)) // original EVENT.C:251
+         if (message != -1 && message != (int32_t)NR->message)
             continue;
 
          if (!match_parameter(event, NR->parameter, parameter))

@@ -94,18 +94,18 @@ uint8_t *decode_shape_data(const void *shape)
 {
    uint8_t *shape_data = shape_get_data(shape);
 
+   int32_t CP_W = shape_get_xmax(shape);
+
+   int linecount = shape_get_ymax(shape) + 1 - shape_get_ymin(shape);
+   if (linecount <= 0)
+      return NULL;
+
    uint8_t *buffer = (uint8_t *)calloc(320 * 200, 1);
    if (!buffer)
       exit(EXIT_FAILURE);
 
    // clear to white to save black pixels
    memset(buffer, 255, 320 * 200);
-
-   int32_t CP_W = shape_get_xmax(shape);
-
-   int linecount = shape_get_ymax(shape) + 1 - shape_get_ymin(shape);
-   if (linecount <= 0)
-      return NULL;
 
    int startX = shape_get_xmin(shape);
    int startY = shape_get_ymin(shape);
