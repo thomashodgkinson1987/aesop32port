@@ -208,68 +208,161 @@ static SHAPEHEADER *shape_header(void *shape_table, int32_t shape_num)
 }
 
 //
-// Blit a decoded shape into a window buffer at (pos_x, pos_y), with
-// pane clipping, optional color translation (fade lookaside), and
-// color 255 transparent.
+// Draw a shape straight from its RLE stream into a window buffer at
+// (pos_x, pos_y), with pane clipping and optional color translation
+// (fade lookaside).
 //
-// Convention (matches decode_shape_data() and the verified PGM
-// dumps): decoded rows are packed at stride = xmax; shape pixel (x, y)
-// lives at decoded[y * xmax + x] for x in [xmin, xmax), y in
-// [ymin, ymax). decode_shape_data() white-fills (255) untouched
-// pixels, so 255 doubles as the transparency marker — fonts and
-// cursor shapes use 255 as their transparent color in the 1993
-// toolchain. Note the decode is 320*200 regardless of shape size.
+// This is a port of the original DrawShapeUnclipped() (VFX 1.19,
+// VFXA.ASM:2824-2973), which VFX_shape_draw() drives after pane
+// clipping.  The verified semantics, straight from that source:
 //
-// DOS drew shape pixel (xmin, ymin) at (hotX, hotY) (see the
-// shp_x = -hot_x alignment in the original MOUSE.C).
+//   - The RLE stream is decoded directly to the destination; there is
+//     NO transparent color anywhere in shape drawing.  Run packets
+//     (RSTOSB32) and string packets (RMOVSB32) write every pixel they
+//     encode; skip packets are the one and only transparency mechanism.
+//     (An earlier version of this port white-filled a decode buffer
+//     and skipped color 255 — that is VFX_shape_transform()'s internal
+//     intermediate-buffer convention (VFXA.ASM:3917), not a rule of
+//     shape drawing, and it punched holes in the outtake letterbox
+//     shapes, which legitimately draw palette-255 white pixels.)
+//
+//   - linecount = ymax + 1 - ymin: ymax is inclusive.
+//
+//   - Destination anchoring: shape pixel (xmin, ymin) lands at
+//     pane->x0 + hotX, pane->y0 + hotY (the RLE stream then continues
+//     right/down from there).  DOS adds the pane offset to the hotspot
+//     and indexes lines from ymin (VFXA.ASM:2861-2875).
+//
+//   - DOS clips to the pane rect intersected with the window
+//     (CP_L..CP_R / CP_T..CP_B); lines outside the vertical clip are
+//     still walked to stay in sync with the stream (the original's
+//     skipLine loop).  We do the same with per-pixel clip checks.
+//
+// pos_x/pos_y are pane-local (draw_bitmap subtracts the pane origin);
+// for the mouse merge path the caller passes pane coords that already
+// encode the buffer position.
 //
 
-static void shape_blit(PANE *pane, const uint8_t *decoded, SHAPEHEADER *h,
-                       int32_t pos_x, int32_t pos_y, const uint8_t *xlat)
+static void shape_draw_rle(PANE *pane, const SHAPEHEADER *h,
+                           int32_t pos_x, int32_t pos_y, const uint8_t *xlat)
 {
     WINDOW *w = pane->window;
 
-    if (w == NULL || w->buffer == NULL || decoded == NULL)
+    if (w == NULL || w->buffer == NULL || h == NULL)
         return;
 
-    int32_t stride = h->xmax;
-    int32_t x_end = h->xmax;
-    int32_t y_end = h->ymax;
+    int32_t clip_x0 = (pane->x0 > 0) ? pane->x0 : 0;
+    int32_t clip_y0 = (pane->y0 > 0) ? pane->y0 : 0;
+    int32_t clip_x1 = (pane->x1 < w->x_max) ? pane->x1 : w->x_max;
+    int32_t clip_y1 = (pane->y1 < w->y_max) ? pane->y1 : w->y_max;
 
-    //
-    // pos_x/pos_y are pane-local (draw_bitmap subtracts the pane
-    // origin); the destination lands at the pane offset + position in
-    // the window's buffer. For the mouse merge path the caller passes
-    // pane coords that already encode the buffer position.
-    //
+    if (clip_x0 > clip_x1 || clip_y0 > clip_y1)
+        return;
 
-    int32_t base_x = pane->x0 + pos_x;
-    int32_t base_y = pane->y0 + pos_y;
+    int32_t base_x = pane->x0 + pos_x + h->xmin;
+    int32_t base_y = pane->y0 + pos_y + h->ymin;
 
-    for (int32_t y = h->ymin; y < y_end; y++)
+    int32_t linecount = h->ymax + 1 - h->ymin;
+
+    if (linecount <= 0)
+        return;
+
+    const uint8_t *p = (const uint8_t *)h + sizeof(SHAPEHEADER);
+    int32_t win_w = w->x_max + 1;
+
+    for (int32_t line = 0; line < linecount; line++)
     {
-        int32_t dy = base_y + y;
+        int32_t dy = base_y + line;
 
-        if (dy < 0 || dy > w->y_max)
-            continue;
-
-        const uint8_t *src_row = decoded + (y * stride);
-        uint8_t *dst_row = w->buffer + (dy * (w->x_max + 1));
-
-        for (int32_t x = h->xmin; x < x_end; x++)
+        if (dy >= clip_y0 && dy <= clip_y1)
         {
-            int32_t dx = base_x + x;
+            uint8_t *dst_row = w->buffer + (dy * win_w);
+            int32_t x = 0; // pixel offset within this line
 
-            if (dx < 0 || dx > w->x_max)
-                continue;
+            for (;;)
+            {
+                uint8_t tok = *p++;
+                int32_t type = tok & 1;
+                int32_t count = tok >> 1;
 
-            uint8_t px = src_row[x];
+                if (count > 0 && type == 0)
+                {
+                    // run packet: 'count' pixels of one color
+                    uint8_t color = *p++;
 
-            if (xlat != NULL)
-                px = xlat[px];
+                    for (int32_t i = 0; i < count; i++)
+                    {
+                        int32_t dx = base_x + x + i;
 
-            if (px != 255) // 255 = transparent (after translation)
-                dst_row[dx] = px;
+                        if (dx >= clip_x0 && dx <= clip_x1)
+                        {
+                            uint8_t px = color;
+
+                            if (xlat != NULL)
+                                px = xlat[px];
+
+                            dst_row[dx] = px;
+                        }
+                    }
+
+                    x += count;
+                }
+                else if (count > 0 && type == 1)
+                {
+                    // string packet: 'count' literal pixels
+                    for (int32_t i = 0; i < count; i++)
+                    {
+                        int32_t dx = base_x + x + i;
+
+                        if (dx >= clip_x0 && dx <= clip_x1)
+                        {
+                            uint8_t px = p[i];
+
+                            if (xlat != NULL)
+                                px = xlat[px];
+
+                            dst_row[dx] = px;
+                        }
+                    }
+
+                    p += count;
+                    x += count;
+                }
+                else if (count == 0 && type == 1)
+                {
+                    // skip packet: transparent area
+                    x += *p++;
+                }
+                else
+                {
+                    // end packet
+                    break;
+                }
+            }
+        }
+        else
+        {
+            //
+            // Line outside the vertical clip: walk the tokens without
+            // drawing, exactly like the original's skipLine loop, so
+            // the stream stays in sync.
+            //
+
+            for (;;)
+            {
+                uint8_t tok = *p++;
+                int32_t type = tok & 1;
+                int32_t count = tok >> 1;
+
+                if (count > 0 && type == 0)
+                    p += 1; // color byte
+                else if (count > 0 && type == 1)
+                    p += count; // literal data
+                else if (count == 0 && type == 1)
+                    p += 1; // skip byte
+                else
+                    break; // end packet
+            }
         }
     }
 }
@@ -286,11 +379,7 @@ void VFX_shape_draw(
     if (h == NULL)
         return;
 
-    uint8_t *decoded = decode_shape_data(h);
-
-    shape_blit(pane, decoded, h, hotX, hotY, NULL);
-
-    free(decoded);
+    shape_draw_rle(pane, h, hotX, hotY, NULL);
 }
 
 void VFX_shape_translate_draw(
@@ -310,11 +399,7 @@ void VFX_shape_translate_draw(
     if (h == NULL)
         return;
 
-    uint8_t *decoded = decode_shape_data(h);
-
-    shape_blit(pane, decoded, h, hotX, hotY, shape_lookaside_table);
-
-    free(decoded);
+    shape_draw_rle(pane, h, hotX, hotY, shape_lookaside_table);
 }
 
 void VFX_shape_lookaside(uint8_t *table)
@@ -885,7 +970,7 @@ void VFX_shape_transform(
         int32_t dst_height = (int32_t)(((int64_t)height * y_scale) >> 16);
 
         //
-        // pos_x/pos_y are pane-local (see shape_blit)
+        // pos_x/pos_y are pane-local (see shape_draw_rle)
         //
 
         int32_t base_x = pane->x0 + hotX;
@@ -914,11 +999,22 @@ void VFX_shape_transform(
 
                 uint8_t px = src_row[src_x];
 
+                //
+                // 255 = untouched/transparent in the intermediate
+                // buffer (the original renders transparent areas as
+                // color 255 and always skips them during the inverse
+                // transformation pass, VFXA.ASM:3917-3919).  Skipped
+                // pixels are never translated, matching the original's
+                // first-pass/second-pass split.
+                //
+
+                if (px == 255)
+                    continue;
+
                 if (xlat != NULL)
                     px = xlat[px];
 
-                if (px != 255) // 255 = transparent (after translation)
-                    dst[dx] = px;
+                dst[dx] = px;
             }
         }
     }
