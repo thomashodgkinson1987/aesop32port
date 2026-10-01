@@ -37,12 +37,14 @@ Two eras:
 | `GRAPHICS.C` | `graphics.c` | core graphics routines |
 | `SOUND32.C`, `MODSND32.C`, `ail/` | `sound32.c` | AIL 2.0 audio; stubbed in the port |
 | `GIL2VFX.C` | `gil2vfx.c` | glue between the game's GIL layer and the VFX video library |
-| `vfx/` (VFX 1.19 library, DLL-based) | `vfx.c`, `mouse.c` | video API; the port replaces the VFX DLL system with SDL2, implemented in `video.c` (the "driver": window/renderer/texture lifecycle, event pump, present, 60 Hz frame pacing at `VFX_wait_vblank*`) |
+| `vfx/` (VFX 1.19 library, DLL-based) | `vfx.c`, `mouse.c` | video API; the port replaces the VFX DLL system with SDL2, implemented in `video.c` (the "driver": window/renderer/texture lifecycle, event pump, present, 60 Hz frame pacing at `VFX_wait_vblank*`). The complete VFX 1.19 source release is archived at `../../reference/vfx119/` — `VFX_115/VFXA.ASM` is the ground truth for shape drawing: RLE decoded straight to the destination, **no transparent color anywhere** (skip packets are the only transparency), inclusive `xmax`/`ymax` (`linecount = ymax+1-ymin`); the color-255 skip rule exists only inside `VFX_shape_transform`'s intermediate buffer (VFXA.ASM:3917) and texture mapping (`XCOLOR`) |
 | `xfer/` | — | file-transfer library, not ported |
 
 Supporting code in the port that has no Watcom counterpart: `video.c/h`
-(SDL2 video driver stand-in), `utils.c/h`
-(EOB3 shape/RLE decoding, PPM dumps, debug shape drawing), `globals.h`.
+(SDL2 video driver stand-in), `utils.c/h` (EOB3 shape-table access, RLE
+decode — used only by `VFX_shape_transform` and the debug PGM dumps since
+shape drawing went RLE-direct —, PPM dumps, debug shape drawing),
+`trace.c/h` (shared hot-path trace gating, `AESOP_TRACE`), `globals.h`.
 
 ## Resource format essentials
 
@@ -61,7 +63,15 @@ Supporting code in the port that has no Watcom counterpart: `video.c/h`
 - `daesop` (companion repo) — container info/extract/replace, bytecode
   disassembly, EOB3 bitmap/font conversion, `-eob3menupatch`.
 - The kernel's C-function inventory and bytecode opcode table live in
-  `../reference/decompiler-dumps/`.
+  `../../reference/decompiler-dumps/`. Caveat: those dumps were generated
+  against the Apr 14 1993 EYE.RES revision, not the Jul 6 revision the
+  port runs (`../game-data/eobiii/EYE.RES`). The `kernel` and `menu`
+  bytecode is byte-identical across revisions (see
+  `../../game-data/EYE-RES-notes.md`), but regenerate anything else
+  with the current daesop: `cd ../daesop && ./bin/daesop -i
+  ../game-data/eobiii/EYE.RES out.txt`.
+- VFX 1.19 documentation and sources: `../../reference/vfx119/` (see the
+  component map above for what to read first).
 
 ## Ecosystem & credits
 
