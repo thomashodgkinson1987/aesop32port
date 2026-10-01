@@ -107,6 +107,30 @@ mouse across the whole screen (the display scans out of video RAM at
 60 Hz from the yield hook, VGA-style) and merges correctly with menu
 refreshes; clicking "Abandon Quest" quits cleanly.
 
+### Driving the game programmatically
+
+The window (title `AESOP/32 Port`, 320x200 client) can be driven and
+verified from the command line with `xdotool` and ImageMagick — move
+the OS pointer (`mousemove` takes screen coordinates: window origin
+from `getwindowgeometry --shell` + client offset), click with
+`mousedown 1` → `sleep 0.3` → `mouseup 1` (the port polls button state
+per yield, so instant synthetic clicks can be missed), and capture the
+window with `import -window <id> shot.png` (inside a `timeout`, with a
+non-empty window ID). PNGs can be read directly for visual checks, and
+`compare -metric RMSE` diffs two captures. The full recipe — including
+bounded launch/capture commands — lives in the workspace `AGENTS.md`.
+
+Main menu item centres (window-relative; entries ~8 px tall, ~242 px
+wide; the pointer position is the hit-tested point):
+
+| Item | x | y |
+|------|-----|-----|
+| Introduction | 160 | 106 |
+| Continue the Quest | 160 | 114 |
+| Gather a New Party | 160 | 122 |
+| Summon the Heroes of Darkmoon | 160 | 130 |
+| Abandon the Quest | 160 | 138 |
+
 ### Sprite dumps
 
 `VFX_shape_draw` debug-dumps every shape of a drawn shape table to
