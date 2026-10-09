@@ -44,10 +44,10 @@ extern uint32_t current_index;
 
 // Assorted speed-critical .ASM routines
 
-void *RTD_first(void *dictionary); // Tom: original
+void *RTD_first(void *dictionary, uint32_t dict_size); // Tom: original
 // uint32_t *RTD_first(void *dictionary);
 
-void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def); // Tom: original
+void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def, uint32_t base_size); // Tom: original
 // uint32_t *RTD_iterate(void *base, uint32_t cur, int8_t **tag, int8_t **def); // Tom: new
 
 int8_t *RTD_lookup(uint32_t dictionary, void *key); // Tom: original

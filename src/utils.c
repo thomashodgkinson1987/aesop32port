@@ -281,7 +281,9 @@ uint32_t *shape_table_get_offsets_as_uint32(const void *shape_table)
 
 void *shape_table_get_shape(const void *shape_table, int32_t index)
 {
-   if (shape_table_get_shape_count(shape_table) < index)
+   // Valid range is 0..count-1; index == count is already out of bounds,
+   // and negative indices would read before the offset table.
+   if (index < 0 || index >= shape_table_get_shape_count(shape_table))
       return NULL;
 
    uint64_t *shape_offsets = shape_table_get_offsets(shape_table);
@@ -339,8 +341,18 @@ uint8_t *shape_get_data(const void *shape)
    return (uint8_t *)shape + sizeof(SHAPEHEADER);
 }
 
-void update_palette(const PAL_HDR *PHDR, AESOP_Palette *palette)
+void update_palette(const PAL_HDR *PHDR, AESOP_Palette *palette, uint32_t res_size)
 {
+   // ncolors is uint16_t against a 256-entry destination, and the reader
+   // below consumes ncolors*3 bytes past the header: validate both.
+   if (PHDR->ncolors > 256 ||
+       (uint32_t)sizeof(PAL_HDR) + (uint32_t)PHDR->ncolors * 3u > res_size)
+   {
+      printf("[utils] update_palette: bad palette (ncolors=%u size=%u)\n",
+         PHDR->ncolors, res_size);
+      return;
+   }
+
    palette->ncolors = PHDR->ncolors;
 
    uint8_t *rgb_data = (uint8_t *)PHDR + sizeof(PAL_HDR);

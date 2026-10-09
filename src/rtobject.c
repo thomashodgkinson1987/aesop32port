@@ -312,8 +312,8 @@ void dump_static_context(uint32_t index, TF_class *TF)
 
       inst = add_ptr(RTR_addr(instance), offset);
 
-      dict = RTD_first(RTR_addr(expt));
-      while ((dict = RTD_iterate(RTR_addr(expt), dict, &tag, &def)) != NULL)
+      dict = RTD_first(RTR_addr(expt), RTR_size(expt));
+      while ((dict = RTD_iterate(RTR_addr(expt), dict, &tag, &def, RTR_size(expt))) != NULL)
       {
          type = tag[0];
          if ((type != 'B') && (type != 'W') && (type != 'L'))

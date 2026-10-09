@@ -469,7 +469,7 @@ void set_palette(int32_t argcnt, uint32_t region, uint32_t resource)
 
    //////
 
-   update_palette(PHDR, &test_palette);
+   update_palette(PHDR, &test_palette, RTR_size(handle));
 
    //////
 

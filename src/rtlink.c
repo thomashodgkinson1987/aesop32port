@@ -171,8 +171,8 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
       //
 
       mcnt = 0;
-      dict = RTD_first(RTR_addr(expt[depth]));
-      while ((dict = RTD_iterate(RTR_addr(expt[depth]), dict, &tag, &def)) != NULL)
+      dict = RTD_first(RTR_addr(expt[depth]), RTR_size(expt[depth]));
+      while ((dict = RTD_iterate(RTR_addr(expt[depth]), dict, &tag, &def, RTR_size(expt[depth]))) != NULL)
       {
          switch (tag[0])
          {
@@ -190,8 +190,8 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
       // Calculate Size of External Reference List
       //
 
-      dict = RTD_first(RTR_addr(impt[depth]));
-      while ((dict = RTD_iterate(RTR_addr(impt[depth]), dict, &tag, &def)) != NULL)
+      dict = RTD_first(RTR_addr(impt[depth]), RTR_size(impt[depth]));
+      while ((dict = RTD_iterate(RTR_addr(impt[depth]), dict, &tag, &def, RTR_size(impt[depth]))) != NULL)
       {
          switch (tag[0])
          {
@@ -250,8 +250,8 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
       XR = (void *)((uint32_t)m);
 
-      dict = RTD_first(RTR_addr(impt[i]));
-      while ((dict = RTD_iterate(RTR_addr(impt[i]), dict, &tag, &def)) != NULL)
+      dict = RTD_first(RTR_addr(impt[i]), RTR_size(impt[i]));
+      while ((dict = RTD_iterate(RTR_addr(impt[i]), dict, &tag, &def, RTR_size(impt[i]))) != NULL)
       {
          int8_t *loRTDLookupResult;
          tagbase = RTR_addr(impt[i]);
@@ -347,8 +347,8 @@ uint32_t construct_thunk(RTR_class *RTR, RTR_class *LNK, uint32_t object)
 
    for (i = m = 0; i < depth; i++)
    {
-      dict = RTD_first(RTR_addr(expt[i]));
-      while ((dict = RTD_iterate(RTR_addr(expt[i]), dict, &tag, &def)) != NULL)
+      dict = RTD_first(RTR_addr(expt[i]), RTR_size(expt[i]));
+      while ((dict = RTD_iterate(RTR_addr(expt[i]), dict, &tag, &def, RTR_size(expt[i]))) != NULL)
          if (tag[0] == 'M')
          {
             MV[m].msg = (uint16_t)ascnum(&tag[2]);

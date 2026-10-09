@@ -48,11 +48,14 @@ static uint32_t key_head = 0;
 static uint32_t key_tail = 0;
 
 //
-// Frame cadence, matching the 60Hz VGA refresh the DOS build synced to
+// Frame cadence, matching the 60Hz VGA refresh the DOS build synced to.
+// A 60 Hz period is 1000/60 = 16.666... ms, which has no exact integer
+// form: the old (1000 / 60) truncated to 16 ms and ran everything at
+// ~62.5 Hz. Step 17,17,16 ms in rotation instead (50 ms per 3 frames),
+// so the long-term average is exactly 60 Hz with no accumulated error.
 //
 
 #define VIDEO_FRAME_RATE 60
-#define VIDEO_FRAME_MS (1000 / VIDEO_FRAME_RATE)
 
 //
 // Minimum interval between event pumps from the interpreter yield hook
@@ -60,9 +63,21 @@ static uint32_t key_tail = 0;
 
 #define VIDEO_POLL_MIN_MS 5
 
+// Next whole-ms step of the 17,17,16 rotation, advancing *phase.
+static uint32_t video_frame_step(uint32_t *phase)
+{
+   uint32_t step = (*phase % 3u == 2u) ? 16u : 17u;
+
+   ++(*phase);
+
+   return step;
+}
+
 static uint32_t next_frame_tick = 0;
 static uint32_t last_poll_tick = 0;
 static uint32_t next_scan_tick = 0;
+static uint32_t scan_phase = 0;
+static uint32_t frame_phase = 0;
 static uint32_t present_count = 0;
 
 //
@@ -689,12 +704,18 @@ int32_t video_yield(void)
    if (next_scan_tick == 0 || (int32_t)(now - next_scan_tick) >= 0)
    {
       if (next_scan_tick == 0)
-         next_scan_tick = now + VIDEO_FRAME_MS;
+      {
+         next_scan_tick = now;
+         scan_phase = 0;
+      }
       else
-         next_scan_tick += VIDEO_FRAME_MS;
+         next_scan_tick += video_frame_step(&scan_phase);
 
       if ((int32_t)(now - next_scan_tick) >= 0)
-         next_scan_tick = now + VIDEO_FRAME_MS; // fell behind: re-anchor
+      {
+         next_scan_tick = now; // fell behind: re-anchor
+         scan_phase = 0;
+      }
 
       video_present();
    }
@@ -745,7 +766,10 @@ void video_wait_vblank_leading(void)
    video_poll_events();
 
    if (next_frame_tick == 0)
-      next_frame_tick = SDL_GetTicks() + VIDEO_FRAME_MS;
+   {
+      next_frame_tick = SDL_GetTicks();
+      frame_phase = 0;
+   }
 
    uint32_t now = SDL_GetTicks();
    if ((int32_t)(next_frame_tick - now) > 0)
@@ -753,7 +777,7 @@ void video_wait_vblank_leading(void)
 
    video_present();
 
-   next_frame_tick += VIDEO_FRAME_MS;
+   next_frame_tick += video_frame_step(&frame_phase);
 
    // If we fell behind by a whole frame or more (long stall without a
    // vblank call), re-anchor instead of bursting through the backlog.

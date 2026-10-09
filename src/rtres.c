@@ -354,7 +354,11 @@ static uint32_t RTR_new_entry(RTR_class *RTR)
 
    n = RTR->nentries;
 
-   if (n >= (unsigned)(-DIR_BLK))
+   // Directory capacity: nentries is uint16_t, so growth past 64K
+   // entries would truncate. (The expression this replaces,
+   // (unsigned)(-DIR_BLK), is dead in 32-bit C; the original RTRES.C
+   // line depended on 16-bit unsigned wraparound.)
+   if (n > (uint32_t)UINT16_MAX - (uint32_t)DIR_BLK)
    {
       printf("[rtres] RTR_new_entry: RTR=%p return=%u\n", (void *)RTR, UINT32_MAX);
       return UINT32_MAX;
@@ -403,6 +407,40 @@ static uint32_t RTR_new_entry(RTR_class *RTR)
 
 /***************************************************/
 //
+// Read exactly /len/ bytes from /file/ into /dest/ (retrying short
+// counts is unnecessary for a regular file, but a short or failed
+// read must not pass silently: truncated resources otherwise become
+// memory corruption instead of clean failures).
+//
+// Returns 1 with the file pointer advanced past the data, 0 on any
+// shortfall (diagnostic already printed).
+//
+/***************************************************/
+
+static uint32_t RTR_read_exact(int16_t file, void *dest, uint32_t len)
+{
+   uint8_t *p = (uint8_t *)dest;
+   uint32_t left = len;
+
+   while (left > 0)
+   {
+      ssize_t got = read(file, p, left);
+
+      if (got <= 0)
+      {
+         printf("[rtres] RTR_read_exact: short read, want=%u got=%u\n", len, len - left);
+         return 0;
+      }
+
+      p = (uint8_t *)add_ptr(p, (uint32_t)got);
+      left -= (uint32_t)got;
+   }
+
+   return 1;
+}
+
+/***************************************************/
+//
 // Read resource header to get data attribs & len, return w/file
 // pointer positioned at start of resource data
 //
@@ -432,14 +470,18 @@ uint32_t RTR_seek(RTR_class *RTR, uint32_t rnum)
 
       do
       {
-         lseek(RTR->file, next, SEEK_SET);
-         read(RTR->file, &RTR->OD, sizeof(OD_block));
+         if (lseek(RTR->file, (off_t)next, SEEK_SET) == (off_t)-1)
+            return 0;
+         if (!RTR_read_exact(RTR->file, &RTR->OD, sizeof(OD_block)))
+            return 0;
          next = RTR->OD.next;
       } while (dirblk--);
    }
 
-   lseek(RTR->file, RTR->OD.index[dirent], SEEK_SET);
-   read(RTR->file, &RTR->REH, sizeof(RF_entry_hdr));
+   if (lseek(RTR->file, (off_t)RTR->OD.index[dirent], SEEK_SET) == (off_t)-1)
+      return 0;
+   if (!RTR_read_exact(RTR->file, &RTR->REH, sizeof(RF_entry_hdr)))
+      return 0;
 
    if (RTR->REH.data_attrib & DA_PLACEHOLDER)
    {
@@ -460,7 +502,7 @@ uint32_t RTR_seek(RTR_class *RTR, uint32_t rnum)
 //
 /***************************************************/
 
-static void RTR_read(RTR_class *RTR, uint32_t entry)
+static uint32_t RTR_read(RTR_class *RTR, uint32_t entry)
 {
    uint8_t *ptr;
    HD_entry *sel;
@@ -475,11 +517,15 @@ static void RTR_read(RTR_class *RTR, uint32_t entry)
 
    while (len > (uint32_t)DOS_BUFFSIZE)
    {
-      read(RTR->file, ptr, DOS_BUFFSIZE);
-      len -= DOS_BUFFSIZE;
-      ptr += DOS_BUFFSIZE;
+      if (!RTR_read_exact(RTR->file, ptr, (uint32_t)DOS_BUFFSIZE))
+         return 0;
+      len -= (uint32_t)DOS_BUFFSIZE;
+      ptr += (uint32_t)DOS_BUFFSIZE;
    }
-   read(RTR->file, ptr, len);
+   if (!RTR_read_exact(RTR->file, ptr, len))
+      return 0;
+
+   return 1;
 }
 
 /***************************************************/
@@ -731,9 +777,11 @@ void RTR_lock(RTR_class *RTR, uint32_t entry)
          return;
       }
 
-      lseek(RTR->file, sel->user, SEEK_SET);
+      if (lseek(RTR->file, (off_t)sel->user, SEEK_SET) == (off_t)-1)
+         return;
 
-      RTR_read(RTR, entry);
+      if (!RTR_read(RTR, entry))
+         return;
 
       sel->flags &= (~DA_DISCARDED);
    }
@@ -835,13 +883,17 @@ void RTR_read_resource(RTR_class *RTR, void *dest, uint32_t len)
 {
    printf("[rtres] RTR_read_resource: RTR=%p dest=%p len=%u\n", (void *)RTR, dest, len);
 
+   uint8_t *p = (uint8_t *)dest;
+
    while (len > (uint32_t)DOS_BUFFSIZE)
    {
-      read(RTR->file, dest, DOS_BUFFSIZE);
-      len -= DOS_BUFFSIZE;
-      dest = add_ptr(dest, DOS_BUFFSIZE);
+      if (!RTR_read_exact(RTR->file, p, (uint32_t)DOS_BUFFSIZE))
+         return;
+      len -= (uint32_t)DOS_BUFFSIZE;
+      p += (uint32_t)DOS_BUFFSIZE;
    }
-   read(RTR->file, dest, len);
+   if (!RTR_read_exact(RTR->file, p, len))
+      return;
 }
 
 /***************************************************/
@@ -874,9 +926,23 @@ uint32_t RTR_load_resource(RTR_class *RTR, uint32_t resource, uint32_t attrib)
 
    if (entry != UINT32_MAX)
    {
+      off_t pos;
+
       sel = (HD_entry *)entry;
-      sel->user = lseek(RTR->file, 0, SEEK_CUR);
-      RTR_read(RTR, entry);
+      pos = lseek(RTR->file, 0, SEEK_CUR);
+      if (pos == (off_t)-1)
+      {
+         RTR_free(RTR, entry);
+         printf("[rtres] RTR_load_resource: RTR=%p resource=%u attrib=%u return=%u\n", (void *)RTR, resource, attrib, UINT32_MAX);
+         return UINT32_MAX;
+      }
+      sel->user = (uint32_t)pos;
+      if (!RTR_read(RTR, entry))
+      {
+         RTR_free(RTR, entry);
+         printf("[rtres] RTR_load_resource: RTR=%p resource=%u attrib=%u return=%u\n", (void *)RTR, resource, attrib, UINT32_MAX);
+         return UINT32_MAX;
+      }
    }
 
    printf("[rtres] RTR_load_resource: RTR=%p resource=%u attrib=%u return=%u\n", (void *)RTR, resource, attrib, entry);

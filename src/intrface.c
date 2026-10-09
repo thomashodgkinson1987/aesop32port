@@ -218,12 +218,20 @@ static void timer_callback(void) // Warning: called during IRQ 0
 
 void interface_timer_serve(void)
 {
+   // 60 Hz gate matching video.c's cadence: 17,17,16 ms in rotation
+   // (50 ms per 3 ticks). The old (1000 / 60) truncated to 16 ms and
+   // ran the timer at ~62.5 Hz.
    static uint32_t last_tick = 0;
+   static uint32_t timer_phase = 0;
    uint32_t now = SDL_GetTicks();
+   uint32_t step;
 
-   if ((int32_t)(now - last_tick) < (1000 / 60))
+   step = (timer_phase % 3u == 2u) ? 16u : 17u;
+
+   if ((int32_t)(now - last_tick) < (int32_t)step)
       return;
 
+   ++timer_phase;
    last_tick = now;
 
    timer_callback();

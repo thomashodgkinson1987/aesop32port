@@ -59,7 +59,7 @@ int32_t shape_get_xmax(const void *shape);
 int32_t shape_get_ymax(const void *shape);
 uint8_t *shape_get_data(const void *shape);
 
-void update_palette(const PAL_HDR *PHDR, AESOP_Palette *palette);
+void update_palette(const PAL_HDR *PHDR, AESOP_Palette *palette, uint32_t res_size);
 
 void draw_shape_unclipped(void *buffer, void *shape, int hotX, int hotY, int CP_W);
 

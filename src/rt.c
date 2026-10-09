@@ -146,7 +146,18 @@ const char *case_list_strings[] = {
 
 int8_t *RTD_lookup(uint32_t HRES, void *Key)
 {
+    // All walks below use an offset with the invariant off <= size, so
+    // every `need > size - off` check is exact: malformed dictionaries
+    // fail the lookup instead of walking out of bounds.
     uint8_t *dict = (uint8_t *)RTR_addr(HRES);
+    uint32_t size = RTR_size(HRES);
+
+    if (size < 2u)
+    {
+        printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL (truncated header)\n", HRES, Key);
+        return NULL;
+    }
+
     uint32_t hash_size = *(uint16_t *)dict;
 
     uint8_t *esi = Key;
@@ -175,21 +186,44 @@ int8_t *RTD_lookup(uint32_t HRES, void *Key)
         esi += 4;
     }
 
+    if (hash_size == 0)
+    {
+        printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL (empty hash)\n", HRES, Key);
+        return NULL;
+    }
+
     uint32_t edx = sum % hash_size;
+
+    // Offset-table entry: 2-byte header + edx*4 offset + 4-byte read.
+    // edx < hash_size <= 0xFFFF, so no wraparound here.
+    if (2u + edx * 4u + 4u > size)
+    {
+        printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL (chain table overrun)\n", HRES, Key);
+        return NULL;
+    }
+
     uint32_t chain_offset = *(uint32_t *)(dict + 2 + edx * 4);
 
-    if (chain_offset == 0)
+    if (chain_offset == 0 || chain_offset >= size)
     {
         printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL\n", HRES, Key);
         return NULL;
     }
 
-    uint8_t *edi = dict + chain_offset;
+    uint32_t off = chain_offset;
 
     while (1)
     {
-        uint32_t ecx = *(uint16_t *)edi;
-        edi += 2;
+        uint32_t ecx;
+
+        if (2u > size - off)
+        {
+            printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL (tag overrun)\n", HRES, Key);
+            return NULL;
+        }
+
+        ecx = *(uint16_t *)(dict + off);
+        off += 2;
         if (ecx == 0)
         {
             printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL\n", HRES, Key);
@@ -198,56 +232,116 @@ int8_t *RTD_lookup(uint32_t HRES, void *Key)
 
         if (ecx == tag_len)
         {
-            if (memcmp(edi, Key, tag_len) == 0)
+            if (tag_len + 2u > size - off)
             {
-                int8_t *def_ptr = (int8_t *)(edi + tag_len + 2);
+                printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL (entry overrun)\n", HRES, Key);
+                return NULL;
+            }
+            if (memcmp(dict + off, Key, tag_len) == 0)
+            {
+                int8_t *def_ptr = (int8_t *)(dict + off + tag_len + 2);
+                // The definition is consumed as a C string downstream;
+                // require its terminator inside the resource image.
+                if (memchr(def_ptr, 0, (size_t)(size - (off + tag_len + 2u))) == NULL)
+                {
+                    printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL (unterminated def)\n", HRES, Key);
+                    return NULL;
+                }
                 printf("[rt] RTD_lookup: HRES=%u Key=%s return=%s\n", HRES, (char *)Key, (char *)def_ptr);
                 return def_ptr;
             }
         }
 
-        edi += ecx;
-        uint32_t def_len = *(uint16_t *)edi;
-        edi += 2;
-        edi += def_len;
+        if (ecx + 2u > size - off)
+        {
+            printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL (def overrun)\n", HRES, Key);
+            return NULL;
+        }
+        off += ecx;
+        uint32_t def_len = *(uint16_t *)(dict + off);
+        off += 2;
+        if (def_len > size - off)
+        {
+            printf("[rt] RTD_lookup: HRES=%u Key=%p return=NULL (def overrun)\n", HRES, Key);
+            return NULL;
+        }
+        off += def_len;
     }
 }
 
-void *RTD_first(void *dictionary)
+void *RTD_first(void *dictionary, uint32_t dict_size)
 {
-    uint8_t *esi = (uint8_t *)dictionary;
-    uint32_t hash_size = *(uint16_t *)esi;
+    // Offset-invariant walk (see RTD_lookup): the dictionary image is
+    // dict_size bytes at dictionary; anything past it fails cleanly.
+    uint8_t *base = (uint8_t *)dictionary;
+    uint32_t hash_size;
+    uint32_t off;
 
-    esi += 2;
-    esi += hash_size * 4;
+    if (dict_size < 2u)
+    {
+        printf("[rt] RTD_first: dictionary=%p return=0 (truncated)\n", dictionary);
+        return 0;
+    }
 
-    if (*(uint16_t *)esi == 0)
+    hash_size = *(uint16_t *)base;
+
+    // Header + offset table + first-terminator probe must all fit.
+    // hash_size <= 0xFFFF, so 2 + hash_size*4 cannot wrap uint32.
+    if (2u + hash_size * 4u + 2u > dict_size)
+    {
+        printf("[rt] RTD_first: dictionary=%p return=0 (overrun)\n", dictionary);
+        return 0;
+    }
+
+    off = 2u + hash_size * 4u;
+
+    if (*(uint16_t *)(base + off) == 0)
     {
         printf("[rt] RTD_first: dictionary=%p return=0\n", dictionary);
         return 0;
     }
 
-    printf("[rt] RTD_first: dictionary=%p return=%p\n", dictionary, (void *)(esi - (uint8_t *)dictionary));
-    return (void *)(esi - (uint8_t *)dictionary);
+    printf("[rt] RTD_first: dictionary=%p return=%p\n", dictionary, (void *)(uintptr_t)off);
+    return (void *)(uintptr_t)off;
 }
 
-void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def)
+void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def, uint32_t base_size)
 {
+    uint8_t *b = (uint8_t *)base;
+    uint32_t off = (uint32_t)(uintptr_t)cur;
+    uint32_t tag_len;
+    uint32_t def_len;
+
     if (cur == 0)
     {
         printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=0\n", base, cur, (void *)tag, (void *)def);
         return 0;
     }
 
-    uint8_t *esi = (uint8_t *)((uintptr_t)base + (uintptr_t)cur);
-    uint32_t tag_len = *(uint16_t *)esi;
+    if (off >= base_size)
+    {
+        printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=0 (overrun)\n", base, cur, (void *)tag, (void *)def);
+        return 0;
+    }
 
-    esi += 2;
+    if (2u > base_size - off)
+    {
+        printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=0 (tag overrun)\n", base, cur, (void *)tag, (void *)def);
+        return 0;
+    }
+
+    tag_len = *(uint16_t *)(b + off);
+    off += 2;
 
     if (tag_len == 0)
     {
-        tag_len = *(uint16_t *)esi;
-        esi += 2;
+        if (2u > base_size - off)
+        {
+            printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=0 (tag overrun)\n", base, cur, (void *)tag, (void *)def);
+            return 0;
+        }
+        tag_len = *(uint16_t *)(b + off);
+        off += 2;
         if (tag_len == 0)
         {
             printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=0\n", base, cur, (void *)tag, (void *)def);
@@ -255,16 +349,39 @@ void *RTD_iterate(void *base, void *cur, int8_t **tag, int8_t **def)
         }
     }
 
-    *tag = (int8_t *)esi;
-    esi += tag_len;
+    // Tags and defs are consumed as C strings downstream; both the
+    // bytes and their terminators must lie inside the image.
+    if (tag_len + 1u > base_size - off ||
+        memchr(b + off, 0, (size_t)tag_len + 1u) == NULL)
+    {
+        printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=0 (tag overrun)\n", base, cur, (void *)tag, (void *)def);
+        return 0;
+    }
 
-    uint32_t def_len = *(uint16_t *)esi;
-    esi += 2;
-    *def = (int8_t *)esi;
-    esi += def_len;
+    *tag = (int8_t *)(b + off);
+    off += tag_len;
 
-    printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=%p\n", base, cur, (void *)tag, (void *)def, (void *)(esi - (uint8_t *)base));
-    return (void *)(esi - (uint8_t *)base);
+    if (2u > base_size - off)
+    {
+        printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=0 (def overrun)\n", base, cur, (void *)tag, (void *)def);
+        return 0;
+    }
+
+    def_len = *(uint16_t *)(b + off);
+    off += 2;
+
+    if (def_len + 1u > base_size - off ||
+        memchr(b + off, 0, (size_t)def_len + 1u) == NULL)
+    {
+        printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=0 (def overrun)\n", base, cur, (void *)tag, (void *)def);
+        return 0;
+    }
+
+    *def = (int8_t *)(b + off);
+    off += def_len;
+
+    printf("[rt] RTD_iterate: base=%p cur=%p tag=%p def=%p return=%p\n", base, cur, (void *)tag, (void *)def, (void *)(uintptr_t)off);
+    return (void *)(uintptr_t)off;
 }
 
 /* Subsystem Control Functions */
@@ -540,18 +657,22 @@ __handle_msg:
             edi->val = (edi->val != 0) ? 1 : 0;
             break;
         case 8: // do_NEG
-            edi->val = -edi->val;
+            // Unsigned negation: bit-identical to x86 NEG (wraps;
+            // INT32_MIN stays INT32_MIN) with no signed-overflow UB.
+            edi->val = (int32_t)(0u - (uint32_t)edi->val);
             break;
         case 9: // do_ADD
-            edi[1].val += edi[0].val;
+            // All VM arithmetic is 32-bit two's-complement wraparound
+            // (cf. RT.ASM: plain x86 ADD/SUB/MUL), so compute unsigned.
+            edi[1].val = (int32_t)((uint32_t)edi[1].val + (uint32_t)edi[0].val);
             edi++;
             break;
         case 10: // do_SUB
-            edi[1].val -= edi[0].val;
+            edi[1].val = (int32_t)((uint32_t)edi[1].val - (uint32_t)edi[0].val);
             edi++;
             break;
         case 11: // do_MUL
-            edi[1].val *= edi[0].val;
+            edi[1].val = (int32_t)((uint32_t)edi[1].val * (uint32_t)edi[0].val);
             edi++;
             break;
         case 12: // do_DIV
@@ -575,11 +696,11 @@ __handle_msg:
         {
             uint16_t exp = edi->val_l;
             edi++;
-            int32_t base = edi->val;
-            int32_t res = 1;
+            uint32_t base = (uint32_t)edi->val;
+            uint32_t res = 1u;
             for (uint16_t i = 0; i < exp; i++)
                 res *= base;
-            edi->val = res;
+            edi->val = (int32_t)res;
             break;
         }
         case 15: // do_BAND
@@ -598,11 +719,14 @@ __handle_msg:
             edi->val = ~edi->val;
             break;
         case 19: // do_SHL
-            edi[1].val <<= edi[0].val_l;
+            // RT.ASM uses SHL r/m32,CL, which masks the count to 5 bits;
+            // masking also removes C's shift-width UB. SHR was already a
+            // logical (uint32) shift; it gets the same count treatment.
+            edi[1].val = (int32_t)((uint32_t)edi[1].val << (edi[0].val_l & 31));
             edi++;
             break;
         case 20: // do_SHR
-            edi[1].val = (int32_t)((uint32_t)edi[1].val >> edi[0].val_l);
+            edi[1].val = (int32_t)((uint32_t)edi[1].val >> (edi[0].val_l & 31));
             edi++;
             break;
         case 21: // do_LT
@@ -901,7 +1025,8 @@ __handle_msg:
             uint32_t max_index = edi->val_l;
             uint8_t shift_val = *esi++;
             edi++;
-            edi->val += (max_index << shift_val);
+            // Masked count, as for do_SHL (RT.ASM SHL r/m32,CL semantics).
+            edi->val = (int32_t)((uint32_t)edi->val + (max_index << (shift_val & 31)));
             break;
         }
         case 40: // do_LTBA
