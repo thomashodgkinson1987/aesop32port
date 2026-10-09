@@ -80,6 +80,11 @@ static uint32_t scan_phase = 0;
 static uint32_t frame_phase = 0;
 static uint32_t present_count = 0;
 
+// Host (OS) cursor visibility over our window. Testing aid, toggled
+// with F12 in video_poll_events(): when hidden, only the in-game
+// cursor is visible. Starts visible; the game never sees the toggle.
+static int host_cursor_visible = 1;
+
 //
 // 8-bit ARGB palette lookup, kept in sync with video_dac by
 // video_DAC_write(); video_present() converts the screen buffer
@@ -205,6 +210,11 @@ int32_t video_init(const char *title, int32_t width, int32_t height)
    }
 
    SDL_RenderSetLogicalSize(sdl_renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+   // Deterministic cursor state (SDL defaults to visible, but be
+   // explicit since F12 can change it mid-session).
+   host_cursor_visible = 1;
+   SDL_ShowCursor(SDL_ENABLE);
 
    sdl_texture = SDL_CreateTexture(sdl_renderer,
                                    SDL_PIXELFORMAT_ARGB8888,
@@ -332,6 +342,13 @@ void video_poll_events(void)
          if (e.key.keysym.sym == SDLK_ESCAPE)
          {
             video_quit = 1;
+         }
+         else if (e.key.keysym.sym == SDLK_F12 && e.key.repeat == 0)
+         {
+            // Testing aid, consumed here: the game never sees it.
+            host_cursor_visible = !host_cursor_visible;
+            SDL_ShowCursor(host_cursor_visible ? SDL_ENABLE : SDL_DISABLE);
+            printf("[video] host cursor %s\n", host_cursor_visible ? "visible" : "hidden");
          }
          else
          {
