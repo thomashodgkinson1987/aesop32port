@@ -58,6 +58,7 @@ int8_t *RTD_lookup(uint32_t dictionary, void *key); // Tom: original
 void RT_init(RTR_class *RTR, uint32_t stack_size, uint32_t *objlist);
 void RT_shutdown(void);
 void RT_arguments(void *base, uint32_t size);
+void RT_drop_arguments(uint32_t size);
 int32_t RT_execute(uint32_t index, uint32_t msg_num, uint32_t vector);
 
 //

@@ -682,6 +682,8 @@ void dispatch_event(void)
          RT_arguments(&event_message_descriptor, sizeof(event_message_descriptor));
 
          RT_execute((int32_t)NR->client, (int32_t)NR->message, -1U);
+
+         RT_drop_arguments(sizeof(event_message_descriptor));
       }
    }
 }

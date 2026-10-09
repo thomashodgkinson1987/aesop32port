@@ -45,6 +45,7 @@ uint32_t current_index;
 /* Local State */
 static RTR_class *RTR_ptr;
 static uint8_t *stk_base;
+static uint8_t *stk_top; // one past the last stack byte (empty-stack stk_off)
 static uint8_t *stk_off;
 static uint32_t *objlist_ptr;
 
@@ -275,7 +276,8 @@ void RT_init(RTR_class *RTR, uint32_t StkSize, uint32_t *ObjectList)
     objlist_ptr = ObjectList;
     RTR_ptr = RTR;
     stk_base = (uint8_t *)mem_alloc(StkSize);
-    stk_off = stk_base + StkSize;
+    stk_top = stk_base + StkSize;
+    stk_off = stk_top;
 }
 
 void RT_shutdown(void)
@@ -289,14 +291,42 @@ void RT_arguments(void *Base, uint32_t Bytes)
 {
     printf("[rt] RT_arguments: Base=%p Bytes=%u\n", Base, Bytes);
 
+    if (stk_off < stk_base || (size_t)(stk_off - stk_base) < (size_t)Bytes)
+    {
+        printf("[rt] RT_arguments: VM stack overflow, need=%u\n", Bytes);
+        return;
+    }
+
     stk_off = stk_off - Bytes;
     memcpy(stk_off, Base, Bytes);
+}
+
+// Pop a frame previously pushed by RT_arguments (the pusher owns the pop:
+// RT_execute cannot know the frame's size). Must be called after the
+// matching RT_execute returns, which rebalances the stack to the
+// post-push position, so the pop lands exactly on the pre-push position.
+void RT_drop_arguments(uint32_t Bytes)
+{
+    if (stk_off + Bytes > stk_top)
+    {
+        printf("[rt] RT_drop_arguments: VM stack underflow, drop=%u\n", Bytes);
+        return;
+    }
+
+    stk_off = stk_off + Bytes;
 }
 
 /* AESOP Runtime execution unit */
 
 int32_t RT_execute(uint32_t Index, uint32_t Message, uint32_t Vector)
 {
+    // Frame anchor: the stack must be balanced when this call returns, so
+    // that a caller-pushed argument frame (see RT_arguments) sits exactly
+    // where the caller left it for RT_drop_arguments to pop. Any residue
+    // from nested CALL/SEND/PASS frames is reclaimed at the common exit.
+    uint8_t *saved_stk_off = stk_off;
+    int32_t result = -1;
+
     uint32_t h_prg;
     // uint8_t **h_thunk; // Tom: removed, not used?
     uint8_t *ptr_thunk;
@@ -1254,8 +1284,8 @@ __handle_msg:
         }
         case 86: // do_END
         {
-            RTR_unlock(h_prg);
-            return edi->val;
+            result = edi->val; // copy first: edi points into the stack below
+            goto rt_execute_out;
         }
         case 87: // do_BRK
             break;
@@ -1265,8 +1295,20 @@ __handle_msg:
         }
     }
 
-    // Host requested shutdown (window close or ESC): unlock the code
-    // resource, as do_END would, and report failure up the call chain.
+    // Host requested shutdown (window close or ESC): report failure up
+    // the call chain via the common exit below.
+    goto rt_execute_out;
+
+rt_execute_out:
+    if (stk_off != saved_stk_off)
+    {
+        // A nested CALL/SEND/PASS frame was not unwound, or a caller frame
+        // is being dropped: reclaim it here rather than leaking VM stack.
+        if (aesop_trace)
+            printf("[rt] RT_execute: stk_off mismatch, entry=%p exit=%p\n", (void *)saved_stk_off, (void *)stk_off);
+        stk_off = saved_stk_off;
+    }
+    // Unlock the code resource, as do_END would.
     RTR_unlock(h_prg);
-    return -1;
+    return result;
 }

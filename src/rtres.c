@@ -720,8 +720,16 @@ void RTR_lock(RTR_class *RTR, uint32_t entry)
 
    if ((sel->flags & DA_DISCARDED) && (sel->user != UINT32_MAX))
    {
-      if (RTR_assign_space(RTR, sel->size, sel->flags, entry) == UINT32_MAX)
+      // RTR_assign_space reports 1 on success, 0 when no cache space
+      // could be freed (never UINT32_MAX). On failure the entry stays
+      // discarded and unlocked, so callers fall back to its stale
+      // segment instead of RTR_read() writing through an unassigned one.
+      if (!RTR_assign_space(RTR, sel->size, sel->flags, entry))
+      {
+         printf("[rtres] RTR_lock: cache exhausted, entry=%u need=%u free=%u\n",
+            entry, sel->size, RTR->free);
          return;
+      }
 
       lseek(RTR->file, sel->user, SEEK_SET);
 

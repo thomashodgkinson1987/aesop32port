@@ -7,7 +7,7 @@ CC = gcc
 # Paths are quoted so workspaces containing spaces are supported.
 SDL2_DIR ?= $(abspath ../SDL2_32)
 
-CFLAGS = -g -m32 -std=c17 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wformat=2 -rdynamic -I./src -I"$(SDL2_DIR)/include/SDL2" -D_REENTRANT
+CFLAGS = -g -m32 -std=c17 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wformat=2 -rdynamic -I./src -I"$(SDL2_DIR)/include" -D_REENTRANT
 LDFLAGS = -m32 -L"$(SDL2_DIR)/lib" -Wl,-rpath,"$(SDL2_DIR)/lib" -lSDL2
 
 SRC_DIR = src
