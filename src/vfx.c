@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #include "vfx.h"
 
@@ -590,7 +591,27 @@ void VFX_shape_visible_rectangle(
     int32_t mirror,
     int32_t *rectangle)
 {
-    printf("[STUB] [vfx] VFX_shape_visible_rectangle: "
+    //
+    // Trace the shape's RLE stream and return the smallest rectangle
+    // holding its visible (drawn) pixels. Port of VFXA.ASM's
+    // VFX_shape_visible_rectangle: run/string packets contribute
+    // [x, x+count), skip packets only advance x, vx1/vy1 are exclusive
+    // maxima, mirroring folds around 2*hot (2*hot-vmax, 2*hot-vmin).
+    // Coordinates are in the caller's hotspot space (hotX/hotY as
+    // passed in); an empty shape yields {0,0,0,0} instead of the
+    // original's INT32 extremes so callers' nothing-visible test
+    // (bounds[0] > bounds[2]) keeps working.
+    //
+
+    SHAPEHEADER *h = shape_header(shape_table, shape_number);
+    int32_t linecount;
+    const uint8_t *p;
+    int32_t vx0, vy0, vx1, vy1;
+    int32_t x0, y0;
+    int32_t y, line;
+    int found = 0;
+
+    printf("[vfx] VFX_shape_visible_rectangle: "
            "shape_table=%p "
            "shape_number=%i "
            "hotX=%i "
@@ -599,6 +620,126 @@ void VFX_shape_visible_rectangle(
            "rectangle=%p"
            "\n",
            shape_table, shape_number, hotX, hotY, mirror, (void *)rectangle);
+
+    if (rectangle == NULL)
+        return;
+
+    rectangle[0] = 0;
+    rectangle[1] = 0;
+    rectangle[2] = 0;
+    rectangle[3] = 0;
+
+    if (h == NULL)
+        return;
+
+    x0 = h->xmin + hotX;
+    y0 = h->ymin + hotY;
+
+    linecount = h->ymax + 1 - h->ymin;
+
+    if (linecount <= 0)
+        return;
+
+    vx0 = INT32_MAX;
+    vy0 = INT32_MAX;
+    vx1 = INT32_MIN;
+    vy1 = INT32_MIN;
+
+    p = (const uint8_t *)h + sizeof(SHAPEHEADER);
+    y = y0;
+
+    for (line = 0; line < linecount; line++)
+    {
+        int32_t x = x0;
+
+        for (;;)
+        {
+            uint8_t tok = *p++;
+            int32_t type = tok & 1;
+            int32_t count = tok >> 1;
+
+            if (count > 0 && type == 0)
+            {
+                // run packet: 'count' pixels of one color
+                p += 1;
+
+                if (x < vx0)
+                    vx0 = x;
+
+                x += count;
+
+                if (x > vx1)
+                    vx1 = x;
+
+                if (y < vy0)
+                    vy0 = y;
+
+                if (y > vy1)
+                    vy1 = y;
+
+                found = 1;
+            }
+            else if (count > 0 && type == 1)
+            {
+                // string packet: 'count' literal pixels
+                p += count;
+
+                if (x < vx0)
+                    vx0 = x;
+
+                x += count;
+
+                if (x > vx1)
+                    vx1 = x;
+
+                if (y < vy0)
+                    vy0 = y;
+
+                if (y > vy1)
+                    vy1 = y;
+
+                found = 1;
+            }
+            else if (count == 0 && type == 1)
+            {
+                // skip packet: transparent area
+                x += *p++;
+            }
+            else
+            {
+                // end packet
+                break;
+            }
+        }
+
+        y++;
+    }
+
+    if (!found)
+        return;
+
+    if (mirror & VR_X_MIRROR)
+    {
+        int32_t nx0 = hotX + hotX - vx1;
+        int32_t nx1 = hotX + hotX - vx0;
+
+        vx0 = nx0;
+        vx1 = nx1;
+    }
+
+    if (mirror & VR_Y_MIRROR)
+    {
+        int32_t ny0 = hotY + hotY - vy1;
+        int32_t ny1 = hotY + hotY - vy0;
+
+        vy0 = ny0;
+        vy1 = ny1;
+    }
+
+    rectangle[0] = vx0;
+    rectangle[1] = vy0;
+    rectangle[2] = vx1;
+    rectangle[3] = vy1;
 }
 
 int32_t VFX_shape_scan(
@@ -715,17 +856,88 @@ int32_t VFX_shape_palette_list(void *shape_table, uint32_t *index_list)
     return 0;
 }
 
+//
+// Single-pixel access. Coordinates are window (buffer) coordinates —
+// the GIL2VFX dot wrappers subtract the pane origin before calling —
+// matching VFX_line_draw's convention in this port (the original took
+// pane coords and converted with CONVERT_REG_PAIR_PANE_TO_WINDOW).
+// Return contract mirrors VFXA.ASM: prior pixel 0..255, -1 bad
+// window, -2 bad pane, -3 off pane.
+//
+
+static int32_t pixel_clip(const PANE *pane, int32_t x, int32_t y,
+                           int32_t *win_w_out, int32_t *adr_out)
+{
+    const WINDOW *w;
+    int32_t cx0, cy0, cx1, cy1;
+
+    if (pane == NULL)
+        return -2;
+
+    w = pane->window;
+
+    if (w == NULL || w->buffer == NULL || w->x_max < 0 || w->y_max < 0)
+        return -1;
+
+    if (pane->x1 < pane->x0 || pane->y1 < pane->y0)
+        return -2;
+
+    cx0 = (pane->x0 > 0) ? pane->x0 : 0;
+    cy0 = (pane->y0 > 0) ? pane->y0 : 0;
+    cx1 = (pane->x1 < w->x_max) ? pane->x1 : w->x_max;
+    cy1 = (pane->y1 < w->y_max) ? pane->y1 : w->y_max;
+
+    if (x < cx0 || x > cx1 || y < cy0 || y > cy1)
+        return -3;
+
+    *win_w_out = w->x_max + 1;
+    *adr_out = y * (w->x_max + 1) + x;
+
+    return 0;
+}
+
 int32_t VFX_pixel_write(PANE *pane, int32_t x, int32_t y, uint32_t color)
 {
-    printf("[STUB] [vfx] VFX_pixel_write: pane=%p x=%i y=%i color=%u return=0\n",
+    WINDOW *w;
+    int32_t win_w, adr;
+    int32_t rc;
+    uint8_t prior;
+
+    printf("[vfx] VFX_pixel_write: pane=%p x=%i y=%i color=%u\n",
            (void *)pane, x, y, color);
-    return 0;
+
+    rc = pixel_clip(pane, x, y, &win_w, &adr);
+
+    if (rc != 0)
+        return rc;
+
+    (void)win_w;
+
+    w = pane->window;
+    prior = w->buffer[adr];
+    w->buffer[adr] = (uint8_t)color;
+
+    return (int32_t)prior;
 }
 int32_t VFX_pixel_read(PANE *pane, int32_t x, int32_t y)
 {
-    printf("[STUB] [vfx] VFX_pixel_read: pane=%p x=%i y=%i return=0\n",
+    WINDOW *w;
+    int32_t win_w, adr;
+    int32_t rc;
+
+    printf("[vfx] VFX_pixel_read: pane=%p x=%i y=%i\n",
            (void *)pane, x, y);
-    return 0;
+
+    rc = pixel_clip(pane, x, y, &win_w, &adr);
+
+    if (rc != 0)
+        return rc;
+
+    (void)win_w;
+
+    w = pane->window;
+
+    return (int32_t)w->buffer[adr];
 }
 
 int32_t VFX_rectangle_hash(
@@ -736,16 +948,77 @@ int32_t VFX_rectangle_hash(
     int32_t y1,
     uint32_t color)
 {
-    printf("[STUB] [vfx] VFX_rectangle_hash: "
+    //
+    // Checkerboard fill: every other pixel, odd rows offset by one —
+    // the __odd_or_even/__write_pixel loop of VFXA.ASM's
+    // VFX_rectangle_hash, whose row parity comes from the remaining
+    // line count ((y1-y0-i) & 1). Coordinates are window (buffer)
+    // coordinates like the other port rasterizers; the rect is
+    // clipped to the pane intersected with the window. Returns 0,
+    // -1 bad window, -2 bad pane, -4 bad rectangle.
+    //
+
+    WINDOW *w;
+    int32_t cx0, cy0, cx1, cy1;
+    int32_t stride;
+    int32_t row, i;
+    uint8_t c;
+
+    printf("[vfx] VFX_rectangle_hash: "
            "pane=%p "
            "x0=%i "
            "y0=%i "
            "x1=%i "
            "y1=%i "
-           "color=%u "
-           "return=0"
+           "color=%u"
            "\n",
            (void *)pane, x0, y0, x1, y1, color);
+
+    if (pane == NULL)
+        return -2;
+
+    w = pane->window;
+
+    if (w == NULL || w->buffer == NULL || w->x_max < 0 || w->y_max < 0)
+        return -1;
+
+    if (pane->x1 < pane->x0 || pane->y1 < pane->y0)
+        return -2;
+
+    cx0 = (x0 > pane->x0) ? x0 : pane->x0;
+    cy0 = (y0 > pane->y0) ? y0 : pane->y0;
+    cx1 = (x1 < pane->x1) ? x1 : pane->x1;
+    cy1 = (y1 < pane->y1) ? y1 : pane->y1;
+
+    if (cx0 < 0)
+        cx0 = 0;
+
+    if (cy0 < 0)
+        cy0 = 0;
+
+    if (cx1 > w->x_max)
+        cx1 = w->x_max;
+
+    if (cy1 > w->y_max)
+        cy1 = w->y_max;
+
+    if (cx1 < cx0 || cy1 < cy0)
+        return -4;
+
+    stride = w->x_max + 1;
+    c = (uint8_t)color;
+
+    for (row = cy0, i = 0; row <= cy1; row++, i++)
+    {
+        // Original parity: odd remaining-line-count rows start one
+        // pixel in (see __odd_or_even: `and edx,1` on lines left).
+        int32_t dx = cx0 + (((y1 - y0 - i) & 1) ? 1 : 0);
+        uint8_t *dst = w->buffer + (row * stride);
+
+        for (; dx <= cx1; dx += 2)
+            dst[dx] = c;
+    }
+
     return 0;
 }
 
@@ -942,8 +1215,23 @@ void VFX_fixed_mul(int32_t M1, int32_t M2, int32_t *result)
 
 int32_t VFX_font_height(void *font)
 {
-    printf("[STUB] [vfx] VFX_font_height: font=%p return=0\n", font);
-    return 0;
+    int32_t height;
+
+    if (font == NULL)
+    {
+        printf("[vfx] VFX_font_height: font=(nil) return=0\n");
+        return 0;
+    }
+
+    // Per VFXA.ASM VFX_font_height: the height is the FONT header's
+    // char_height slot (EOB3 fonts: "2." magic + char_count,
+    // char_height, font_background as int32).
+
+    height = ((const FONT *)font)->char_height;
+
+    printf("[vfx] VFX_font_height: font=%p return=%i\n", font, height);
+
+    return height;
 }
 //
 // EOB3/VFX font access: the 16-byte header (version slot holds the
