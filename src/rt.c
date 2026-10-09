@@ -470,7 +470,11 @@ __handle_msg:
 
         if (trace_opcodes)
         {
-            printf("[rt] RT_execute: opcode=%u %s\n", opcode, case_list_strings[opcode]);
+            // Bound the name lookup: the opcode byte is unrestricted and
+            // the switch below faults on anything unknown.
+            size_t n_opcodes = sizeof(case_list_strings) / sizeof(case_list_strings[0]);
+            const char *opname = ((size_t)opcode < n_opcodes) ? case_list_strings[opcode] : "<invalid>";
+            printf("[rt] RT_execute: opcode=%u %s\n", opcode, opname);
         }
 
         switch (opcode)
@@ -743,6 +747,13 @@ __handle_msg:
             case 18:
                 ret_val = ((int32_t (*)(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t))func_ptr)(arg_count, args[17], args[16], args[15], args[14], args[13], args[12], args[11], args[10], args[9], args[8], args[7], args[6], args[5], args[4], args[3], args[2], args[1], args[0]);
                 break;
+            default:
+                // The host-call ABI supports 0-18 arguments; anything else
+                // is malformed bytecode. Fault loudly (opcode_fault exits
+                // via abend) rather than silently returning zero. esi points
+                // past the count byte, so the CALL opcode itself is esi-2.
+                opcode_fault((void *)(esi - 2), (void *)edi);
+                break;
             }
             stk_off = (uint8_t *)fptr;
 
@@ -824,6 +835,16 @@ __handle_msg:
             uint16_t target = *(uint16_t *)esi;
             esi += 2;
 
+            if (call_stack_ptr >= 256)
+            {
+                // Synthetic call-stack overflow from malformed bytecode
+                // or runaway recursion. opcode_fault exits via abend;
+                // the break is only for compiler satisfaction. The JSR
+                // opcode (1 byte + 2 target bytes) starts at esi-3.
+                opcode_fault((void *)(esi - 3), (void *)edi);
+                break;
+            }
+
             call_stack[call_stack_ptr].ds32 = ds32;
             call_stack[call_stack_ptr].esi = esi;
             call_stack[call_stack_ptr].edi = edi;
@@ -842,6 +863,15 @@ __handle_msg:
         case 37: // do_RTS
         {
             int32_t ret_val = edi->val;
+
+            if (call_stack_ptr <= 0)
+            {
+                // Return with an empty synthetic call stack: malformed
+                // bytecode. opcode_fault exits via abend; the break is
+                // only for compiler satisfaction.
+                opcode_fault((void *)(esi - 1), (void *)edi);
+                break;
+            }
 
             call_stack_ptr--;
             fptr = call_stack[call_stack_ptr].fptr;
