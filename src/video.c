@@ -140,6 +140,8 @@ static uint16_t keysym_to_key(SDL_Keycode sym)
    case SDLK_F8:       return 0x4200;
    case SDLK_F9:       return 0x4300;
    case SDLK_F10:      return 0x4400;
+   case SDLK_RETURN:
+   case SDLK_KP_ENTER: return 13;
    default:
       break;
    }

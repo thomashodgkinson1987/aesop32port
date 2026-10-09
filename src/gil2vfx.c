@@ -33,11 +33,157 @@ int32_t gil2vfx_active = 0;
 
 TEXTWINDOW *twptr;
 
+// Capped buffer read for the print-buffer port: NUL past the
+// formatted end, so scans can always probe one past the last byte.
+static int32_t print_bufch(const char *buf, int32_t buflen, int32_t i)
+{
+   if (i < 0 || i > buflen)
+      return 0;
+
+   return (int32_t)(uint8_t)buf[i];
+}
+
+// J_FILL handler (GIL2VFXA.ASM out_f): leading spaces and the first
+// word print normally, then the leftover gap distributes across the
+// line's word gaps, quotient each plus one extra while the remainder
+// lasts. Lines that overflow, are empty, or have no word gaps fall
+// back to plain left dump.
+static void print_buffer_fill(const char *buf, int32_t buflen, int32_t line_beg, int32_t line_end, int32_t x2, int32_t w_lin, int32_t w_win)
+{
+   int32_t si = line_beg;
+   int32_t nwords = 0;
+   int32_t remaining;
+   int32_t quotient = 0;
+   int32_t remainder = 0;
+
+   if (w_lin < 0)
+      w_lin = 0;
+
+   // Overflowing lines fall back to a plain dump, like the original.
+   if ((uint32_t)w_lin >= (uint32_t)w_win)
+   {
+      for (; si < line_end; si++)
+      {
+         int32_t ch = print_bufch(buf, buflen, si);
+
+         if (ch == 0)
+            break;
+
+         GIL2VFX_cout(ch);
+      }
+
+      return;
+   }
+
+   // Last character NUL/LF (or empty line): nothing to distribute;
+   // dump plainly. (line_beg/line_end bound every read via print_bufch.)
+   if (line_end <= line_beg || print_bufch(buf, buflen, line_end - 1) == 0 ||
+       print_bufch(buf, buflen, line_end - 1) == 10)
+   {
+      for (; si < line_end; si++)
+      {
+         int32_t ch = print_bufch(buf, buflen, si);
+
+         if (ch == 0)
+            break;
+
+         GIL2VFX_cout(ch);
+      }
+
+      return;
+   }
+
+   // Leading spaces print normally, shrinking the remainder. The
+   // cursor advances with them, so any fallback below resumes after
+   // what is already on screen (as in the original).
+   while (si < line_end && print_bufch(buf, buflen, si) == ' ')
+   {
+      GIL2VFX_cout(' ');
+      w_lin -= VFX_character_width(twptr->font, ' ');
+      si++;
+   }
+
+   // First word prints normally.
+   while (si < line_end && print_bufch(buf, buflen, si) != ' ')
+   {
+      int32_t ch = print_bufch(buf, buflen, si);
+
+      if (ch == 0)
+         break;
+
+      GIL2VFX_cout(ch);
+      w_lin -= VFX_character_width(twptr->font, ch);
+      si++;
+   }
+
+   if (w_lin < 0)
+      w_lin = 0;
+
+   remaining = x2 - twptr->htab + 1 - w_lin;
+
+   // Word gaps in what remains to be distributed (leading spaces and
+   // the first word are already on screen).
+   {
+      int32_t wi;
+
+      for (wi = si; wi < line_end; wi++)
+      {
+         if (print_bufch(buf, buflen, wi) == ' ')
+            nwords++;
+      }
+   }
+
+   if (nwords == 0 || nwords > 255 || remaining < 0)
+   {
+      // Fall back to a plain dump of what is not already on screen
+      // (the original resumes from its advanced line_beg the same way).
+      for (; si < line_end; si++)
+      {
+         int32_t ch = print_bufch(buf, buflen, si);
+
+         if (ch == 0)
+            break;
+
+         GIL2VFX_cout(ch);
+      }
+
+      return;
+   }
+
+   quotient = remaining / nwords;
+   remainder = remaining % nwords;
+
+   for (; si < line_end; si++)
+   {
+      int32_t ch = print_bufch(buf, buflen, si);
+
+      if (ch == 0)
+         break;
+
+      GIL2VFX_cout(ch);
+
+      if (ch == ' ')
+      {
+         twptr->htab += quotient;
+
+         if (remainder > 0)
+         {
+            twptr->htab++;
+            remainder--;
+         }
+      }
+   }
+}
+
+// End-of-page / pending-line state for GIL2VFX_print_buffer, mirroring
+// GIL2VFXA.ASM's eop_reached/pending_flag (set by cout at page end;
+// print_buffer honours them when linenum != 0). No current caller
+// passes a nonzero linenum, so these stay 0 for now.
+int32_t eop_reached = 0;
+int32_t pending_flag = 0;
+
 extern VFX_DESC *VFX;
 extern int8_t *pathname;
-
-extern int32_t eop_reached;
-extern int32_t pending_flag;
 
 void GIL2VFX_copy_window(uint32_t src, uint32_t dst)
 {
@@ -696,6 +842,191 @@ void GIL2VFX_scroll_window(int32_t wnd, int32_t dx, int32_t dy, int32_t flags, i
 void GIL2VFX_print_buffer(int32_t linenum)
 {
    printf("[gil2vfx] GIL2VFX_print_buffer: linenum=%i\n", linenum);
+
+   //
+   // Structured C port of GIL2VFXA_print_buffer
+   // (watcom-original/asm/GIL2VFXA.ASM:277-558): word-wrap scan with
+   // VFX_character_width against the remaining window width, then one
+   // of four justification handlers (LEFT/RIGHT/CENTER/FILL) dumping
+   // through GIL2VFX_cout, with linenum pending-line counting and
+   // CR/LF handling between lines. x1/x2 below are the pane's left
+   // and right edges (the ASM's x1_1/x2_1 via SETWND).
+   //
+   // All buffer reads below are capped at buflen (the NUL terminator
+   // lives there), so malformed buffers and window overruns terminate
+   // the dump instead of walking out of bounds.
+   //
+
+   char *buf;
+   int32_t buflen;
+   int32_t pending;
+   int32_t pos;
+
+   if (twptr == NULL || twptr->txtbuf == NULL || twptr->txtpnt == NULL || twptr->font == NULL)
+      return;
+
+   if (twptr->window < 0 || twptr->window >= MAX_WINDOWS + MAX_PANES)
+      return;
+
+   if (twptr->txtpnt < twptr->txtbuf ||
+       twptr->txtpnt > twptr->txtbuf + TXTBUF_SIZE)
+      return;
+
+   buf = twptr->txtbuf;
+   buflen = (int32_t)(twptr->txtpnt - twptr->txtbuf);
+
+   pending_flag = (linenum != 0);
+   eop_reached = 0;
+   pending = (linenum > 0) ? linenum - 1 : 0;
+   pos = 0;
+
+   for (;;)
+   {
+      int32_t line_beg, line_end, w_lin, w_win;
+      int32_t x1, x2;
+      int32_t si;
+      int32_t edi_w;
+
+      if (pending_flag != 0 && eop_reached != 0)
+         break;
+
+      x1 = panes[twptr->window].x0;
+      x2 = panes[twptr->window].x1;
+      line_beg = pos;
+
+      if (pos > buflen)
+         break;
+
+      // Word-wrap scan: accumulate widths, breaking the line at the
+      // last space that fits (or at NUL/LF). edi_w tracks the running
+      // right edge starting from the current htab.
+      si = pos;
+      line_end = pos;
+      edi_w = twptr->htab;
+
+      for (;;)
+      {
+         int32_t ch = (si <= buflen) ? (int32_t)(uint8_t)buf[si] : 0;
+
+         if (ch == 0 || ch == 10)
+         {
+            si++;
+            line_end = si;
+            break;
+         }
+
+         if (ch == ' ')
+            line_end = si;
+
+         si++;
+         edi_w += VFX_character_width(twptr->font, ch);
+
+         if (edi_w > x2 + 1)
+            break;
+      }
+
+      // Guarantee progress: a first word wider than the window would
+      // otherwise leave line_end == line_beg forever (the original
+      // hangs here); split it mid-word instead. Never fires on real
+      // game text.
+      if (line_end <= line_beg)
+      {
+         line_end = line_beg + 1;
+
+         if (line_end > buflen + 1)
+            line_end = buflen + 1;
+      }
+
+      // Pixels remaining in the window line from the cursor.
+      w_win = x2 - twptr->htab + 1;
+
+      // Total pixel width of the line.
+      w_lin = 0;
+
+      for (si = line_beg; si < line_end; si++)
+         w_lin += VFX_character_width(twptr->font, (si <= buflen) ? (int32_t)(uint8_t)buf[si] : 0);
+
+      if (pending_flag == 0 || pending <= 0)
+      {
+         int32_t dumped = 0;
+
+         if (pending_flag != 0)
+         {
+            // Pending satisfied: this and all following lines print.
+            pending = 0;
+         }
+
+         switch (twptr->justify)
+         {
+         case J_RIGHT:
+         {
+            // Right-anchor to the pane end, unless the line overflows
+            // the remainder or is empty (then pane-left, like the ASM).
+            int32_t first = (line_beg <= buflen) ? (int32_t)(uint8_t)buf[line_beg] : 0;
+
+            if ((uint32_t)w_lin <= (uint32_t)w_win && first != 0)
+               twptr->htab = x2 - w_lin + 1;
+            else
+               twptr->htab = x1;
+            break;
+         }
+         case J_CENTER:
+         {
+            // Center in the remaining line width.
+            int32_t first = (line_beg <= buflen) ? (int32_t)(uint8_t)buf[line_beg] : 0;
+
+            if ((uint32_t)w_win > (uint32_t)w_lin && first != 0)
+               twptr->htab += (w_win - w_lin + 1) / 2;
+            break;
+         }
+         case J_FILL:
+            print_buffer_fill(buf, buflen, line_beg, line_end, x2, w_lin, w_win);
+            dumped = 1;
+            break;
+         case J_LEFT:
+         default:
+            break;
+         }
+
+         // Dump the line through the text cursor (skipped when the
+         // FILL handler already emitted it).
+         if (!dumped)
+         {
+            for (si = line_beg; si < line_end; si++)
+            {
+               int32_t ch = (si <= buflen) ? (int32_t)(uint8_t)buf[si] : 0;
+
+               if (ch == 0)
+                  break;
+
+               GIL2VFX_cout(ch);
+            }
+         }
+      }
+      else
+      {
+         // Pending line: skip output, advance past it if another follows.
+         pending--;
+
+         if (line_end <= 0 || ((line_end - 1 <= buflen) ? buf[line_end - 1] : 0) == 0)
+            break;
+      }
+
+      // Advance past this line; emit CR between lines (an LF already
+      // printed needs none), skipping the next line's leading spaces.
+      pos = line_end;
+
+      if (pos <= 0 || ((pos - 1 <= buflen) ? buf[pos - 1] : 0) == 0)
+         break;
+
+      if (buf[pos - 1] != 10)
+         GIL2VFX_cout(10);
+
+      while (pos <= buflen && buf[pos] == ' ')
+         pos++;
+   }
+
+   pending_flag = 0;
 
    // GIL2VFXA_print_buffer(&panes[twptr->window], linenum); // Tom: TODO
 }

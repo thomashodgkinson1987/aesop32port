@@ -945,11 +945,48 @@ int32_t VFX_font_height(void *font)
     printf("[STUB] [vfx] VFX_font_height: font=%p return=0\n", font);
     return 0;
 }
+//
+// EOB3/VFX font access: the 16-byte header (version slot holds the
+// "2." magic, then char_count, char_height, font_background as
+// int32) is followed by char_count uint32 offsets from the font
+// base; each character is a uint32 width plus width*height
+// row-major bitmap bytes (verified against resource 185: 128
+// chars, monotonic offsets, space = width 4 blank).
+//
+// Returns the character bitmap (or NULL) with its width. Geometry
+// safety comes from the caller's pane clipping, but absurd widths
+// are rejected outright.
+//
+
+static const uint8_t *font_char_bits(const FONT *f, int32_t character, int32_t *width_out)
+{
+    const uint8_t *base = (const uint8_t *)f;
+    uint32_t off;
+
+    if (f == NULL || character < 0 || character >= f->char_count)
+        return NULL;
+
+    off = ((const uint32_t *)(base + 16))[character];
+
+    if (off > (uint32_t)INT32_MAX - sizeof(uint32_t))
+        return NULL;
+
+    *width_out = *(const int32_t *)(base + off);
+
+    if (*width_out < 0 || *width_out > 256 || f->char_height < 0)
+        return NULL;
+
+    return base + off + sizeof(uint32_t);
+}
+
 int32_t VFX_character_width(void *font, int32_t character)
 {
-    printf("[STUB] [vfx] VFX_character_width: font=%p character=%i return=0\n",
-           font, character);
-    return 0;
+    int32_t width = 0;
+
+    if (font_char_bits((const FONT *)font, character, &width) == NULL)
+        return 0;
+
+    return width;
 }
 int32_t VFX_character_draw(
     PANE *pane,
@@ -959,17 +996,71 @@ int32_t VFX_character_draw(
     int32_t character,
     uint8_t *color_translate)
 {
-    printf("[STUB] [vfx] VFX_character_draw: "
-           "pane=%p "
-           "x=%i "
-           "y=%i "
-           "font=%p "
-           "character=%i "
-           "color_translate=%p "
-           "return=0"
-           "\n",
-           (void *)pane, x, y, font, character, (void *)color_translate);
-    return 0;
+    WINDOW *w;
+    const uint8_t *bits;
+    int32_t width;
+    int32_t height;
+    int32_t stride;
+    int32_t clip_x0, clip_y0, clip_x1, clip_y1;
+    int32_t row, col;
+
+    if (pane == NULL)
+        return 0;
+
+    w = pane->window;
+
+    if (w == NULL || w->buffer == NULL)
+        return 0;
+
+    bits = font_char_bits((const FONT *)font, character, &width);
+
+    if (bits == NULL || width == 0)
+        return 0;
+
+    height = ((const FONT *)font)->char_height;
+
+    // Inclusive clip rect, same convention as shape_draw_rle.
+    clip_x0 = (pane->x0 > 0) ? pane->x0 : 0;
+    clip_y0 = (pane->y0 > 0) ? pane->y0 : 0;
+    clip_x1 = (pane->x1 < w->x_max) ? pane->x1 : w->x_max;
+    clip_y1 = (pane->y1 < w->y_max) ? pane->y1 : w->y_max;
+
+    stride = w->x_max + 1;
+
+    // Row-major blit; with a translate table, pixels reading 255 are
+    // skipped (transparency), per VFX_character_draw's contract. The
+    // per-pixel clip checks make even hostile widths safe.
+    for (row = 0; row < height; row++)
+    {
+        int32_t dy = pane->y0 + y + row;
+
+        if (dy < clip_y0 || dy > clip_y1)
+            continue;
+
+        for (col = 0; col < width; col++)
+        {
+            int32_t dx = pane->x0 + x + col;
+            uint8_t px;
+
+            if (dx < clip_x0 || dx > clip_x1)
+                continue;
+
+            px = bits[(row * width) + col];
+
+            if (color_translate != NULL)
+            {
+                px = color_translate[px];
+
+                if (px == 255)
+                    continue;
+            }
+
+            w->buffer[(dy * stride) + dx] = px;
+        }
+    }
+
+    // Full advance width even when clipped, as the original returns.
+    return width;
 }
 void VFX_string_draw(
     PANE *pane,
@@ -979,15 +1070,14 @@ void VFX_string_draw(
     char *string,
     uint8_t *color_translate)
 {
-    printf("[STUB] [vfx] VFX_string_draw: "
-           "pane=%p "
-           "x=%i "
-           "y=%i "
-           "font=%p "
-           "string=%s "
-           "color_translate=%p"
-           "\n",
-           (void *)pane, x, y, font, string, color_translate);
+    if (string == NULL)
+        return;
+
+    while (*string != 0)
+    {
+        x += VFX_character_draw(pane, x, y, font, (int32_t)(uint8_t)*string, color_translate);
+        string++;
+    }
 }
 
 int32_t VFX_ILBM_draw(PANE *pane, uint8_t *ILBM_buffer)
