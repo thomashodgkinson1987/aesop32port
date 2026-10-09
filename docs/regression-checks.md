@@ -35,6 +35,24 @@ the menu is idling. `141` + `nonzero=0` + `return=0` means the game
 walked its abandon/quit path with no input — a regression (or a
 behavior change requiring explicit justification).
 
+## Acceptance tests (rendering-path changes)
+
+Beyond the idle tripwire, two interactive proofs cover the paths
+the tripwire cannot reach (neither fires on the untouched menu):
+
+- **Summon transfer dialog**: click true-Summon (aim at the bottom
+  of its box — hit zones sit lower than the visuals, see below) or
+  keyboard-select it (Down ×2 from boot, then Enter). Expect the
+  `xfer` dialog with panel border (`VFX_line_draw`) and legible
+  CHARCOPY text; second click dismisses back to a full menu repaint.
+  Log markers: `open_transfer_file`, 4× `draw_line`, dialog `print`
+  strings.
+- **Hover highlight**: park the pointer on an item, move it fully
+  away (off-window corner), screenshot. The last-hovered item must
+  recolor in place (same pixels, highlight palette — verified as a
+  300 px gold→bright swap with zero positional shift), with no
+  cursor overlap to confuse the diff.
+
 Visual confirmation (optional but recommended for rendering-path
 changes): capture the window and diff against a known-good shot —
 
@@ -100,6 +118,35 @@ Collateral established during the hunt (verified, reusable):
   README).
 - `mem_alloc` checksums are exit-only accounting, not a suspect.
 - `host_yield` returns `video_yield()` verbatim.
+
+## Verified game facts (don't re-derive these)
+
+- **No menu fade-in exists in bytecode.** The show/enable paths
+  call no fade; `start` imports `light_fade` but never calls it.
+  The "reveal" is the shape_transform zoom series (9 scaled draws,
+  unpaced — completes in microseconds on modern hardware, hence
+  invisible; leave alone). Do not invent a fade-in.
+- **Menu quit fade-out is requested but stubbed.** M:1 destroy
+  calls `light_fade(color=0)` → `VFX_window_fade(..., 20)` (DDA
+  palette cross-fade per VFXA.ASM:9823-9985), then wipes. The port
+  drops it (stub + NULL DAC hooks): current behavior is a hard cut
+  to black.
+- **Menu item text is dual-rendered.** The background shape carries
+  baked item text; M:3 re-prints the same strings through fonts
+  (base colors normally, highlight remap on hover). Both must land
+  pixel-on-pixel (CENTER justification does this); any positional
+  mismatch shows as doubling.
+- **Dialog text needs fonts + line fills.** `print` output that
+  looks "missing" is usually glyph pixels (font rasterizer) or line
+  background clears — check both before blaming layout.
+- **Pointer hit zones sit lower than the visuals** (~8 px; click
+  bottom-of-box, e.g. y≈133 for Summon). Keyboard nav avoids this
+  entirely: arrows + Enter (selection starts at Continue, so Down
+  ×2 + Enter reaches Summon).
+- **Open text-layout question**: text background fills span
+  x=3–318 and cover the dialog's right border pixel column;
+  re-examine fill extent vs border geometry if dialogs ever look
+  off by one pixel on the right.
 
 Sharpest next experiments: `gdb` hardware watchpoint on the menu
 statics (`staticVar0/2` in the RTR cache segment — traps only on
