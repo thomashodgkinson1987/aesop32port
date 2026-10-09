@@ -650,7 +650,7 @@ void RTR_free(RTR_class *RTR, uint32_t entry)
             if ((!(RTR->dir[i].flags & DA_FIXED)) &&
                 (RTR->dir[i].flags & DA_FREE) &&
                 (!(RTR->dir[i].flags & DA_DISCARDED)) &&
-                ((uint32_t)RTR->dir[i].seg + sel->size == (uint32_t)RTR->next_M))
+                ((uint32_t)RTR->dir[i].seg + RTR->dir[i].size == (uint32_t)RTR->next_M))
             {
                sel = &(RTR->dir[i]);
                entry = (uint32_t)sel;
