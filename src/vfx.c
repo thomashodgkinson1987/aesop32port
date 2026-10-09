@@ -165,6 +165,37 @@ int32_t VFX_register_driver(void *DLLbase)
     return 0;
 }
 
+//
+// Per-pixel operation for VFX_line_draw's Bresenham walk. Coordinates
+// are window (buffer) coordinates, matching the original
+// (CONVERT_QUAD_PANE_TO_WINDOW precedes rasterization in VFXA.ASM).
+//
+
+static void line_plot_pixel(WINDOW *w, int32_t stride, int32_t X, int32_t Y,
+                            int32_t mode, uint8_t color,
+                            const uint8_t *xlat,
+                            void (*callback)(int32_t x, int32_t y))
+{
+    uint8_t *dst = w->buffer + (Y * stride) + X;
+
+    switch (mode)
+    {
+    case LD_DRAW:
+        *dst = color;
+        break;
+    case LD_TRANSLATE:
+        if (xlat != NULL)
+            *dst = xlat[*dst];
+        break;
+    case LD_EXECUTE:
+        if (callback != NULL)
+            callback(X, Y);
+        break;
+    default:
+        break;
+    }
+}
+
 int32_t VFX_line_draw(
     PANE *pane,
     int32_t x0,
@@ -174,18 +205,156 @@ int32_t VFX_line_draw(
     int32_t mode,
     int32_t parm)
 {
-    printf("[STUB] [vfx] VFX_line_draw: "
-           "pane=%p "
-           "x0=%i "
-           "y0=%i "
-           "x1=%i "
-           "y1=%i "
-           "mode=%i "
-           "parm=%i "
-           "return=0"
-           "\n",
-           (void *)pane, x0, y0, x1, y1, mode, parm);
-    return 0;
+    WINDOW *w;
+    int32_t clip_x0, clip_y0, clip_x1, clip_y1;
+    int32_t X0, Y0, X1, Y1;
+    int32_t clipped = 0;
+    int32_t stride;
+    int32_t dx, dy, sx, sy, err, e2;
+    uint8_t color = 0;
+    const uint8_t *xlat = NULL;
+    void (*callback)(int32_t x, int32_t y) = NULL;
+
+    if (pane == NULL)
+        return -2;
+
+    w = pane->window;
+
+    if (w == NULL || w->buffer == NULL)
+        return -1;
+
+    // Inclusive clip rect: pane intersected with the window, in buffer
+    // coordinates (same convention as shape_draw_rle).
+    clip_x0 = (pane->x0 > 0) ? pane->x0 : 0;
+    clip_y0 = (pane->y0 > 0) ? pane->y0 : 0;
+    clip_x1 = (pane->x1 < w->x_max) ? pane->x1 : w->x_max;
+    clip_y1 = (pane->y1 < w->y_max) ? pane->y1 : w->y_max;
+
+    if (clip_x0 > clip_x1 || clip_y0 > clip_y1)
+        return -2;
+
+    // Endpoints from pane-local to buffer coordinates.
+    X0 = pane->x0 + x0;
+    Y0 = pane->y0 + y0;
+    X1 = pane->x0 + x1;
+    Y1 = pane->y0 + y1;
+
+    if (mode == LD_DRAW)
+        color = (uint8_t)(parm & 0xff);
+    else if (mode == LD_TRANSLATE)
+        xlat = (const uint8_t *)(uintptr_t)(uint32_t)parm;
+    else if (mode == LD_EXECUTE)
+        callback = (void (*)(int32_t x, int32_t y))(uintptr_t)(uint32_t)parm;
+
+    // Cohen-Sutherland clip to the inclusive clip rect.
+    for (;;)
+    {
+        int32_t out0 = 0;
+        int32_t out1 = 0;
+
+        if (X0 < clip_x0)
+            out0 |= 1;
+        else if (X0 > clip_x1)
+            out0 |= 2;
+        if (Y0 < clip_y0)
+            out0 |= 4;
+        else if (Y0 > clip_y1)
+            out0 |= 8;
+
+        if (X1 < clip_x0)
+            out1 |= 1;
+        else if (X1 > clip_x1)
+            out1 |= 2;
+        if (Y1 < clip_y0)
+            out1 |= 4;
+        else if (Y1 > clip_y1)
+            out1 |= 8;
+
+        if ((out0 | out1) == 0)
+            break;
+
+        if ((out0 & out1) != 0)
+            return 2;
+
+        clipped = 1;
+
+        // Move the outside endpoint onto the crossed edge. The crossed
+        // edge always spans the other axis, so no division by zero.
+        if ((out0 & 1) != 0)
+        {
+            Y0 = Y0 + (Y1 - Y0) * (clip_x0 - X0) / (X1 - X0);
+            X0 = clip_x0;
+        }
+        else if ((out0 & 2) != 0)
+        {
+            Y0 = Y0 + (Y1 - Y0) * (clip_x1 - X0) / (X1 - X0);
+            X0 = clip_x1;
+        }
+        else if ((out0 & 4) != 0)
+        {
+            X0 = X0 + (X1 - X0) * (clip_y0 - Y0) / (Y1 - Y0);
+            Y0 = clip_y0;
+        }
+        else if ((out0 & 8) != 0)
+        {
+            X0 = X0 + (X1 - X0) * (clip_y1 - Y0) / (Y1 - Y0);
+            Y0 = clip_y1;
+        }
+        else if ((out1 & 1) != 0)
+        {
+            Y1 = Y1 + (Y0 - Y1) * (clip_x0 - X1) / (X0 - X1);
+            X1 = clip_x0;
+        }
+        else if ((out1 & 2) != 0)
+        {
+            Y1 = Y1 + (Y0 - Y1) * (clip_x1 - X1) / (X0 - X1);
+            X1 = clip_x1;
+        }
+        else if ((out1 & 4) != 0)
+        {
+            X1 = X1 + (X0 - X1) * (clip_y0 - Y1) / (Y0 - Y1);
+            Y1 = clip_y0;
+        }
+        else
+        {
+            X1 = X1 + (X0 - X1) * (clip_y1 - Y1) / (Y0 - Y1);
+            Y1 = clip_y1;
+        }
+    }
+
+    stride = w->x_max + 1;
+
+    // Bresenham walk from (X0,Y0) to (X1,Y1): every plotted point is
+    // within half a pixel of the ideal line in the minor axis, per the
+    // VFX line-draw contract.
+    dx = (X1 > X0) ? (X1 - X0) : (X0 - X1);
+    dy = (Y1 > Y0) ? (Y1 - Y0) : (Y0 - Y1);
+    sx = (X0 < X1) ? 1 : -1;
+    sy = (Y0 < Y1) ? 1 : -1;
+    err = dx - dy;
+
+    for (;;)
+    {
+        line_plot_pixel(w, stride, X0, Y0, mode, color, xlat, callback);
+
+        if (X0 == X1 && Y0 == Y1)
+            break;
+
+        e2 = 2 * err;
+
+        if (e2 > -dy)
+        {
+            err -= dy;
+            X0 += sx;
+        }
+        if (e2 < dx)
+        {
+            err += dx;
+            Y0 += sy;
+        }
+    }
+
+    return clipped ? 1 : 0;
 }
 
 //
