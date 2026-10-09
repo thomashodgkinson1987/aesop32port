@@ -540,6 +540,16 @@ __handle_msg:
 
     RTR_lock(RTR_ptr, h_prg);
 
+    // The lock above can compact the cache (make_room discards and
+    // memmoves), relocating the thunk and instance segments. Re-derive
+    // every base captured before it — the same reason ds32 is refreshed
+    // below. (Discovered via xfer convert: hundreds of allocations
+    // moved the thunk mid-handler, and a stale RCRS read called
+    // through 0x54505845, "EXPT" string bytes, into SIGSEGV.)
+    inst = (IHDR *)*h_instance;
+    ptr_thunk = (uint8_t *)RTR_addr(inst->thunk);
+    thdr = (THDR *)ptr_thunk;
+
     ds32 = (uint8_t *)RTR_addr(h_prg);
     esi = ds32 + handler_offset;
 
@@ -888,6 +898,13 @@ __handle_msg:
             uint8_t *new_ds32 = (uint8_t *)RTR_addr(h_prg);
             esi = esi - ds32 + new_ds32;
             ds32 = new_ds32;
+
+            // The called C function may itself have allocated (or run
+            // nested RT_execute), relocating thunk/instance segments:
+            // refresh those bases the same way (see entry comment).
+            inst = (IHDR *)*h_instance;
+            ptr_thunk = (uint8_t *)RTR_addr(inst->thunk);
+            thdr = (THDR *)ptr_thunk;
             break;
         }
         case 34: // do_SEND
@@ -913,6 +930,11 @@ __handle_msg:
             uint8_t *new_ds32 = (uint8_t *)RTR_addr(h_prg);
             esi = esi - ds32 + new_ds32;
             ds32 = new_ds32;
+
+            // Nested execution may have relocated segments (see entry).
+            inst = (IHDR *)*h_instance;
+            ptr_thunk = (uint8_t *)RTR_addr(inst->thunk);
+            thdr = (THDR *)ptr_thunk;
             break;
         }
         case 35: // do_PASS
@@ -952,6 +974,11 @@ __handle_msg:
             uint8_t *new_ds32 = (uint8_t *)RTR_addr(h_prg);
             esi = esi - ds32 + new_ds32;
             ds32 = new_ds32;
+
+            // Nested execution may have relocated segments (see entry).
+            inst = (IHDR *)*h_instance;
+            ptr_thunk = (uint8_t *)RTR_addr(inst->thunk);
+            thdr = (THDR *)ptr_thunk;
             break;
         }
         case 36: // do_JSR

@@ -67,6 +67,19 @@
 // static int32_t dos_bda_04f0 = 0; // Virtualise the BIOS Data Area address 0x04f0
 static int32_t dos_bda_04f0 = 1229870162; // Virtualise the BIOS Data Area address 0x04f0
 
+void dos_bda_init(void)
+{
+   const char *env = getenv("AESOP_BDA");
+
+   if (env != NULL)
+      dos_bda_04f0 = (int32_t)strtol(env, NULL, 0);
+}
+
+int32_t dos_bda_value(void)
+{
+   return dos_bda_04f0;
+}
+
 /*
    43494e45 / 1128877637 = CINE
    56494354 / 1447641940 = VICT

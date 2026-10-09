@@ -7,12 +7,23 @@
 
 #include <stdint.h>
 
+// On-disk save entries are 8 bytes (1-byte packing, as written by
+// the original): without this, the compiler pads CDESC to 12 bytes
+// and every save-file read past entry 0 lands misaligned — observed
+// as garbage object names ("Program object 17629184 not found")
+// when the xfer convert flow restores ITEMS_00.BIN.
+#pragma pack(push, 1)
+
 typedef struct
 {
    uint16_t slot; // object list index
    uint32_t name; // code object name
    uint16_t size; // size of instance data (unused in text files)
 } CDESC;          // static context descriptor
+
+#pragma pack(pop)
+
+_Static_assert(sizeof(CDESC) == 8, "CDESC must match the 8-byte save-file entry");
 
 #define SF_TXT 1 // text savetype
 #define SF_BIN 0 // binary savetype

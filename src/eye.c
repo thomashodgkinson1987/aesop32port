@@ -23,12 +23,17 @@
 // ##                                                                        ##
 // ############################################################################
 
+// POSIX.1-2008 for setenv()/execv() (strict C17 hides them).
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <unistd.h>
 
 #include "vfx.h"
 #include "gil2vfx.h"
@@ -38,6 +43,12 @@
 #include "rtcode.h"
 #include "rtsystem.h"
 #include "rtmsg.h"
+#include "video.h"
+
+// Original command line, stashed by interp.c main for launch()'s
+// emulated restart (re-exec with identical arguments).
+extern int aesop_argc;
+extern char **aesop_argv;
 #include "rtobject.h"
 #include "graphics.h"
 #include "event.h"
@@ -1358,13 +1369,41 @@ void launch(int32_t argcnt, int8_t *dirname, int8_t *prgname, int8_t *argn1, int
    else
       s->arg2[0] = 0;
 
+   //
+   // Emulated DOS shell loop. The original tore everything down and
+   // exit(127)'d so the launcher batch file could run the external
+   // module (cine.exe/chgen.exe) and restart AESOP.EXE, with the
+   // next-module magic carried in BDA 0x04F0. Here the external
+   // program itself is skipped (cosmetic movie / pre-made party
+   // files), but the restart is real: the poked magic travels in
+   // AESOP_BDA and this process image re-execs with its original
+   // arguments, so boot routes through start/CREATE's BDA CASE
+   // exactly like a post-module DOS boot. stdio is flushed first:
+   // exec never flushes user-space buffers.
+   //
+   // (If exec is ever unavailable, the old exit(127) fallback below
+   // preserves the previous behavior.)
+   //
+
+   {
+      char magic[16];
+
+      snprintf(magic, sizeof(magic), "%d", (int)dos_bda_value());
+      setenv("AESOP_BDA", magic, 1);
+   }
+
    RT_execute(bootstrap, MSG_DESTROY, UINT32_MAX);
 
    shutdown_sound();
+   video_shutdown();
    RTR_destroy(RTR, RTR_FREEBASE);
 
    locate(0, 51);
    // chdir(dir); // Tom: commented out
 
+   fflush(NULL);
+   execv("/proc/self/exe", aesop_argv);
+
+   printf("[eye] launch: exec failed (%s), falling back to exit\n", strerror(errno));
    exit(127);
 }

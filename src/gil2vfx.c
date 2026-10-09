@@ -13,6 +13,7 @@
 #include "vfx.h"
 #include "gil2vfx.h"
 #include "graphics.h"
+#include "video.h"
 
 #include "defs.h"
 #include "rtmsg.h"
@@ -233,6 +234,23 @@ void GIL2VFX_init()
    int32_t dummy;
 
    printf("[gil2vfx] GIL2VFX_init\n");
+
+   // Describe the video mode for VFX clients (the original asked the
+   // driver via VFX_describe_driver). Without this, any VFX->
+   // dereference faults on the NULL descriptor — e.g.
+   // GIL2VFX_color_fade's full-screen refresh, which crashes the
+   // Continue path out of the menu.
+   {
+      static VFX_DESC vfx_desc;
+
+      vfx_desc.scrn_width = SCREEN_WIDTH;
+      vfx_desc.scrn_height = SCREEN_HEIGHT;
+      vfx_desc.bytes_per_pixel = 1;
+      vfx_desc.ncolors = 256;
+      vfx_desc.npages = 1;
+      vfx_desc.flags = 0;
+      VFX = &vfx_desc;
+   }
 
    // VFX = VFX_describe_driver();
 
@@ -705,6 +723,19 @@ void GIL2VFX_color_fade(int32_t src_wnd, int32_t dst_wnd)
 
    if (gil2vfx_active != -1)
       return;
+
+   // Transitions (e.g. menu teardown on the way to enter-game) can
+   // reach here with torn-down panes; dereferencing them faults, as
+   // the Continue path demonstrated. Fail the fade cleanly instead.
+   if (src_wnd < 0 || src_wnd >= MAX_WINDOWS + MAX_PANES ||
+       dst_wnd < 0 || dst_wnd >= MAX_WINDOWS + MAX_PANES ||
+       panes[src_wnd].window == NULL || panes[src_wnd].window->buffer == NULL ||
+       panes[dst_wnd].window == NULL || panes[dst_wnd].window->buffer == NULL ||
+       windows[0].buffer == NULL)
+   {
+      printf("[gil2vfx] GIL2VFX_color_fade: bad panes, skipped\n");
+      return;
+   }
 
    num_colors = VFX_color_scan(&panes[src_wnd], colors);
 

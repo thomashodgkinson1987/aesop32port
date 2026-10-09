@@ -95,6 +95,10 @@ RTR_class *RTR;
 uint32_t HROED;
 uint32_t heap_size;
 
+// Original command line, stashed for launch()'s emulated restart.
+int aesop_argc = 0;
+char **aesop_argv = NULL;
+
 //
 // Host yield hook: pump SDL events, then serve the mouse and the 60Hz
 // interface timer — the stand-ins for the DOS INT 33h callback and the
@@ -119,6 +123,16 @@ int main(int argc, char *argv[]) // Tom: added
    uint32_t i;
    uint32_t code;
    int32_t rtn;
+
+   // Stashed for launch(): the DOS shell loop re-ran AESOP.EXE after
+   // each external module, and our launch() emulation re-execs this
+   // process image with the same arguments.
+   aesop_argc = argc;
+   aesop_argv = argv;
+
+   // Module-routing magic, possibly carried over an emulated restart
+   // (AESOP_BDA); defaults to 'INTR' cold boot when unset.
+   dos_bda_init();
 
    printf("[interp] main: stdout buffering + trace flag\n");
    aesop_trace_init();
