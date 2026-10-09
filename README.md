@@ -12,10 +12,13 @@ psi29a's [thirdeye](https://github.com/psi29a/thirdeye)); see also the
 companion `daesop` repository for `.RES` container tooling. Credits and
 ecosystem links: [docs/architecture.md](docs/architecture.md).
 
-> **Status: work in progress.** The interpreter core, resource manager,
-> linker and SDL2 video path are in place; gameplay brings-up through
-> to rendering the main menu. Large parts of the VFX, sound
-> and game-side layers are still stubs (see [Status](#status) below).
+> **Status: playable into the dungeon.** The interpreter core,
+> resource manager, linker, SDL2 video path, shape/line/font drawing
+> and text layout are in place; the DOS module-restart loop is
+> emulated (see below), so play reaches the main menu, save
+> restore, party formation and dungeon gameplay with stub-level
+> rendering gaps. Large parts of the VFX, sound and game-side
+> layers are still stubs (see [Status](#status) below).
 
 ## Why 32-bit?
 
@@ -85,15 +88,16 @@ The binary takes the resource file and start object as arguments
 ### What you should see
 
 The engine boots the resource system, links the `start` bootstrap and the
-`main menu` program, dumps decoded sprites (see below), then enters the
-interpreter loop. Press **ESC** or close the window for a clean shutdown.
+`main menu` program, then enters the interpreter loop. Press **ESC** or close the window for a clean shutdown.
 Rendering is decoupled from opcode execution: the interpreter runs at
 full speed, and a frame is presented when the game refreshes a window
 (`refresh_window`) or hits the vblank stand-in
-(`VFX_wait_vblank_leading`, paced to 60 Hz by `src/video.c`) — the same
-point the DOS build throttled itself at. The screen shows a black window
-with a single 16x16 sprite (draw call 1), and the main menu background
-(319x199) paints itself (draw call 2) moments later.
+(`VFX_wait_vblank_leading`, paced to exact 60 Hz by `src/video.c`) — the same
+point the DOS build throttled itself at. The main menu renders (title,
+menu items with hover highlight, transfer dialogs with text), and menu
+choices route onward: Continue loads the save list, Gather runs the
+`xfer` party conversion, Introduction/Gather re-exec through the
+emulated module-restart loop (see below).
 
 Input flows too: `video.c` records pointer/keyboard state, and the
 interpreter's yield hook drives `MOUSE_serve()` and the 60 Hz interface
@@ -172,14 +176,24 @@ will want re-visiting).
 
 Implemented (non-stub): interpreter core, resource manager, linker,
 message/event system, C-function dispatch, SDL2 window/renderer/texture
-lifecycle, palette handling, EOB3 shape (RLE) decoding.
+lifecycle, palette handling, EOB3 shape (RLE) decoding, pane-clipped
+line drawing, font glyph rasterization + text layout (all four
+justifications), exact-60 Hz frame pacing, and the DOS module-restart
+loop (`launch()` re-execs with the BDA magic in `AESOP_BDA`, so boot
+routes through `start`/CREATE's module CASE like post-module DOS).
 
 Still stubbed (grep for `[STUB]`), by file:
 
-- `vfx.c` — 56 (stencils, pane scroll, fonts, fades)
-- `eye.c` — 11 (game math/effects)
+- `vfx.c` — 52 (stencils, pane scroll, fades, ILBM/PCX, misc)
+- `eye.c` — 11 (game math/effects; transfer-file IO)
 - `sound32.c` — 10 (AIL/MOD sound)
 - `graphics.c` — 3, `rtsystem.c` — 2
+
+Known gameplay gaps: external DOS modules are skipped by design
+(intro movie, chargen party creation — pre-made `CREATE.SAV` via
+`xfer` convert only, no custom parties); dungeon 3D and later UI
+layers render through remaining stubs (expect draw-order issues,
+a non-updating compass, and text-placement quirks — all open).
 
 ## Related repositories
 

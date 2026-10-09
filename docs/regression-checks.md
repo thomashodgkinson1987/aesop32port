@@ -53,6 +53,25 @@ the tripwire cannot reach (neither fires on the untouched menu):
   300 px gold→bright swap with zero positional shift), with no
   cursor overlap to confuse the diff.
 
+## Post-menu states (module-restart era)
+
+Since the `launch()` emulation landed, these are reachable and
+serve as deeper acceptance captures:
+
+- **Continue → Restore Game screen**: save-slot list (slot 1
+  "Quick Start Party"), portraits, compass, CAMP button. Reached
+  via keyboard Enter from boot (selection starts at Continue).
+- **Gather → party formation screen**: epitaph text, four
+  portraits with HP bars, compass, CAMP — game idles cleanly.
+  Reached via Down + Enter (selection index 2).
+- Both flows reboot the process image mid-way (two+ `main:
+  resource file` headers in one log); BDA magic must change
+  across each exec (INTR→menu, CINE→enter-game, CHGN→xfer),
+  never loop.
+- Known-open in these screens (do not re-triage): draw-order
+  bugs, non-updating compass, text-placement quirks, skeleton
+  placeholder portraits.
+
 Visual confirmation (optional but recommended for rendering-path
 changes): capture the window and diff against a known-good shot —
 
