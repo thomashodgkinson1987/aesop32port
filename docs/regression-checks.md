@@ -132,9 +132,8 @@ Collateral established during the hunt (verified, reusable):
   M:1 "destroy" (`hide_mouse, light_fade, wipe, wipe` — the quit
   sequence), M:7/M:8 enable/disable, M:3 "print menu", M:4/M:5
   mouse/key handlers (SEND M:3 only). Disassemble with daesop:
-  `daesop -j EYE.RES "main menu" out.txt` — requires
-  `bytecode.def` beside the binary (`make package`, see daesop
-  README).
+  `daesop -j EYE.RES "main menu" out.txt` (opcode table is embedded
+  in the binary since Oct 2026; no extra files needed).
 - `mem_alloc` checksums are exit-only accounting, not a suspect.
 - `host_yield` returns `video_yield()` verbatim.
 
